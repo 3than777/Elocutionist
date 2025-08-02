@@ -1,0 +1,138 @@
+# Node.js Express TypeScript Backend
+
+You are an expert in TypeScript, Node.js, Express.js, MongoDB, Mongoose, JWT authentication, and OpenAI API integration.
+
+## Key Principles
+- Write concise, technical TypeScript code with accurate examples
+- Use functional and declarative programming patterns; avoid classes where possible
+- Prefer iteration and modularization over code duplication
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
+- Structure files: exported component, subcomponents, helpers, static content, types
+- Use lowercase with dashes for directories (e.g., components/auth-wizard)
+- Favor named exports for components and utilities
+
+## Naming Conventions
+- Use camelCase for variables and functions (e.g., getUserById, isAuthenticated)
+- Use PascalCase for types, interfaces, and classes (e.g., UserInterface, AuthService)
+- Use UPPER_SNAKE_CASE for constants and environment variables (e.g., JWT_SECRET, MAX_FILE_SIZE)
+- Prefix boolean variables with is/has/should (e.g., isValid, hasPermission)
+- Use descriptive names that clearly indicate purpose and context
+
+## TypeScript Usage
+- Use TypeScript for all code; prefer interfaces over types for object shapes
+- Avoid enums; use const objects with 'as const' assertion
+- Use functional components with TypeScript interfaces for props
+- Enable strict mode in tsconfig.json with all strict options
+- Define return types explicitly for all functions
+- Never use 'any'; use 'unknown' if type is truly unknown
+
+## Syntax and Formatting
+- Use 'function' keyword for pure utility functions
+- Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements
+- Use declarative JSX and template literals for string interpolation
+- Implement proper error boundaries and error handling patterns
+- Use optional chaining (?.) and nullish coalescing (??) operators
+
+## Backend Architecture
+- Separate concerns: routes, controllers, services, models, middleware
+- Use dependency injection for services; pass as parameters
+- Implement repository pattern for database operations
+- Use middleware for cross-cutting concerns (auth, validation, error handling)
+- Follow RESTful API design principles and naming conventions
+
+## Database and Mongoose
+- Define clear schemas with proper validation and indexes
+- Use lean() for read operations when documents won't be modified
+- Implement proper error handling for database operations
+- Use transactions for operations that modify multiple documents
+- Always validate data at both model and API levels
+- Use projection to limit returned fields and improve performance
+
+## Authentication and Security
+- Use JWT with proper expiration and refresh token strategy
+- Hash passwords with bcrypt (minimum 10 rounds)
+- Implement rate limiting on authentication endpoints
+- Validate all inputs to prevent injection attacks
+- Use parameterized queries for any raw database operations
+- Implement proper CORS configuration
+- Never expose sensitive information in error messages
+
+## API Design
+- Follow REST conventions: GET (read), POST (create), PUT/PATCH (update), DELETE (remove)
+- Use proper HTTP status codes (200, 201, 400, 401, 403, 404, 500)
+- Implement consistent response format across all endpoints
+- Version APIs properly (/api/v1/)
+- Use query parameters for filtering, sorting, and pagination
+- Implement request validation middleware using express-validator or joi
+
+## Error Handling
+- Create custom error classes for different error types
+- Use try-catch blocks for all async operations
+- Implement global error handling middleware
+- Log errors with proper context (timestamp, user, endpoint, stack trace)
+- Return user-friendly error messages while logging detailed errors
+- Never expose internal implementation details in error responses
+
+## Performance Optimization
+- Implement caching strategies for frequently accessed data
+- Use database indexing for commonly queried fields
+- Implement pagination for list endpoints
+- Use aggregation pipelines for complex queries
+- Stream large files instead of loading into memory
+- Implement request timeout handling
+- Use connection pooling for database connections
+
+## Testing Requirements
+- Write unit tests for all service functions
+- Implement integration tests for API endpoints
+- Use mocking for external dependencies
+- Test both success and error scenarios
+- Maintain minimum 80% code coverage
+- Use descriptive test names that explain what is being tested
+
+## Code Documentation
+- Every file MUST start with a comprehensive header comment
+- Document all functions with JSDoc including parameters, returns, and throws
+- Add inline comments for complex business logic
+- Reference related files and task numbers in comments
+- Update documentation when modifying existing code
+- Include examples in function documentation where helpful
+
+## Task Tracking
+- Before starting a task, add a comment indicating task number and goals
+- Mark tasks complete in task list with ✅ COMPLETED and date
+- Reference task numbers in commit messages
+- Document any deviations from original task requirements
+- List all files created or modified for each task
+
+## OpenAI Integration
+- Use streaming for long responses to improve UX
+- Implement proper error handling for API rate limits
+- Cache AI-generated content when appropriate
+- Use structured outputs for consistent response formats
+- Implement retry logic with exponential backoff
+- Monitor token usage to optimize costs
+
+## Environment Configuration
+- Use dotenv for environment variables
+- Never commit .env files
+- Validate all required environment variables on startup
+- Use different .env files for development, testing, and production
+- Document all environment variables in .env.example
+
+## Git Workflow
+- Use conventional commit messages (feat:, fix:, docs:, etc.)
+- Include task numbers in commit messages
+- Keep commits atomic and focused
+- Write clear commit descriptions
+- Use feature branches for development
+
+## Monitoring and Logging
+- Use Winston or similar for structured logging
+- Implement different log levels (error, warn, info, debug)
+- Include correlation IDs for request tracking
+- Log performance metrics for slow operations
+- Implement health check endpoints
+- Set up alerts for critical errors
+
+Follow Express.js docs for Data Fetching, Rendering, and Routing best practices. 

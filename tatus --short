@@ -1,0 +1,15 @@
+[33mcf0b4fcd[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mAlex-Connection[m[33m, [m[1;31morigin/Alex-Connection[m[33m)[m Markdown added
+[33m178007de[m Settings works
+[33m42c30781[m Basic chat functions
+[33m875865da[m[33m ([m[1;31morigin/Alex-Frontend[m[33m)[m Frontend skeleton
+[33mcf3450c5[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m Finished backend api
+[33m6234508f[m Finishing + initial tests backend api
+[33me1d832dd[m Updated readme.md
+[33m1dbb0c44[m Added openai integration and api routes
+[33mdaf987e2[m Updating w/ openai integration and mongodb support
+[33m4c52e0f2[m Remove old backend
+[33me9df4205[m New simplified backend api code with TypeScript and w/o redis (WIP)
+[33m8f2e3faa[m[33m ([m[1;31morigin/Week-6-Deliverable[m[33m)[m Update README.md
+[33m4c7d4531[m Create README.md
+[33mcae2202c[m Cleanup test files
+[33mdb115251[m Initial backend API commit
