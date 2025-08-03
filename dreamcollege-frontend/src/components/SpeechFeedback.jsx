@@ -2,11 +2,11 @@
  * SpeechFeedback Component
  * 
  * Provides comprehensive visual feedback for speech recognition and text-to-speech functionality.
- * Displays real-time indicators for listening state, speech confidence, TTS progress, and audio levels.
+ * Displays real-time indicators for listening state, TTS progress, and audio levels.
  * 
  * Features:
  * - Animated microphone indicator with pulse effects
- * - Speech recognition confidence meter with color coding
+
  * - Text-to-speech progress indicator with estimated duration
  * - Real-time audio level visualization (waveform/bars)
  * - Error messages with retry options and help text
@@ -42,7 +42,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 export default function SpeechFeedback({
   // Speech Recognition Props
   isListening = false,
-  speechConfidence = 0,
+
   interimTranscript = '',
   speechError = null,
   audioLevel = 0,
@@ -55,7 +55,7 @@ export default function SpeechFeedback({
   ttsError = null,
   
   // Configuration Props
-  showConfidence = true,
+
   showAudioLevel = true,
   showProgress = true,
   showInterimText = true,
@@ -142,15 +142,7 @@ export default function SpeechFeedback({
     return () => clearInterval(pulseIntervalRef.current);
   }, [isListening]);
   
-  /**
-   * Get confidence level color
-   */
-  const getConfidenceColor = useCallback((confidence) => {
-    if (confidence >= 0.8) return '#28a745'; // High - Green
-    if (confidence >= 0.6) return '#ffc107'; // Medium - Yellow
-    if (confidence >= 0.4) return '#fd7e14'; // Low - Orange
-    return '#dc3545'; // Very Low - Red
-  }, []);
+
   
   /**
    * Get progress color based on speech state
@@ -244,66 +236,7 @@ export default function SpeechFeedback({
     );
   };
   
-  /**
-   * Render confidence meter
-   */
-  const renderConfidenceMeter = () => {
-    if (!showConfidence || speechConfidence === 0) return null;
-    
-    const meterWidth = compactMode ? 80 : 120;
-    const confidence = Math.round(speechConfidence * 100);
-    
-    return (
-      <div style={{ marginTop: '8px' }}>
-        <div style={{
-          fontSize: compactMode ? '11px' : '12px',
-          color: '#6c757d',
-          marginBottom: '4px',
-          fontWeight: '500'
-        }}>
-          Confidence: {confidence}%
-        </div>
-        
-        <div style={{
-          width: `${meterWidth}px`,
-          height: '6px',
-          backgroundColor: '#e9ecef',
-          borderRadius: '3px',
-          overflow: 'hidden',
-          position: 'relative'
-        }}>
-          <div
-            style={{
-              width: `${confidence}%`,
-              height: '100%',
-              backgroundColor: getConfidenceColor(speechConfidence),
-              borderRadius: '3px',
-              transition: 'all 0.3s ease',
-              position: 'relative'
-            }}
-            role="progressbar"
-            aria-label={`Speech confidence ${confidence}%`}
-            aria-valuenow={confidence}
-            aria-valuemin="0"
-            aria-valuemax="100"
-          >
-            {/* Shimmer effect for active confidence */}
-            {speechConfidence > 0 && (
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                animation: 'shimmer 2s infinite'
-              }} />
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
+
   
   /**
    * Render TTS progress indicator
@@ -557,7 +490,7 @@ export default function SpeechFeedback({
           alignItems: 'center',
           width: '100%'
         }}>
-          {renderConfidenceMeter()}
+  
           {renderTTSProgress()}
           {renderInterimTranscript()}
           {renderErrorDisplay()}

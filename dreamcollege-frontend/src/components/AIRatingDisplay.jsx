@@ -1,22 +1,18 @@
 /**
- * AI Rating Display Component - Enhanced for Step 13
+ * AI Rating Display Component - Apple Design Language
  * 
- * Displays AI-generated interview feedback with advanced UI/UX features:
- * - Visual rating indicators (stars, progress bars, color coding)
- * - Collapsible sections for detailed feedback
- * - Enhanced loading skeleton with multiple states
- * - Icons and visual hierarchy for readability
- * - Responsive design and smooth animations
+ * Apple-style AI interview feedback display featuring:
+ * - Apple's San Francisco font family
+ * - Rounded corners and soft shadows matching Apple's design
+ * - Apple-style color palette and visual hierarchy
+ * - SF Symbols-inspired iconography
+ * - Apple's signature spacing and typography principles
+ * - iOS/macOS-style card layouts and interactions
  * 
- * Features implemented for Step 13:
- * ✅ Replace plain textarea with structured feedback display
- * ✅ Add visual rating indicators (stars, progress bars, color coding)
- * ✅ Implement collapsible sections for detailed feedback
- * ✅ Add loading skeleton while generating rating
- * ✅ Include icons and visual hierarchy for readability
+ * Updated to match Apple's design language from provided references
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 
 const AIRatingDisplay = ({ 
   rating, 
@@ -32,12 +28,12 @@ const AIRatingDisplay = ({
     detailedScores: false // Start collapsed for less clutter
   });
 
-  const toggleSection = (section) => {
+  const toggleSection = useCallback((section) => {
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section]
     }));
-  };
+  }, []);
 
   // Enhanced loading state with skeleton
   if (loading) {
@@ -253,7 +249,7 @@ const AIRatingDisplay = ({
     );
   }
 
-  // Helper function to render enhanced star rating
+  // Helper function to render Apple-style star rating
   const renderStarRating = (rating) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -261,66 +257,81 @@ const AIRatingDisplay = ({
     
     for (let i = 0; i < fullStars; i++) {
       stars.push(
-        <span key={i} style={{ 
-          color: '#ffc107', 
-          fontSize: '24px',
-          textShadow: '0 1px 2px rgba(0,0,0,0.1)',
+        <div key={i} style={{ 
+          width: '16px',
+          height: '16px',
+          backgroundColor: '#FF9500',
+          clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
           animation: `starPop 0.3s ease ${i * 0.1}s both`
-        }}>★</span>
+        }}></div>
       );
     }
     
     if (hasHalfStar) {
       stars.push(
-        <span key="half" style={{ 
-          color: '#ffc107', 
-          fontSize: '24px',
-          textShadow: '0 1px 2px rgba(0,0,0,0.1)' 
-        }}>☆</span>
+        <div key="half" style={{ 
+          width: '16px',
+          height: '16px',
+          backgroundColor: '#FF9500',
+          opacity: 0.5,
+          clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)'
+        }}></div>
       );
     }
     
     const emptyStars = 10 - Math.ceil(rating);
     for (let i = 0; i < emptyStars; i++) {
       stars.push(
-        <span key={`empty-${i}`} style={{ 
-          color: '#e9ecef', 
-          fontSize: '24px' 
-        }}>☆</span>
+        <div key={`empty-${i}`} style={{ 
+          width: '16px',
+          height: '16px',
+          backgroundColor: 'rgba(255,255,255,0.3)',
+          clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)'
+        }}></div>
       );
     }
     
     return stars;
   };
 
-  // Helper function to get priority color and icon
+  // Helper function to get priority color and icon - Apple Design System
   const getPriorityStyle = (priority) => {
-    switch (priority) {
+    switch (priority?.toLowerCase()) {
       case 'high': 
-        return { color: '#dc3545', icon: '🔴', bgColor: '#f8d7da' };
+        return { color: '#FF3B30', icon: '●', bgColor: '#FFF2F2' };
       case 'medium': 
-        return { color: '#fd7e14', icon: '🟡', bgColor: '#fff3cd' };
+        return { color: '#FF9500', icon: '●', bgColor: '#FFF8E6' };
       case 'low': 
-        return { color: '#28a745', icon: '🟢', bgColor: '#d4edda' };
+        return { color: '#34C759', icon: '●', bgColor: '#F0FFF4' };
       default: 
-        return { color: '#6c757d', icon: '⚪', bgColor: '#f8f9fa' };
+        return { color: '#8E8E93', icon: '●', bgColor: '#F2F2F7' };
     }
   };
 
-  // Helper function to get score color and emoji
+  // Helper function to get score color and emoji - Apple Design System
   const getScoreStyle = (score) => {
-    if (score >= 80) return { color: '#28a745', emoji: '🟢', label: 'Excellent' };
-    if (score >= 60) return { color: '#fd7e14', emoji: '🟡', label: 'Good' };
-    return { color: '#dc3545', emoji: '🔴', label: 'Needs Work' };
+    if (score >= 80) return { color: '#34C759', emoji: '●', label: 'Good' };
+    if (score >= 60) return { color: '#FF9500', emoji: '●', label: 'Good' };
+    return { color: '#FF3B30', emoji: '●', label: 'Needs Work' };
   };
 
-  // Collapsible section component
+  // Helper function to format category names properly
+  const formatCategoryName = (category) => {
+    return category
+      .replace(/([A-Z])/g, ' $1')
+      .trim()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
+  // Collapsible section component - Apple Design Language
   const CollapsibleSection = ({ 
     title, 
     icon, 
     children, 
     sectionKey, 
-    defaultColor = '#495057',
+    defaultColor = '#1D1D1F',
     count = null 
   }) => {
     const isExpanded = expandedSections[sectionKey];
@@ -334,32 +345,37 @@ const AIRatingDisplay = ({
             alignItems: 'center',
             justifyContent: 'space-between',
             cursor: 'pointer',
-            padding: '12px 15px',
-            backgroundColor: '#f8f9fa',
-            borderRadius: '8px',
-            border: '1px solid #dee2e6',
+            padding: '16px 20px',
+            backgroundColor: '#F2F2F7',
+            borderRadius: '16px',
+            border: 'none',
             transition: 'all 0.2s ease',
-            marginBottom: isExpanded ? '12px' : '0'
+            marginBottom: '0'
           }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = '#e9ecef';
-            e.currentTarget.style.transform = 'translateY(-1px)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = '#f8f9fa';
-            e.currentTarget.style.transform = 'translateY(0)';
-          }}
+          className="collapsible-header"
         >
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '10px'
+            gap: '12px'
           }}>
-            <span style={{ fontSize: '20px' }}>{icon}</span>
+            <div style={{
+              width: '28px',
+              height: '28px',
+              borderRadius: '8px',
+              backgroundColor: defaultColor,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              fontSize: '14px',
+              fontWeight: '600'
+            }}>{icon}</div>
             <span style={{
-              fontSize: '16px',
+              fontSize: '17px',
               fontWeight: '600',
-              color: defaultColor
+              color: defaultColor,
+              letterSpacing: '-0.41px'
             }}>
               {title}
             </span>
@@ -367,33 +383,37 @@ const AIRatingDisplay = ({
               <span style={{
                 backgroundColor: defaultColor,
                 color: 'white',
-                padding: '2px 8px',
+                padding: '4px 8px',
                 borderRadius: '12px',
-                fontSize: '12px',
-                fontWeight: '500'
+                fontSize: '13px',
+                fontWeight: '600',
+                letterSpacing: '-0.08px'
               }}>
                 {count}
               </span>
             )}
           </div>
           <div style={{
-            fontSize: '18px',
-            color: '#6c757d',
-            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+            fontSize: '14px',
+            color: '#8E8E93',
+            transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
             transition: 'transform 0.2s ease'
           }}>
-            ▼
+            ❯
           </div>
         </div>
         
-        {isExpanded && (
-          <div style={{
-            animation: 'fadeIn 0.3s ease',
-            overflow: 'hidden'
-          }}>
-            {children}
-          </div>
-        )}
+        <div style={{
+          maxHeight: isExpanded ? '2000px' : '0',
+          overflow: 'hidden',
+          transition: 'max-height 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          marginTop: isExpanded ? '12px' : '0',
+          transform: isExpanded ? 'translateY(0)' : 'translateY(-5px)',
+          opacity: isExpanded ? 1 : 0,
+          willChange: isExpanded ? 'transform, max-height, opacity' : 'auto'
+        }}>
+          {children}
+        </div>
       </div>
     );
   };
@@ -401,91 +421,116 @@ const AIRatingDisplay = ({
   return (
     <div style={{
       backgroundColor: '#ffffff',
-      borderRadius: '12px',
-      border: '1px solid #dee2e6',
+      borderRadius: '20px',
+      border: 'none',
       overflow: 'hidden',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+      boxShadow: '0 8px 32px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif'
     }}>
-      {/* Overall Rating Header with enhanced visuals */}
+      {/* Overall Rating Header - Apple Style */}
       <div style={{
-        padding: '25px',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        padding: '40px 32px',
+        background: 'linear-gradient(135deg, #007AFF 0%, #5856D6 100%)',
         color: 'white',
         textAlign: 'center',
-        position: 'relative'
+        position: 'relative',
+        borderRadius: '20px 20px 0 0'
       }}>
         <div style={{
-          fontSize: '20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '12px',
+          fontSize: '17px',
           fontWeight: '600',
-          marginBottom: '15px',
-          textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+          marginBottom: '24px',
+          opacity: 0.9,
+          letterSpacing: '-0.41px'
         }}>
-          🎯 Overall Interview Rating
+          <div style={{
+            width: '24px',
+            height: '24px',
+            borderRadius: '50%',
+            backgroundColor: 'rgba(255,255,255,0.2)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '14px'
+          }}>●</div>
+          Overall Interview Rating
         </div>
         <div style={{
-          fontSize: '48px',
-          fontWeight: 'bold',
-          marginBottom: '10px',
-          textShadow: '0 2px 4px rgba(0,0,0,0.2)'
+          fontSize: '64px',
+          fontWeight: '700',
+          marginBottom: '20px',
+          letterSpacing: '-0.04em',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif'
         }}>
           {rating.overallRating}/10
         </div>
         <div style={{
-          marginBottom: '15px',
+          marginBottom: '24px',
           display: 'flex',
           justifyContent: 'center',
-          gap: '2px'
+          gap: '6px'
         }}>
           {renderStarRating(rating.overallRating)}
         </div>
         {rating.summary && (
           <div style={{
-            fontSize: '16px',
-            fontStyle: 'italic',
-            maxWidth: '400px',
+            fontSize: '15px',
+            fontStyle: 'normal',
+            maxWidth: '480px',
             margin: '0 auto',
-            lineHeight: '1.4',
-            opacity: 0.95
+            lineHeight: '1.47',
+            opacity: 0.95,
+            fontWeight: '400',
+            letterSpacing: '-0.24px'
           }}>
             "{rating.summary}"
           </div>
         )}
       </div>
 
-      {/* Content Sections with collapsible functionality */}
-      <div style={{ padding: '25px' }}>
+      {/* Content Sections - Redesigned */}
+      <div style={{ padding: '32px' }}>
         
         {/* Strengths Section */}
         {rating.strengths && rating.strengths.length > 0 && (
           <CollapsibleSection 
             title="Strengths" 
-            icon="✅" 
+            icon="✓" 
             sectionKey="strengths"
-            defaultColor="#28a745"
+            defaultColor="#34C759"
             count={rating.strengths.length}
           >
             <div style={{
-              backgroundColor: '#d4edda',
-              borderRadius: '8px',
+              backgroundColor: '#F0FFF4',
+              borderRadius: '16px',
               padding: '20px',
-              border: '1px solid #c3e6cb'
+              border: 'none',
+              marginTop: '12px'
             }}>
               {rating.strengths.map((strength, index) => (
                 <div key={index} style={{
                   marginBottom: index < rating.strengths.length - 1 ? '12px' : '0',
-                  fontSize: '14px',
-                  color: '#155724',
+                  fontSize: '15px',
+                  color: '#1D1D1F',
                   display: 'flex',
                   alignItems: 'flex-start',
-                  gap: '10px',
-                  lineHeight: '1.5'
+                  gap: '12px',
+                  lineHeight: '1.47',
+                  letterSpacing: '-0.24px'
                 }}>
-                  <span style={{ 
-                    marginTop: '3px', 
-                    fontSize: '12px',
-                    color: '#28a745' 
-                  }}>●</span>
-                  <span>{strength}</span>
+                  <div style={{ 
+                    width: '6px',
+                    height: '6px',
+                    backgroundColor: '#34C759',
+                    borderRadius: '50%',
+                    marginTop: '7px',
+                    flexShrink: 0
+                  }}></div>
+                  <span style={{ fontWeight: '400' }}>{strength}</span>
                 </div>
               ))}
             </div>
@@ -496,33 +541,38 @@ const AIRatingDisplay = ({
         {rating.weaknesses && rating.weaknesses.length > 0 && (
           <CollapsibleSection 
             title="Areas for Improvement" 
-            icon="⚠️" 
+            icon="△" 
             sectionKey="weaknesses"
-            defaultColor="#dc3545"
+            defaultColor="#FF3B30"
             count={rating.weaknesses.length}
           >
             <div style={{
-              backgroundColor: '#f8d7da',
-              borderRadius: '8px',
+              backgroundColor: '#FFF2F2',
+              borderRadius: '16px',
               padding: '20px',
-              border: '1px solid #f5c6cb'
+              border: 'none',
+              marginTop: '12px'
             }}>
               {rating.weaknesses.map((weakness, index) => (
                 <div key={index} style={{
                   marginBottom: index < rating.weaknesses.length - 1 ? '12px' : '0',
-                  fontSize: '14px',
-                  color: '#721c24',
+                  fontSize: '15px',
+                  color: '#1D1D1F',
                   display: 'flex',
                   alignItems: 'flex-start',
-                  gap: '10px',
-                  lineHeight: '1.5'
+                  gap: '12px',
+                  lineHeight: '1.47',
+                  letterSpacing: '-0.24px'
                 }}>
-                  <span style={{ 
-                    marginTop: '3px', 
-                    fontSize: '12px',
-                    color: '#dc3545' 
-                  }}>●</span>
-                  <span>{weakness}</span>
+                  <div style={{ 
+                    width: '6px',
+                    height: '6px',
+                    backgroundColor: '#FF3B30',
+                    borderRadius: '50%',
+                    marginTop: '7px',
+                    flexShrink: 0
+                  }}></div>
+                  <span style={{ fontWeight: '400' }}>{weakness}</span>
                 </div>
               ))}
             </div>
@@ -533,76 +583,88 @@ const AIRatingDisplay = ({
         {rating.recommendations && rating.recommendations.length > 0 && (
           <CollapsibleSection 
             title="Actionable Recommendations" 
-            icon="💡" 
+            icon="○" 
             sectionKey="recommendations"
-            defaultColor="#007bff"
+            defaultColor="#007AFF"
             count={rating.recommendations.length}
           >
-            {rating.recommendations.map((rec, index) => {
-              const priorityStyle = getPriorityStyle(rec.priority);
-              return (
-                <div key={index} style={{
-                  backgroundColor: priorityStyle.bgColor,
-                  borderRadius: '8px',
-                  padding: '18px',
-                  marginBottom: index < rating.recommendations.length - 1 ? '15px' : '0',
-                  border: `2px solid ${priorityStyle.color}`,
-                  position: 'relative'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '10px'
+            <div style={{ marginTop: '12px' }}>
+              {rating.recommendations.map((rec, index) => {
+                const priorityStyle = getPriorityStyle(rec.priority);
+                return (
+                  <div key={index} style={{
+                    backgroundColor: '#F2F2F7',
+                    borderRadius: '16px',
+                    padding: '20px',
+                    marginBottom: index < rating.recommendations.length - 1 ? '12px' : '0',
+                    border: 'none',
+                    position: 'relative'
                   }}>
                     <div style={{
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: priorityStyle.color,
                       display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      marginBottom: '12px'
                     }}>
-                      <span>{priorityStyle.icon}</span>
-                      {rec.area}
+                      <div style={{
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        color: '#1D1D1F',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        letterSpacing: '-0.32px'
+                      }}>
+                        <div style={{ 
+                          width: '8px', 
+                          height: '8px',
+                          backgroundColor: priorityStyle.color,
+                          borderRadius: '50%',
+                          flexShrink: 0
+                        }}></div>
+                        {rec.area}
+                      </div>
+                      <div style={{
+                        backgroundColor: priorityStyle.color,
+                        color: 'white',
+                        padding: '4px 12px',
+                        borderRadius: '12px',
+                        fontSize: '13px',
+                        fontWeight: '600',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.08px'
+                      }}>
+                        {rec.priority}
+                      </div>
                     </div>
                     <div style={{
-                      backgroundColor: priorityStyle.color,
-                      color: 'white',
-                      padding: '4px 10px',
-                      borderRadius: '15px',
-                      fontSize: '12px',
-                      fontWeight: '600',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px'
+                      fontSize: '15px',
+                      color: '#1D1D1F',
+                      lineHeight: '1.47',
+                      marginBottom: rec.examples ? '16px' : '0',
+                      fontWeight: '400',
+                      letterSpacing: '-0.24px'
                     }}>
-                      {rec.priority}
+                      {rec.suggestion}
                     </div>
+                    {rec.examples && rec.examples.length > 0 && (
+                      <div style={{
+                        fontSize: '14px',
+                        color: '#8E8E93',
+                        fontStyle: 'italic',
+                        padding: '12px 16px',
+                        backgroundColor: 'rgba(255,255,255,0.7)',
+                        borderRadius: '12px',
+                        border: 'none',
+                        letterSpacing: '-0.15px'
+                      }}>
+                        <strong style={{ color: '#1D1D1F' }}>Examples:</strong> {rec.examples.join(', ')}
+                      </div>
+                    )}
                   </div>
-                  <div style={{
-                    fontSize: '14px',
-                    color: priorityStyle.color,
-                    lineHeight: '1.5',
-                    marginBottom: rec.examples ? '10px' : '0'
-                  }}>
-                    {rec.suggestion}
-                  </div>
-                  {rec.examples && rec.examples.length > 0 && (
-                    <div style={{
-                      fontSize: '13px',
-                      color: priorityStyle.color,
-                      fontStyle: 'italic',
-                      padding: '8px 12px',
-                      backgroundColor: 'rgba(255,255,255,0.7)',
-                      borderRadius: '6px',
-                      border: `1px solid ${priorityStyle.color}20`
-                    }}>
-                      <strong>Examples:</strong> {rec.examples.join(', ')}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </CollapsibleSection>
         )}
 
@@ -610,14 +672,15 @@ const AIRatingDisplay = ({
         {rating.detailedScores && (
           <CollapsibleSection 
             title="Detailed Performance Scores" 
-            icon="📊" 
+            icon="■" 
             sectionKey="detailedScores"
-            defaultColor="#6f42c1"
+            defaultColor="#5856D6"
             count={Object.keys(rating.detailedScores).length}
           >
             <div style={{
               display: 'grid',
-              gap: '15px'
+              gap: '12px',
+              marginTop: '12px'
             }}>
               {Object.entries(rating.detailedScores).map(([category, score]) => {
                 const scoreStyle = getScoreStyle(score);
@@ -626,35 +689,48 @@ const AIRatingDisplay = ({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '15px',
-                    backgroundColor: '#f8f9fa',
-                    borderRadius: '8px',
-                    border: '1px solid #e9ecef',
-                    transition: 'transform 0.2s ease'
+                    padding: '16px 20px',
+                    backgroundColor: '#F2F2F7',
+                    borderRadius: '16px',
+                    border: 'none',
+                    transition: 'all 0.2s ease'
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                  onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  className="score-item"
                   >
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '10px'
+                      gap: '16px'
                     }}>
-                      <span style={{ fontSize: '18px' }}>{scoreStyle.emoji}</span>
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        backgroundColor: scoreStyle.color,
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontSize: '14px',
+                        fontWeight: '600'
+                      }}>
+                        {scoreStyle.emoji}
+                      </div>
                       <div>
                         <div style={{
-                          fontSize: '15px',
+                          fontSize: '16px',
                           fontWeight: '600',
-                          color: '#495057',
-                          textTransform: 'capitalize',
-                          marginBottom: '2px'
+                          color: '#1D1D1F',
+                          marginBottom: '2px',
+                          letterSpacing: '-0.32px'
                         }}>
-                          {category.replace(/([A-Z])/g, ' $1').trim()}
+                          {formatCategoryName(category)}
                         </div>
                         <div style={{
-                          fontSize: '12px',
+                          fontSize: '13px',
                           color: scoreStyle.color,
-                          fontWeight: '500'
+                          fontWeight: '500',
+                          letterSpacing: '-0.08px'
                         }}>
                           {scoreStyle.label}
                         </div>
@@ -666,17 +742,18 @@ const AIRatingDisplay = ({
                       gap: '12px'
                     }}>
                       <div style={{
-                        fontSize: '18px',
-                        fontWeight: '700',
-                        color: scoreStyle.color
+                        fontSize: '17px',
+                        fontWeight: '600',
+                        color: scoreStyle.color,
+                        letterSpacing: '-0.41px'
                       }}>
                         {score}/100
                       </div>
                       <div style={{
-                        width: '80px',
-                        height: '12px',
-                        backgroundColor: '#e9ecef',
-                        borderRadius: '6px',
+                        width: '60px',
+                        height: '6px',
+                        backgroundColor: 'rgba(142,142,147,0.2)',
+                        borderRadius: '3px',
                         overflow: 'hidden',
                         position: 'relative'
                       }}>
@@ -684,21 +761,10 @@ const AIRatingDisplay = ({
                           width: `${score}%`,
                           height: '100%',
                           backgroundColor: scoreStyle.color,
-                          borderRadius: '6px',
-                          transition: 'width 0.8s ease',
-                          position: 'relative',
-                          overflow: 'hidden'
-                        }}>
-                          <div style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                            animation: 'shimmer 2s infinite'
-                          }}></div>
-                        </div>
+                          borderRadius: '3px',
+                          transition: 'width 1s ease',
+                          position: 'relative'
+                        }}></div>
                       </div>
                     </div>
                   </div>
@@ -710,9 +776,19 @@ const AIRatingDisplay = ({
       </div>
 
       <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
+        .collapsible-header {
+          will-change: transform, background-color;
+        }
+        .collapsible-header:hover {
+          background-color: #E5E5EA !important;
+          transform: scale(0.98);
+        }
+        .score-item {
+          will-change: transform, background-color;
+        }
+        .score-item:hover {
+          background-color: #E5E5EA !important;
+          transform: scale(0.98);
         }
         @keyframes starPop {
           0% { transform: scale(0); opacity: 0; }

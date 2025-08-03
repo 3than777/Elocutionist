@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useUploadContext } from '../context/UploadContext';
 import { submitInterviewTranscript, generateAIRating as apiGenerateAIRating, retryApiCall, getUserFriendlyErrorMessage, getProgressMessage } from '../services/api';
+import { speakText, stopSpeaking } from '../services/textToSpeech';
 import ProgressIndicator from './ProgressIndicator';
 import VoiceModeToggle from './VoiceModeToggle';
 import VoiceTutorial from './VoiceTutorial';
@@ -68,6 +69,56 @@ export default function ChatBox({
   // Get upload context
   const { uploadedFiles, refreshFiles } = useUploadContext();
   const hasContent = uploadedFiles && uploadedFiles.length > 0;
+
+  /**
+   * Read speech settings from localStorage
+   * @returns {Object} Speech settings object with autoPlayAI flag
+   */
+  const getSpeechSettings = () => {
+    try {
+      const saved = localStorage.getItem('speechSettings');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (error) {
+      console.error('Failed to load speech settings:', error);
+    }
+    // Return default settings if not found or error
+    return {
+      autoPlayAI: true,
+      preferredGender: 'female'
+    };
+  };
+
+  /**
+   * Automatically speak AI response if voice mode and auto-play are enabled
+   * @param {string} text - AI response text to speak
+   * @param {boolean} interrupt - Whether to interrupt current speech (default: false)
+   */
+  const handleAutoSpeakAIResponse = async (text, interrupt = false) => {
+    // Only auto-speak if in voice mode
+    if (!isVoiceMode) {
+      return;
+    }
+
+    const speechSettings = getSpeechSettings();
+    
+    // Only auto-speak if auto-play is enabled
+    if (!speechSettings.autoPlayAI) {
+      return;
+    }
+
+    try {
+      console.log('Auto-speaking AI response in voice mode', interrupt ? '(with interruption)' : '');
+      await speakText(text, {
+        interrupt: interrupt, // Allow interruption when specified
+        priority: interrupt ? 'high' : 'normal'
+      });
+    } catch (error) {
+      console.error('Failed to auto-speak AI response:', error);
+      // Don't show error to user - this is a background enhancement
+    }
+  };
    
    // Log upload context for debugging
    useEffect(() => {
@@ -166,6 +217,11 @@ export default function ChatBox({
         {
           role: 'system',
           content: `AI College Interview Coach System Prompt
+
+**CURRENT DIFFICULTY LEVEL: ${mapDifficulty(difficulty) === 'easy' ? 'EASY' : mapDifficulty(difficulty) === 'hard' ? 'HARD' : 'ADVANCED'}**
+
+
+
 You are an expert college interview coach with extensive experience helping students prepare for admissions interviews at top universities. Your role is to conduct realistic practice interviews that help students improve their interviewing skills through personalized questions and constructive feedback.
 Your Core Responsibilities
 Conduct Practice Interviews:
@@ -196,25 +252,27 @@ Intended major or academic interests
 Key extracurricular activities, hobbies, or passions
 Any specific areas they want to practice (e.g., discussing weaknesses, explaining academic choices)
 Previous interview experience level
-Difficulty level preference (Easy, Advanced, or Hard)
 Difficulty-Based Question Adaptation
-If Difficulty: ${mapDifficulty(difficulty) === 'easy' ? 'Easy' : mapDifficulty(difficulty) === 'hard' ? 'Hard' : 'Advanced'}
-${mapDifficulty(difficulty) === 'easy' ? `Ask straightforward, commonly asked interview questions
-Use simpler language and shorter questions
-Provide gentle guidance or hints if the student struggles
-Limit follow-up questions to 1-2 per topic
-Focus on basic topics like interests, academic goals, and simple experiences
-Be more encouraging and less probing in your approach` : mapDifficulty(difficulty) === 'hard' ? `Ask complex, thought-provoking questions that require deep reflection
-Use intensive follow-up questioning (3-4 follow-ups per topic)
-Include unexpected, creative, or scenario-based questions
-Challenge assumptions and push for nuanced thinking
-Ask hypothetical situations and ethical dilemmas
-Expect sophisticated, well-reasoned responses` : `Ask standard college interview questions with moderate complexity
-Use 2-3 thoughtful follow-up questions per topic
-Balance challenge with support
-Include both personal and academic exploration
-Ask for specific examples and deeper explanations
-Maintain professional but supportive tone`}
+**SPECIFIC GUIDELINES FOR ${mapDifficulty(difficulty) === 'easy' ? 'EASY' : mapDifficulty(difficulty) === 'hard' ? 'HARD' : 'ADVANCED'} DIFFICULTY:**
+
+${mapDifficulty(difficulty) === 'easy' ? `- Ask straightforward, commonly asked interview questions
+- Use simpler language and shorter questions
+- Provide gentle guidance or hints if the student struggles
+- Limit follow-up questions to 1-2 per topic
+- Focus on basic topics like interests, academic goals, and simple experiences
+- Be more encouraging and less probing in your approach` : mapDifficulty(difficulty) === 'hard' ? `- Ask complex, thought-provoking questions that require deep reflection
+- Use intensive follow-up questioning (3-4 follow-ups per topic)
+- Include unexpected, creative, or scenario-based questions
+- Challenge assumptions and push for nuanced thinking
+- Ask hypothetical situations and ethical dilemmas
+- Expect sophisticated, well-reasoned responses` : `- Ask standard college interview questions with moderate complexity
+- Use 2-3 thoughtful follow-up questions per topic
+- Balance challenge with support
+- Include both personal and academic exploration
+- Ask for specific examples and deeper explanations
+- Maintain professional but supportive tone`}
+
+**REMEMBER: Maintain this ${mapDifficulty(difficulty) === 'easy' ? 'EASY' : mapDifficulty(difficulty) === 'hard' ? 'HARD' : 'ADVANCED'} difficulty level throughout the entire conversation.**
 Question Guidelines
 Question Types to Include:
 Background and motivation questions
@@ -354,14 +412,20 @@ Your goal is to help students become more confident, articulate, and authentic i
         console.log('Content metadata:', data.contentMetadata);
       }
       
-      setMessages(prev => [...prev, { sender: 'ai', text: data.message }]);
+      const aiMessage = { sender: 'ai', text: data.message };
+      setMessages(prev => [...prev, aiMessage]);
+      
+      // Auto-speak AI response if voice mode and auto-play are enabled
+      handleAutoSpeakAIResponse(data.message);
 
     } catch (error) {
       console.error('Error sending message:', error);
-      setMessages(prev => [...prev, { 
-        sender: 'ai', 
-        text: 'Sorry, I encountered an error. Please try again.' 
-      }]);
+      const errorMessage = 'Sorry, I encountered an error. Please try again.';
+      const aiErrorMessage = { sender: 'ai', text: errorMessage };
+      setMessages(prev => [...prev, aiErrorMessage]);
+      
+      // Auto-speak error message if voice mode and auto-play are enabled
+      handleAutoSpeakAIResponse(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -378,7 +442,11 @@ Your goal is to help students become more confident, articulate, and authentic i
   const startInterview = () => {
     setIsInterviewActive(true);
     setIsInterviewCompleted(false);
-    setMessages([{ sender: 'ai', text: 'Interview started! Let\'s begin with some questions.' }]);
+    const interviewStartMessage = 'Interview started! Let\'s begin with some questions.';
+    setMessages([{ sender: 'ai', text: interviewStartMessage }]);
+    
+    // Auto-speak greeting if voice mode and auto-play are enabled
+    handleAutoSpeakAIResponse(interviewStartMessage);
   };
 
   // Collect Interview Context (Step 10)
@@ -463,17 +531,49 @@ Your goal is to help students become more confident, articulate, and authentic i
     setEndInterviewButtonState('idle');
   };
 
+  // End Interview Without Rating
+  const endInterviewWithoutRating = () => {
+    setShowConfirmDialog(false);
+    setEndInterviewButtonState('complete');
+    setIsInterviewActive(false);
+    setIsInterviewCompleted(true);
+    
+    // Stop any current speech immediately
+    if (isVoiceMode) {
+      stopSpeaking();
+    }
+    
+    // Show completion message without rating
+    const completionMessage = 'Interview completed! Thank you for practicing with me. Click "New Interview" to start again.';
+    setMessages(prev => [...prev, { 
+      sender: 'ai', 
+      text: completionMessage 
+    }]);
+    
+    // Auto-speak completion message with interruption
+    handleAutoSpeakAIResponse(completionMessage, true);
+  };
+
   // End Interview (Enhanced for Steps 6-8)
   const endInterview = async () => {
+    // Stop any current speech immediately
+    if (isVoiceMode) {
+      stopSpeaking();
+    }
+    
     // Validate user authentication
     if (!user?.token) {
       setRatingError('Authentication required for AI rating. Please log in.');
       setIsInterviewActive(false);
       setIsInterviewCompleted(true);
+      const authMessage = 'Interview completed! Please log in to receive AI feedback. Click "New Interview" to start again.';
       setMessages(prev => [...prev, { 
         sender: 'ai', 
-        text: 'Interview completed! Please log in to receive AI feedback. Click "New Interview" to start again.' 
+        text: authMessage 
       }]);
+      
+      // Auto-speak auth message with interruption
+      handleAutoSpeakAIResponse(authMessage, true);
       return;
     }
 
@@ -487,10 +587,14 @@ Your goal is to help students become more confident, articulate, and authentic i
     setProgressStep(1);
 
     // Show completion message with loading indicator
+    const initialProgressMessage = getProgressMessage('transcript', 1);
     setMessages(prev => [...prev, { 
       sender: 'ai', 
-      text: getProgressMessage('transcript', 1) 
+      text: initialProgressMessage 
     }]);
+    
+    // Auto-speak initial progress message with interruption (user just clicked end interview)
+    handleAutoSpeakAIResponse(initialProgressMessage, true);
 
     try {
       // Collect transcript from messages (exclude initial greeting and system messages)
@@ -543,10 +647,14 @@ Your goal is to help students become more confident, articulate, and authentic i
         setProgressStep(2);
         
         // Update completion message
+        const progressMessage = getProgressMessage('rating', 1);
         setMessages(prev => [...prev.slice(0, -1), { 
           sender: 'ai', 
-          text: getProgressMessage('rating', 1) 
+          text: progressMessage 
         }]);
+        
+        // Auto-speak progress message if voice mode and auto-play are enabled
+        handleAutoSpeakAIResponse(progressMessage);
 
         // Automatically generate AI rating
         await generateAIRating(transcriptData.data.transcriptId);
@@ -561,10 +669,14 @@ Your goal is to help students become more confident, articulate, and authentic i
         }, 3000);
         
         // Final completion message
+        const finalCompletionMessage = 'Interview completed! Check the AI Rating section for your personalized feedback. Click "New Interview" to start again.';
         setMessages(prev => [...prev.slice(0, -1), { 
           sender: 'ai', 
-          text: 'Interview completed! Check the AI Rating section for your personalized feedback. Click "New Interview" to start again.' 
+          text: finalCompletionMessage 
         }]);
+        
+        // Auto-speak final completion message if voice mode and auto-play are enabled
+        handleAutoSpeakAIResponse(finalCompletionMessage);
         
       } else {
         throw new Error('Failed to save interview transcript');
@@ -592,10 +704,14 @@ Your goal is to help students become more confident, articulate, and authentic i
       }
       
       // Update with error message
+      const errorCompletionMessage = `Interview completed! However, there was an issue: ${userMessage}${actionMessage}`;
       setMessages(prev => [...prev.slice(0, -1), { 
         sender: 'ai', 
-        text: `Interview completed! However, there was an issue: ${userMessage}${actionMessage}` 
+        text: errorCompletionMessage 
       }]);
+      
+      // Auto-speak error completion message if voice mode and auto-play are enabled
+      handleAutoSpeakAIResponse(errorCompletionMessage);
     } finally {
       setRatingLoading(false);
     }
@@ -603,6 +719,11 @@ Your goal is to help students become more confident, articulate, and authentic i
 
   // New Interview
   const newInterview = async () => {
+    // Stop any current speech immediately
+    if (isVoiceMode) {
+      stopSpeaking();
+    }
+    
     setIsInterviewActive(true); // Start as active when "New Interview" is clicked
     setIsInterviewCompleted(false);
     setInterviewStartTime(new Date());
@@ -616,7 +737,11 @@ Your goal is to help students become more confident, articulate, and authentic i
     // Reset end interview button state (Step 15)
     setEndInterviewButtonState('idle');
     setShowConfirmDialog(false);
-    setMessages([{ sender: 'ai', text: 'Hello! Ready to practice?' }]);
+    const greetingMessage = 'Hello! Ready to practice?';
+    setMessages([{ sender: 'ai', text: greetingMessage }]);
+    
+    // Auto-speak greeting with interruption (user just clicked new interview)
+    handleAutoSpeakAIResponse(greetingMessage, true);
     setInput('');
     
     // Automatically start the interview by sending an initial message
@@ -629,6 +754,11 @@ Your goal is to help students become more confident, articulate, and authentic i
           {
             role: 'system',
             content: `AI College Interview Coach System Prompt
+
+**CURRENT DIFFICULTY LEVEL: ${mapDifficulty(difficulty) === 'easy' ? 'EASY' : mapDifficulty(difficulty) === 'hard' ? 'HARD' : 'ADVANCED'}**
+
+
+
 You are an expert college interview coach with extensive experience helping students prepare for admissions interviews at top universities. Your role is to conduct realistic practice interviews that help students improve their interviewing skills through personalized questions and constructive feedback.
 Your Core Responsibilities
 Conduct Practice Interviews:
@@ -659,25 +789,27 @@ Intended major or academic interests
 Key extracurricular activities, hobbies, or passions
 Any specific areas they want to practice (e.g., discussing weaknesses, explaining academic choices)
 Previous interview experience level
-Difficulty level preference (Easy, Advanced, or Hard)
 Difficulty-Based Question Adaptation
-If Difficulty: ${mapDifficulty(difficulty) === 'easy' ? 'Easy' : mapDifficulty(difficulty) === 'hard' ? 'Hard' : 'Advanced'}
-${mapDifficulty(difficulty) === 'easy' ? `Ask straightforward, commonly asked interview questions
-Use simpler language and shorter questions
-Provide gentle guidance or hints if the student struggles
-Limit follow-up questions to 1-2 per topic
-Focus on basic topics like interests, academic goals, and simple experiences
-Be more encouraging and less probing in your approach` : mapDifficulty(difficulty) === 'hard' ? `Ask complex, thought-provoking questions that require deep reflection
-Use intensive follow-up questioning (3-4 follow-ups per topic)
-Include unexpected, creative, or scenario-based questions
-Challenge assumptions and push for nuanced thinking
-Ask hypothetical situations and ethical dilemmas
-Expect sophisticated, well-reasoned responses` : `Ask standard college interview questions with moderate complexity
-Use 2-3 thoughtful follow-up questions per topic
-Balance challenge with support
-Include both personal and academic exploration
-Ask for specific examples and deeper explanations
-Maintain professional but supportive tone`}
+**SPECIFIC GUIDELINES FOR ${mapDifficulty(difficulty) === 'easy' ? 'EASY' : mapDifficulty(difficulty) === 'hard' ? 'HARD' : 'ADVANCED'} DIFFICULTY:**
+
+${mapDifficulty(difficulty) === 'easy' ? `- Ask straightforward, commonly asked interview questions
+- Use simpler language and shorter questions
+- Provide gentle guidance or hints if the student struggles
+- Limit follow-up questions to 1-2 per topic
+- Focus on basic topics like interests, academic goals, and simple experiences
+- Be more encouraging and less probing in your approach` : mapDifficulty(difficulty) === 'hard' ? `- Ask complex, thought-provoking questions that require deep reflection
+- Use intensive follow-up questioning (3-4 follow-ups per topic)
+- Include unexpected, creative, or scenario-based questions
+- Challenge assumptions and push for nuanced thinking
+- Ask hypothetical situations and ethical dilemmas
+- Expect sophisticated, well-reasoned responses` : `- Ask standard college interview questions with moderate complexity
+- Use 2-3 thoughtful follow-up questions per topic
+- Balance challenge with support
+- Include both personal and academic exploration
+- Ask for specific examples and deeper explanations
+- Maintain professional but supportive tone`}
+
+**REMEMBER: Maintain this ${mapDifficulty(difficulty) === 'easy' ? 'EASY' : mapDifficulty(difficulty) === 'hard' ? 'HARD' : 'ADVANCED'} difficulty level throughout the entire conversation.**
 Question Guidelines
 Question Types to Include:
 Background and motivation questions
@@ -806,14 +938,20 @@ Your goal is to help students become more confident, articulate, and authentic i
         const data = await response.json();
         
         // Add the AI's first question to the messages
-        setMessages(prev => [...prev, { sender: 'ai', text: data.message }]);
+        const aiMessage = { sender: 'ai', text: data.message };
+        setMessages(prev => [...prev, aiMessage]);
+        
+        // Auto-speak AI response if voice mode and auto-play are enabled
+        handleAutoSpeakAIResponse(data.message);
 
       } catch (error) {
         console.error('Error starting interview:', error);
-        setMessages(prev => [...prev, { 
-          sender: 'ai', 
-          text: 'Sorry, I encountered an error starting the interview. Please try again.' 
-        }]);
+        const errorMessage = 'Sorry, I encountered an error starting the interview. Please try again.';
+        const aiErrorMessage = { sender: 'ai', text: errorMessage };
+        setMessages(prev => [...prev, aiErrorMessage]);
+        
+        // Auto-speak error message with interruption (during new interview setup)
+        handleAutoSpeakAIResponse(errorMessage, true);
       } finally {
         setIsLoading(false);
       }
@@ -954,6 +1092,11 @@ Your goal is to help students become more confident, articulate, and authentic i
         {
           role: 'system',
           content: `AI College Interview Coach System Prompt
+
+**CURRENT DIFFICULTY LEVEL: ${mapDifficulty(difficulty) === 'easy' ? 'EASY' : mapDifficulty(difficulty) === 'hard' ? 'HARD' : 'ADVANCED'}**
+
+
+
 You are an expert college interview coach with extensive experience helping students prepare for admissions interviews at top universities. Your role is to conduct realistic practice interviews that help students improve their interviewing skills through personalized questions and constructive feedback.
 Your Core Responsibilities
 Conduct Practice Interviews:
@@ -984,7 +1127,6 @@ Intended major or academic interests
 Key extracurricular activities, hobbies, or passions
 Any specific areas they want to practice (e.g., discussing weaknesses, explaining academic choices)
 Previous interview experience level
-Difficulty level preference (Easy, Advanced, or Hard)
 Difficulty-Based Question Adaptation
 Adjust complexity and expectations based on user-selected difficulty:
 Beginner: Start with basic questions and provide more guidance
@@ -1058,7 +1200,11 @@ Your goal is to help students become more confident, articulate, and authentic i
         console.log('Content metadata:', data.contentMetadata);
       }
       
-      setMessages(prev => [...prev, { sender: 'ai', text: data.message }]);
+      const aiMessage = { sender: 'ai', text: data.message };
+      setMessages(prev => [...prev, aiMessage]);
+      
+      // Auto-speak AI response if voice mode and auto-play are enabled
+      handleAutoSpeakAIResponse(data.message);
 
       // Mark voice calibration as complete after successful voice message
       if (!voiceCalibrationComplete) {
@@ -1067,10 +1213,12 @@ Your goal is to help students become more confident, articulate, and authentic i
 
     } catch (error) {
       console.error('Error sending voice message:', error);
-      setMessages(prev => [...prev, { 
-        sender: 'ai', 
-        text: 'Sorry, I encountered an error. Please try again.' 
-      }]);
+      const errorMessage = 'Sorry, I encountered an error. Please try again.';
+      const aiErrorMessage = { sender: 'ai', text: errorMessage };
+      setMessages(prev => [...prev, aiErrorMessage]);
+      
+      // Auto-speak error message if voice mode and auto-play are enabled
+      handleAutoSpeakAIResponse(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -1144,74 +1292,128 @@ Your goal is to help students become more confident, articulate, and authentic i
   };
 
   return (
-    <div className="chat-container">
+    <div className="chat-container" style={{
+      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif'
+    }}>
       {/* Content Usage Toggle */}
       {(hasContent || user) && (
         <div style={{
-          padding: '10px',
-          backgroundColor: '#f0f8ff',
-          borderBottom: '1px solid #ddd',
+          padding: '16px 20px',
+          backgroundColor: '#F2F2F7',
+          borderBottom: '1px solid #E5E5EA',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          fontSize: '14px'
+          fontSize: '15px',
+          letterSpacing: '-0.24px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                checked={useUploadedContent}
-                onChange={(e) => setUseUploadedContent(e.target.checked)}
-                disabled={!user}
-              />
-              Use uploaded content
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+              <div style={{
+                position: 'relative',
+                width: '20px',
+                height: '20px',
+                borderRadius: '6px',
+                border: useUploadedContent ? 'none' : '2px solid #D1D1D6',
+                backgroundColor: useUploadedContent ? '#007AFF' : 'transparent',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <input
+                  type="checkbox"
+                  checked={useUploadedContent}
+                  onChange={(e) => setUseUploadedContent(e.target.checked)}
+                  disabled={!user}
+                  style={{
+                    position: 'absolute',
+                    opacity: 0,
+                    width: '100%',
+                    height: '100%',
+                    margin: 0,
+                    cursor: 'pointer'
+                  }}
+                />
+                {useUploadedContent && (
+                  <div style={{ color: 'white', fontSize: '12px', fontWeight: '600' }}>✓</div>
+                )}
+              </div>
+              <span style={{
+                fontWeight: '400',
+                color: '#1D1D1F'
+              }}>Use uploaded content</span>
             </label>
             {showContentIndicator && (
               <span style={{
-                color: '#28a745',
-                fontSize: '12px',
-                fontWeight: 'bold'
+                color: '#34C759',
+                fontSize: '13px',
+                fontWeight: '600',
+                letterSpacing: '-0.08px'
               }}>
                 ✓ Content used
               </span>
             )}
           </div>
-          <button
-            onClick={checkUploadedFiles}
-            style={{
-              padding: '5px 10px',
-              fontSize: '12px',
-              backgroundColor: '#6c757d',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              marginRight: '5px'
-            }}
-          >
-            Debug Files
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={checkUploadedFiles}
+              style={{
+                padding: '6px 12px',
+                fontSize: '13px',
+                backgroundColor: '#8E8E93',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                letterSpacing: '-0.08px',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = '#6D6D70';
+                e.currentTarget.style.transform = 'scale(0.98)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = '#8E8E93';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+            >
+              Debug Files
+            </button>
 
-          <button
-            onClick={async () => {
-              const response = await fetch('http://localhost:3000/api/chat/test-auth', {
-                headers: user?.token ? { 'Authorization': `Bearer ${user.token}` } : {}
-              });
-              const data = await response.json();
-              console.log('Auth test result:', data);
-            }}
-            style={{
-              padding: '5px 10px',
-              fontSize: '12px',
-              backgroundColor: '#28a745',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-          >
-            Test Auth
-          </button>
+            <button
+              onClick={async () => {
+                const response = await fetch('http://localhost:3000/api/chat/test-auth', {
+                  headers: user?.token ? { 'Authorization': `Bearer ${user.token}` } : {}
+                });
+                const data = await response.json();
+                console.log('Auth test result:', data);
+              }}
+              style={{
+                padding: '6px 12px',
+                fontSize: '13px',
+                backgroundColor: '#34C759',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                letterSpacing: '-0.08px',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = '#30D158';
+                e.currentTarget.style.transform = 'scale(0.98)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = '#34C759';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+            >
+              Test Auth
+            </button>
+          </div>
         </div>
       )}
 
@@ -1318,21 +1520,35 @@ Your goal is to help students become more confident, articulate, and authentic i
               onClick={handleEndInterviewClick}
               disabled={endInterviewButtonState === 'processing'}
               style={{
-                padding: '10px 18px',
-                fontSize: '14px',
-                backgroundColor: endInterviewButtonState === 'processing' ? '#6c757d' : '#28a745',
+                padding: '12px 20px',
+                fontSize: '15px',
+                backgroundColor: endInterviewButtonState === 'processing' ? '#8E8E93' : '#34C759',
                 color: 'white',
                 border: 'none',
-                borderRadius: '8px',
+                borderRadius: '16px',
                 cursor: endInterviewButtonState === 'processing' ? 'not-allowed' : 'pointer',
-                fontWeight: '500',
+                fontWeight: '600',
+                letterSpacing: '-0.24px',
                 opacity: endInterviewButtonState === 'processing' ? 0.7 : 1,
                 transition: 'all 0.3s ease',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+              }}
+              onMouseOver={(e) => {
+                if (endInterviewButtonState !== 'processing') {
+                  e.currentTarget.style.backgroundColor = '#30D158';
+                  e.currentTarget.style.transform = 'scale(0.98)';
+                }
+              }}
+              onMouseOut={(e) => {
+                if (endInterviewButtonState !== 'processing') {
+                  e.currentTarget.style.backgroundColor = '#34C759';
+                  e.currentTarget.style.transform = 'scale(1)';
+                }
               }}
             >
               {endInterviewButtonState === 'processing' && (
@@ -1363,14 +1579,25 @@ Your goal is to help students become more confident, articulate, and authentic i
             <button
               onClick={newInterview}
               style={{
-                padding: '10px 18px',
-                fontSize: '14px',
-                backgroundColor: '#007bff',
+                padding: '12px 20px',
+                fontSize: '15px',
+                backgroundColor: '#007AFF',
                 color: 'white',
                 border: 'none',
-                borderRadius: '8px',
+                borderRadius: '16px',
                 cursor: 'pointer',
-                fontWeight: '500'
+                fontWeight: '600',
+                letterSpacing: '-0.24px',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = '#0051D5';
+                e.currentTarget.style.transform = 'scale(0.98)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = '#007AFF';
+                e.currentTarget.style.transform = 'scale(1)';
               }}
             >
               🔄 New Interview
@@ -1433,7 +1660,7 @@ Your goal is to help students become more confident, articulate, and authentic i
               color: '#495057',
               marginBottom: '10px'
             }}>
-              End Interview & Generate AI Rating?
+              End Interview?
             </div>
             <div style={{
               fontSize: '14px',
@@ -1441,7 +1668,7 @@ Your goal is to help students become more confident, articulate, and authentic i
               marginBottom: '25px',
               lineHeight: '1.4'
             }}>
-              This will analyze your responses and generate personalized feedback. The process may take a few moments.
+              Choose how you'd like to end this interview session. You can generate AI feedback (requires at least 2-3 exchanges) or simply end without rating.
             </div>
             
             {/* Interview Summary */}
@@ -1499,42 +1726,82 @@ Your goal is to help students become more confident, articulate, and authentic i
             {/* Action Buttons */}
             <div style={{
               display: 'flex',
-              gap: '12px',
-              justifyContent: 'center'
+              gap: '8px',
+              justifyContent: 'center',
+              flexWrap: 'wrap'
             }}>
               <button
                 onClick={cancelEndInterview}
                 style={{
                   padding: '12px 20px',
-                  fontSize: '14px',
-                  backgroundColor: '#6c757d',
+                  fontSize: '15px',
+                  backgroundColor: '#8E8E93',
                   color: 'white',
                   border: 'none',
-                  borderRadius: '8px',
+                  borderRadius: '12px',
                   cursor: 'pointer',
-                  fontWeight: '500',
-                  transition: 'background-color 0.2s ease'
+                  fontWeight: '600',
+                  letterSpacing: '-0.24px',
+                  transition: 'all 0.2s ease'
                 }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#545b62'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#6c757d'}
+                onMouseOver={(e) => {
+                  e.target.style.backgroundColor = '#6D6D70';
+                  e.target.style.transform = 'scale(0.98)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.backgroundColor = '#8E8E93';
+                  e.target.style.transform = 'scale(1)';
+                }}
               >
                 ❌ Cancel
+              </button>
+              <button
+                onClick={endInterviewWithoutRating}
+                style={{
+                  padding: '12px 20px',
+                  fontSize: '15px',
+                  backgroundColor: '#FF9500',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  letterSpacing: '-0.24px',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.backgroundColor = '#DB7600';
+                  e.target.style.transform = 'scale(0.98)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.backgroundColor = '#FF9500';
+                  e.target.style.transform = 'scale(1)';
+                }}
+              >
+                🚪 End Without Rating
               </button>
               <button
                 onClick={confirmEndInterview}
                 style={{
                   padding: '12px 20px',
-                  fontSize: '14px',
-                  backgroundColor: '#28a745',
+                  fontSize: '15px',
+                  backgroundColor: '#34C759',
                   color: 'white',
                   border: 'none',
-                  borderRadius: '8px',
+                  borderRadius: '12px',
                   cursor: 'pointer',
-                  fontWeight: '500',
-                  transition: 'background-color 0.2s ease'
+                  fontWeight: '600',
+                  letterSpacing: '-0.24px',
+                  transition: 'all 0.2s ease'
                 }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#218838'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#28a745'}
+                onMouseOver={(e) => {
+                  e.target.style.backgroundColor = '#30D158';
+                  e.target.style.transform = 'scale(0.98)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.backgroundColor = '#34C759';
+                  e.target.style.transform = 'scale(1)';
+                }}
               >
                 ✅ Yes, Generate Rating
               </button>
@@ -1575,10 +1842,58 @@ Your goal is to help students become more confident, articulate, and authentic i
                 "Type your message..."
               }
               disabled={isLoading || isInterviewCompleted}
+              style={{
+                padding: '12px 16px',
+                border: '1px solid #D1D1D6',
+                borderRadius: '20px',
+                fontSize: '17px',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif',
+                letterSpacing: '-0.41px',
+                backgroundColor: isInterviewCompleted ? '#F2F2F7' : '#ffffff',
+                transition: 'all 0.2s ease',
+                outline: 'none',
+                flex: 1,
+                marginRight: '8px'
+              }}
+              onFocus={(e) => {
+                if (!isInterviewCompleted) {
+                  e.currentTarget.style.borderColor = '#007AFF';
+                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,122,255,0.1)';
+                }
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = '#D1D1D6';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
             />
             <button 
               onClick={sendMessage} 
               disabled={isLoading || !input.trim() || isInterviewCompleted}
+              style={{
+                padding: '12px 20px',
+                backgroundColor: (isLoading || !input.trim() || isInterviewCompleted) ? '#D1D1D6' : '#007AFF',
+                color: (isLoading || !input.trim() || isInterviewCompleted) ? '#8E8E93' : 'white',
+                border: 'none',
+                borderRadius: '20px',
+                fontSize: '15px',
+                fontWeight: '600',
+                letterSpacing: '-0.24px',
+                cursor: (isLoading || !input.trim() || isInterviewCompleted) ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease',
+                minWidth: '70px'
+              }}
+              onMouseOver={(e) => {
+                if (!isLoading && input.trim() && !isInterviewCompleted) {
+                  e.currentTarget.style.backgroundColor = '#0051D5';
+                  e.currentTarget.style.transform = 'scale(0.98)';
+                }
+              }}
+              onMouseOut={(e) => {
+                if (!isLoading && input.trim() && !isInterviewCompleted) {
+                  e.currentTarget.style.backgroundColor = '#007AFF';
+                  e.currentTarget.style.transform = 'scale(1)';
+                }
+              }}
             >
               {isLoading ? '...' : 'Send'}
             </button>

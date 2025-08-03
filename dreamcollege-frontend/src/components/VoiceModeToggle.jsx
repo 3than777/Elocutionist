@@ -117,64 +117,142 @@ export default function VoiceModeToggle({
     return isVoiceMode ? 'Switch to text mode' : 'Switch to voice mode';
   };
 
-  /**
-   * Get toggle button classes
-   */
-  const getToggleClasses = () => {
-    let classes = 'voice-toggle';
-    
-    if (isVoiceMode) classes += ' voice-toggle--active';
-    if (!isVoiceSupported || disabled || isChecking) classes += ' voice-toggle--disabled';
-    
-    return classes;
-  };
+
 
   return (
-    <div className="voice-toggle-container">
-      <button
-        className={getToggleClasses()}
-        onClick={handleToggle}
-        disabled={!isVoiceSupported || disabled || isChecking}
-        title={getTooltipText()}
-        aria-label={`Voice mode ${isVoiceMode ? 'enabled' : 'disabled'}. ${getTooltipText()}`}
-      >
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '12px',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif'
+    }}>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '8px 0',
+        width: '100%'
+      }}>
+        <button
+          onClick={handleToggle}
+          disabled={!isVoiceSupported || disabled || isChecking}
+          title={getTooltipText()}
+          aria-label={`Voice mode ${isVoiceMode ? 'enabled' : 'disabled'}. ${getTooltipText()}`}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '8px',
+            padding: '8px 12px',
+            backgroundColor: '#F2F2F7',
+            borderRadius: '20px',
+            border: 'none',
+            cursor: (!isVoiceSupported || disabled || isChecking) ? 'not-allowed' : 'pointer',
+            opacity: (!isVoiceSupported || disabled || isChecking) ? 0.5 : 1,
+            transition: 'all 0.2s ease',
+            width: '140px',
+            height: '40px'
+          }}
+        >
+          <span style={{
+            fontSize: '15px',
+            fontWeight: !isVoiceMode ? '600' : '400',
+            color: !isVoiceMode ? '#007AFF' : '#8E8E93',
+            letterSpacing: '-0.24px',
+            transition: 'all 0.2s ease'
+          }}>
+            Text
+          </span>
+        
         {/* Toggle Track */}
-        <div className="voice-toggle__track">
+        <div style={{
+          position: 'relative',
+          width: '40px',
+          height: '24px',
+          backgroundColor: isVoiceMode ? '#007AFF' : '#D1D1D6',
+          borderRadius: '12px',
+          transition: 'background-color 0.3s ease',
+          cursor: (!isVoiceSupported || disabled || isChecking) ? 'not-allowed' : 'pointer'
+        }}>
           {/* Toggle Thumb */}
-          <div className="voice-toggle__thumb">
+          <div 
+            style={{
+              position: 'absolute',
+              top: '2px',
+              left: isVoiceMode ? '18px' : '2px',
+              width: '20px',
+              height: '20px',
+              backgroundColor: '#ffffff',
+              borderRadius: '10px',
+              transition: 'all 0.3s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              cursor: (!isVoiceSupported || disabled || isChecking) ? 'not-allowed' : 'pointer'
+            }}
+            onMouseOver={(e) => {
+              if (isVoiceSupported && !disabled && !isChecking) {
+                e.currentTarget.style.transform = 'scale(1.1)';
+                e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15)';
+              }
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+            }}
+          >
             {isChecking ? (
-              <div className="voice-toggle__loading">⟳</div>
+              <div style={{
+                fontSize: '10px',
+                animation: 'spin 1s linear infinite'
+              }}>⟳</div>
             ) : isVoiceMode ? (
-              <div className="voice-toggle__icon voice-toggle__icon--mic">🎤</div>
+              <div style={{ fontSize: '10px' }}>🎤</div>
             ) : (
-              <div className="voice-toggle__icon voice-toggle__icon--text">✎</div>
+              <div style={{ fontSize: '10px' }}>✎</div>
             )}
           </div>
         </div>
         
-        {/* Mode Labels */}
-        <div className="voice-toggle__labels">
-          <span className={`voice-toggle__label ${!isVoiceMode ? 'voice-toggle__label--active' : ''}`}>
-            Text
-          </span>
-          <span className={`voice-toggle__label ${isVoiceMode ? 'voice-toggle__label--active' : ''}`}>
+          <span style={{
+            fontSize: '15px',
+            fontWeight: isVoiceMode ? '600' : '400',
+            color: isVoiceMode ? '#007AFF' : '#8E8E93',
+            letterSpacing: '-0.24px',
+            transition: 'all 0.2s ease'
+          }}>
             Voice
           </span>
-        </div>
-      </button>
+        </button>
+      </div>
 
       {/* Error Message */}
       {voiceError && !isVoiceSupported && (
-        <div className="voice-toggle__error">
-          <small>{voiceError}</small>
+        <div style={{
+          padding: '12px 16px',
+          backgroundColor: '#FFF2F2',
+          borderRadius: '12px',
+          border: '1px solid #FECACA'
+        }}>
+          <div style={{
+            fontSize: '13px',
+            color: '#DC2626',
+            letterSpacing: '-0.08px',
+            marginBottom: voiceError.includes('HTTPS') ? '8px' : '0'
+          }}>
+            {voiceError}
+          </div>
           {voiceError.includes('HTTPS') && (
-            <div className="voice-toggle__help">
-              <small>
-                Voice features require a secure connection. 
-                {window.location.hostname === 'localhost' 
-                  ? ' Try using HTTPS in production.' 
-                  : ' Please access this site via HTTPS.'}
-              </small>
+            <div style={{
+              fontSize: '12px',
+              color: '#7F1D1D',
+              letterSpacing: '-0.05px'
+            }}>
+              Voice features require a secure connection. 
+              {window.location.hostname === 'localhost' 
+                ? ' Try using HTTPS in production.' 
+                : ' Please access this site via HTTPS.'}
             </div>
           )}
         </div>
@@ -182,17 +260,46 @@ export default function VoiceModeToggle({
 
       {/* Warning Message for Limited Functionality */}
       {voiceError && isVoiceSupported && (
-        <div className="voice-toggle__warning">
-          <small style={{ color: '#856404' }}>⚠️ {voiceError}</small>
+        <div style={{
+          padding: '12px 16px',
+          backgroundColor: '#FFF8E6',
+          borderRadius: '12px',
+          border: '1px solid #FDE68A'
+        }}>
+          <div style={{
+            fontSize: '13px',
+            color: '#92400E',
+            letterSpacing: '-0.08px'
+          }}>
+            ⚠️ {voiceError}
+          </div>
         </div>
       )}
 
       {/* Support Info */}
       {isVoiceSupported && !voiceError && (
-        <div className="voice-toggle__info">
-          <small style={{ color: '#28a745' }}>✅ Voice mode available</small>
+        <div style={{
+          padding: '12px 16px',
+          backgroundColor: '#F0FDF4',
+          borderRadius: '12px',
+          border: '1px solid #BBF7D0'
+        }}>
+          <div style={{
+            fontSize: '13px',
+            color: '#166534',
+            letterSpacing: '-0.08px'
+          }}>
+            ✅ Voice mode available
+          </div>
         </div>
       )}
+
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

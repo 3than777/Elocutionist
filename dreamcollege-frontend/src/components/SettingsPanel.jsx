@@ -43,7 +43,6 @@ export default function SettingsPanel({
     pitch: 1.0
   });
   const [speechSettings, setSpeechSettings] = useState({
-    confidence: 0.7,
     autoPlayAI: true,
     preferredGender: 'female'
   });
@@ -233,7 +232,6 @@ export default function SettingsPanel({
       pitch: 1.0
     };
     const defaultSpeechSettings = {
-      confidence: 0.7,
       autoPlayAI: true,
       preferredGender: 'female'
     };
@@ -272,47 +270,87 @@ export default function SettingsPanel({
   };
 
   return (
-    <div>
+    <div style={{
+      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif'
+    }}>
       {/* Expert/Advanced/Beginner */}
-      <div className="settings-box">
-        <h3>Choose Level</h3>
+      <div style={{
+        backgroundColor: '#ffffff',
+        borderRadius: '16px',
+        padding: '20px',
+        marginBottom: '16px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+        border: '1px solid #F2F2F7'
+      }}>
+        <h3 style={{
+          fontSize: '20px',
+          fontWeight: '600',
+          color: '#1D1D1F',
+          margin: '0 0 16px 0',
+          letterSpacing: '-0.32px'
+        }}>Choose Level</h3>
         <LevelSelector onChange={onDifficultyChange} />
       </div>
 
       {/* Voice Settings */}
-      <div className="settings-box">
+      <div style={{
+        backgroundColor: '#ffffff',
+        borderRadius: '16px',
+        padding: '20px',
+        marginBottom: '16px',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+        border: '1px solid #F2F2F7'
+      }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '10px'
+          marginBottom: '16px'
         }}>
-          <h3 style={{ margin: 0 }}>Voice Settings</h3>
+          <h3 style={{ 
+            margin: 0,
+            fontSize: '20px',
+            fontWeight: '600',
+            color: '#1D1D1F',
+            letterSpacing: '-0.32px'
+          }}>Voice Settings</h3>
           <button
             onClick={() => setShowVoiceSettings(!showVoiceSettings)}
             style={{
-              padding: '4px 8px',
-              fontSize: '12px',
-              border: '1px solid #28a745',
-              backgroundColor: '#fff',
-              color: '#28a745',
-              borderRadius: '4px',
-              cursor: 'pointer'
+              padding: '6px 12px',
+              fontSize: '13px',
+              border: 'none',
+              backgroundColor: '#34C759',
+              color: '#ffffff',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              fontWeight: '600',
+              letterSpacing: '-0.08px',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = '#30D158';
+              e.currentTarget.style.transform = 'scale(0.98)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = '#34C759';
+              e.currentTarget.style.transform = 'scale(1)';
             }}
           >
-            {showVoiceSettings ? '🎤 Hide Settings' : '⚙️ Show Settings'}
+            {showVoiceSettings ? 'Hide Settings' : 'Show Settings'}
           </button>
         </div>
 
         {voiceError && (
           <div style={{
-            padding: '8px',
-            backgroundColor: '#fff3cd',
-            border: '1px solid #ffeaa7',
-            borderRadius: '4px',
-            marginBottom: '10px',
-            fontSize: '14px',
-            color: '#856404'
+            padding: '12px 16px',
+            backgroundColor: '#FFF8E6',
+            border: '1px solid #FDE68A',
+            borderRadius: '12px',
+            marginBottom: '16px',
+            fontSize: '15px',
+            color: '#92400E',
+            letterSpacing: '-0.24px'
           }}>
             ⚠️ {voiceError}
           </div>
@@ -321,8 +359,16 @@ export default function SettingsPanel({
         {showVoiceSettings && (
           <div style={{ marginTop: '10px' }}>
             {/* Voice Selection */}
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', marginBottom: '5px', fontWeight: '600' }}>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                marginBottom: '8px', 
+                fontWeight: '600',
+                fontSize: '15px',
+                color: '#1D1D1F',
+                letterSpacing: '-0.24px'
+              }}>
                 🎭 Voice Selection
               </label>
               <select
@@ -330,12 +376,33 @@ export default function SettingsPanel({
                 onChange={(e) => handleVoiceChange(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '8px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '14px'
+                  padding: '12px 16px',
+                  border: '1px solid #D1D1D6',
+                  borderRadius: '12px',
+                  fontSize: '17px',
+                  fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif',
+                  letterSpacing: '-0.41px',
+                  backgroundColor: '#F2F2F7',
+                  transition: 'all 0.2s ease',
+                  outline: 'none',
+                  appearance: 'none',
+                  backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23999\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6,9 12,15 18,9\'%3e%3c/polyline%3e%3c/svg%3e")',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 12px center',
+                  backgroundSize: '16px',
+                  paddingRight: '40px'
                 }}
                 disabled={!voiceInitialized || availableVoices.length === 0}
+                onFocus={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                  e.currentTarget.style.borderColor = '#007AFF';
+                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,122,255,0.1)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.backgroundColor = '#F2F2F7';
+                  e.currentTarget.style.borderColor = '#D1D1D6';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
               >
                 <option value="">Select a voice...</option>
                 {availableVoices.map((voice) => (
@@ -433,24 +500,7 @@ export default function SettingsPanel({
               </select>
             </div>
 
-            {/* Recognition Confidence */}
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', marginBottom: '5px', fontWeight: '600' }}>
-                🎯 Recognition Confidence: {Math.round(speechSettings.confidence * 100)}%
-              </label>
-              <input
-                type="range"
-                min="0.1"
-                max="1.0"
-                step="0.1"
-                value={speechSettings.confidence}
-                onChange={(e) => handleSpeechSettingChange('confidence', parseFloat(e.target.value))}
-                style={{ width: '100%' }}
-              />
-              <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
-                Lower = accepts more uncertain speech, Higher = requires clearer speech
-              </div>
-            </div>
+
 
             {/* Auto-play AI responses */}
             <div style={{ marginBottom: '15px' }}>

@@ -445,10 +445,10 @@ function processTextForSpeech(text) {
   processed = processed.replace(/\bCSS\b/g, 'C S S');
   processed = processed.replace(/\bJS\b/g, 'JavaScript');
   
-  // Add natural pauses
-  processed = processed.replace(/\. /g, '. <break time="300ms"/> ');
-  processed = processed.replace(/\? /g, '? <break time="400ms"/> ');
-  processed = processed.replace(/! /g, '! <break time="400ms"/> ');
+  // Add natural pauses using punctuation (Web Speech API doesn't support SSML)
+  processed = processed.replace(/\. /g, '... ');
+  processed = processed.replace(/\? /g, '?... ');
+  processed = processed.replace(/! /g, '!... ');
   
   // Limit length
   if (processed.length > CONFIG.maxTextLength) {

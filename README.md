@@ -30,6 +30,199 @@ A comprehensive Node.js/Express TypeScript backend API for conducting AI-powered
 - MongoDB (optional - mock mode available)
 - OpenAI API key
 
+### 🍎 macOS Setup Instructions
+
+#### Required Dependencies for macOS
+
+**1. Install Homebrew (if not already installed):**
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+**2. Install Node.js 18+ (LTS recommended):**
+```bash
+# Install Node.js via Homebrew
+brew install node
+
+# Verify installation
+node --version  # Should be 18.0.0 or higher
+npm --version   # Should be included with Node.js
+```
+
+**3. Install MongoDB (Optional - for full database functionality):**
+```bash
+# Install MongoDB Community Edition
+brew tap mongodb/brew
+brew install mongodb-community
+
+# Start MongoDB service
+brew services start mongodb/brew/mongodb-community
+
+# Verify MongoDB is running
+brew services list | grep mongodb
+```
+
+**4. Install Git (if not already installed):**
+```bash
+# Install Git via Homebrew
+brew install git
+
+# Verify installation
+git --version
+```
+
+**5. Install additional build tools for native dependencies:**
+```bash
+# Install Xcode Command Line Tools (required for native modules like sharp, bcrypt)
+xcode-select --install
+
+# Install Python (required for some native modules)
+brew install python@3.11
+```
+
+#### macOS-Specific Notes
+
+- **M1/M2 Macs**: All dependencies are compatible with Apple Silicon
+- **Rosetta**: Not required - all dependencies have native ARM64 builds
+- **Sharp image processing**: Will automatically install the correct ARM64 or x64 binaries
+- **MongoDB**: Can be replaced with MongoDB Atlas (cloud) if local installation is not preferred
+
+#### Complete macOS Setup Commands
+
+```bash
+# 1. Clone the repository
+git clone <repository-url>
+cd project1
+
+# 2. Install backend dependencies
+npm install
+
+# 3. Install frontend dependencies
+cd dreamcollege-frontend
+npm install
+cd ..
+
+# 4. Create environment file from template
+cat > .env << 'EOF'
+# Core Configuration
+PORT=3000
+MONGODB_URI=mongodb://localhost:27017/ai-interview-coach
+JWT_SECRET=your-strong-secret-key-change-this-in-production
+OPENAI_API_KEY=your-openai-api-key
+
+# Optional Configuration
+NODE_ENV=development
+FRONTEND_URL=http://localhost:5173
+JWT_EXPIRES_IN=24h
+USE_MOCK_DB=false
+OPENAI_MODEL=gpt-4
+BCRYPT_SALT_ROUNDS=12
+EOF
+
+# Edit .env with your actual API keys and secrets
+
+# 5. Start MongoDB (if using local MongoDB)
+brew services start mongodb/brew/mongodb-community
+
+# 6. Start the backend server
+npm run dev
+
+# 7. In a new terminal, start the frontend
+cd dreamcollege-frontend
+npm run dev
+```
+
+**Access the application:**
+- Backend API: http://localhost:3000
+- Frontend: http://localhost:5173
+- Health check: http://localhost:3000/health
+
+#### Quick Start (Minimal Setup)
+
+For the fastest setup experience on macOS:
+
+```bash
+# Install prerequisites
+brew install node mongodb-community
+xcode-select --install
+
+# Clone and setup
+git clone <repository-url>
+cd project1
+npm install
+cd dreamcollege-frontend && npm install && cd ..
+
+# Use mock database mode (no MongoDB required)
+echo "USE_MOCK_DB=true
+PORT=3000
+JWT_SECRET=development-secret-change-in-production
+OPENAI_API_KEY=your-openai-api-key" > .env
+
+# Start both servers
+npm run dev &
+cd dreamcollege-frontend && npm run dev
+```
+
+#### Troubleshooting macOS Issues
+
+**Permission Issues:**
+```bash
+# Fix npm permissions (if needed)
+sudo chown -R $(whoami) ~/.npm
+
+# Fix Node.js permissions
+sudo chown -R $(whoami) /usr/local/lib/node_modules
+```
+
+**Native Module Build Errors:**
+```bash
+# Clear npm cache and reinstall
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+
+# For M1/M2 Macs with build issues
+export ARCH=arm64
+npm install
+```
+
+**MongoDB Connection Issues:**
+```bash
+# Check MongoDB status
+brew services list | grep mongodb
+
+# Restart MongoDB
+brew services restart mongodb/brew/mongodb-community
+
+# Alternative: Use MongoDB Atlas (cloud) instead of local MongoDB
+# Set USE_MOCK_DB=true in .env for development without MongoDB
+```
+
+#### System Requirements Summary
+
+**Minimum Requirements:**
+- macOS 10.15 (Catalina) or later
+- Node.js 18.0.0 or higher
+- npm 8.0.0 or higher
+- 4GB RAM minimum, 8GB recommended
+- 2GB free disk space
+
+**Recommended for Development:**
+- macOS 12.0 (Monterey) or later
+- Node.js 18.x LTS or Node.js 20.x LTS
+- 16GB RAM
+- SSD storage
+- MongoDB 6.0+ (or use mock mode)
+
+**Supported Architectures:**
+- Intel x64 (macOS 10.15+)
+- Apple Silicon M1/M2/M3 (macOS 11.0+)
+
+**Optional but Recommended:**
+- Visual Studio Code with TypeScript extension
+- MongoDB Compass (GUI for database management)
+- Postman or similar for API testing
+
 ### 1. Clone and Install
 
 ```bash

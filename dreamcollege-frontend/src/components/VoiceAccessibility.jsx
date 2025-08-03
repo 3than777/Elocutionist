@@ -81,7 +81,7 @@ export default function VoiceAccessibility({
   onRepeatLastMessage,
   currentMessage = '',
   voiceError = null,
-  speechConfidence = 0
+
 }) {
   // Accessibility state
   const [highContrastMode, setHighContrastMode] = useState(false);
@@ -121,12 +121,7 @@ export default function VoiceAccessibility({
     announceVoiceStateChange();
   }, [isVoiceMode, isListening, isSpeaking, voiceError]);
 
-  // Announce speech confidence changes
-  useEffect(() => {
-    if (isListening && speechConfidence > 0) {
-      announceConfidenceLevel(speechConfidence);
-    }
-  }, [speechConfidence, isListening]);
+
 
   /**
    * Initialize accessibility features based on system preferences
@@ -431,19 +426,7 @@ export default function VoiceAccessibility({
     announce(announcement);
   };
 
-  /**
-   * Announce speech confidence level
-   */
-  const announceConfidenceLevel = (confidence) => {
-    const confidencePercent = Math.round(confidence * 100);
-    if (confidencePercent >= 80) {
-      announce(`High confidence speech recognition: ${confidencePercent}%`);
-    } else if (confidencePercent >= 60) {
-      announce(`Medium confidence speech recognition: ${confidencePercent}%`);
-    } else if (confidencePercent >= 40) {
-      announce(`Low confidence speech recognition: ${confidencePercent}%`);
-    }
-  };
+
 
   /**
    * Make announcement to screen readers
@@ -515,8 +498,7 @@ export default function VoiceAccessibility({
     isVoiceMode,
     isListening,
     isSpeaking,
-    voiceError,
-    speechConfidence
+    voiceError
   };
 
   return (

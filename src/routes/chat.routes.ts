@@ -144,6 +144,16 @@ router.post('/', optionalAuth, async (req: AuthenticatedRequest, res: Response):
 
     // Process messages with optional content
     let enhancedMessages = [...messages];
+    
+    // Debug: Log received messages structure
+    console.log(`\n=== RECEIVED MESSAGES DEBUG ===`);
+    console.log(`Number of messages received: ${messages.length}`);
+    messages.forEach((msg, index) => {
+      console.log(`Message ${index}: role="${msg.role}", content_length=${msg.content?.length || 0}`);
+      if (msg.role === 'system') {
+        console.log(`  System message preview: "${msg.content?.substring(0, 100)}..."`);
+      }
+    });
 
                    // Debug the exact conditions
       console.log(`\n=== PRE-CONTENT CHECK ===`);
@@ -276,7 +286,7 @@ router.post('/', optionalAuth, async (req: AuthenticatedRequest, res: Response):
       // Find the system message and enhance it with difficulty information
       const systemMessageIndex = enhancedMessages.findIndex(msg => msg.role === 'system');
       if (systemMessageIndex >= 0) {
-        const originalSystemPrompt = enhancedMessages[systemMessageIndex].content;
+        const originalSystemPrompt = enhancedMessages[systemMessageIndex]?.content || '';
         
         // Map the interview type (which is actually the difficulty level from frontend) to difficulty instructions
         const difficultyMapping: { [key: string]: string } = {
@@ -297,40 +307,24 @@ router.post('/', optionalAuth, async (req: AuthenticatedRequest, res: Response):
         const mappedDifficulty = difficultyMapping[interviewType] || 'Advanced';
         
         console.log(`Difficulty mapping: ${interviewType} -> ${mappedDifficulty}`);
+        console.log(`System message index: ${systemMessageIndex}`);
         
-        // Add difficulty-specific guidance to the system prompt
+        if (systemMessageIndex >= 0) {
+          console.log(`Original system prompt length: ${originalSystemPrompt.length} chars`);
+          console.log(`Original prompt contains "Difficulty:": ${originalSystemPrompt.includes('Difficulty:')}`);
+        }
+        
+        // Add reinforcement for difficulty level (frontend already includes detailed guidance)
         const difficultyGuidance = `
 
-## Difficulty Level: ${mappedDifficulty}
+## BACKEND DIFFICULTY CONFIRMATION: ${mappedDifficulty}
+**This reinforces the difficulty level set in the frontend. Maintain ${mappedDifficulty} complexity throughout the interview.**`;
 
-${mappedDifficulty === 'Easy' ? `**Easy Level Guidelines:**
-- Ask straightforward, commonly asked interview questions
-- Use simpler language and shorter questions  
-- Limit follow-up questions to 1-2 per topic
-- Focus on basic topics like interests, academic goals, and simple experiences
-- Maintain an encouraging tone
-- Example types: "What is your favorite subject?" "Why do you want to attend college?" "Tell me about a hobby you enjoy"` : ''}
-
-${mappedDifficulty === 'Advanced' ? `**Advanced Level Guidelines:**
-- Ask standard college interview questions with moderate complexity
-- Use 2-3 thoughtful follow-up questions per topic
-- Include both personal and academic exploration
-- Ask for specific examples and deeper explanations
-- Maintain professional tone
-- Example types: "Describe a challenge you've overcome," "How has a particular book or class changed your thinking?" "What would you contribute to our campus community?"` : ''}
-
-${mappedDifficulty === 'Hard' ? `**Hard Level Guidelines:**
-- Ask sophisticated, thought-provoking questions
-- Use 3-4 detailed follow-up questions per topic
-- Include complex scenarios and hypothetical situations
-- Expect detailed analysis and critical thinking
-- Challenge assumptions and dig deep into responses
-- Maintain rigorous academic tone
-- Example types: "How would you approach solving [complex problem]?" "Defend your position on [controversial topic]," "Analyze the implications of [current event] on your field"` : ''}
-
-**Adjust your questioning style and complexity according to the ${mappedDifficulty} difficulty level throughout the entire interview.**`;
-
-        enhancedMessages[systemMessageIndex].content = originalSystemPrompt + difficultyGuidance;
+        if (enhancedMessages[systemMessageIndex]) {
+          enhancedMessages[systemMessageIndex].content = originalSystemPrompt + difficultyGuidance;
+          console.log(`Enhanced system prompt length: ${enhancedMessages[systemMessageIndex].content.length} chars`);
+          console.log(`Enhanced prompt contains mapped difficulty "${mappedDifficulty}": ${enhancedMessages[systemMessageIndex].content.includes(mappedDifficulty)}`);
+        }
       }
     }
 

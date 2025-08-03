@@ -8,7 +8,7 @@
  * Features:
  * - Large microphone button for intuitive voice input
  * - Real-time audio level visualization (voice activity detection)
- * - Interim speech results display with confidence indicators
+ * - Interim speech results display
  * - Manual confirm/cancel workflow for speech input
  * - Multiple visual states: idle, listening, processing, confirmed
  * - Error handling with retry options
@@ -60,7 +60,7 @@ export default function VoiceInput({
   
 
   const [transcript, setTranscript] = useState('');
-  const [confidence, setConfidence] = useState(0);
+
   const [interimTranscript, setInterimTranscript] = useState('');
   const [error, setError] = useState(null);
   const [audioLevel, setAudioLevel] = useState(0);
@@ -145,7 +145,6 @@ export default function VoiceInput({
       setError(null);
       setTranscript('');
       setInterimTranscript('');
-      setConfidence(0);
 
       // Initialize audio visualization if not already done
       if (!audioAnalyser) {
@@ -164,7 +163,7 @@ export default function VoiceInput({
                 lastTranscriptRef.current = updated;
                 return updated;
               });
-              setConfidence(result.confidence);
+
             }
             
             // Keep listening until user manually stops - don't auto-submit here
@@ -295,7 +294,6 @@ export default function VoiceInput({
     setInputState('idle');
     setTranscript('');
     setInterimTranscript('');
-    setConfidence(0);
     setError(null);
     lastTranscriptRef.current = '';
   }, [onVoiceInput]);
@@ -307,7 +305,6 @@ export default function VoiceInput({
     stopVoiceInput();
     setTranscript('');
     setInterimTranscript('');
-    setConfidence(0);
     setError(null);
     setInputState('idle');
     lastTranscriptRef.current = '';
@@ -582,14 +579,6 @@ export default function VoiceInput({
             alignItems: 'center'
           }}>
             <span>Confirm your input:</span>
-            {confidence > 0 && (
-              <span style={{
-                fontSize: '12px',
-                color: confidence > 0.8 ? '#28a745' : confidence > 0.6 ? '#ffc107' : '#dc3545'
-              }}>
-                {Math.round(confidence * 100)}% confident
-              </span>
-            )}
           </div>
           
           <div style={{

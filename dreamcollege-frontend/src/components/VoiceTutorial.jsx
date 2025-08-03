@@ -54,7 +54,7 @@ export default function VoiceTutorial({
   const [isPracticing, setIsPracticing] = useState(false);
   const [practiceTranscript, setPracticeTranscript] = useState('');
   const [practiceAudioLevel, setPracticeAudioLevel] = useState(0);
-  const [practiceConfidence, setPracticeConfidence] = useState(0);
+
   
   // Tutorial persistence
   const [tutorialProgress, setTutorialProgress] = useState({});
@@ -314,7 +314,6 @@ export default function VoiceTutorial({
       const recognition = await startListening(
         (result) => {
           setPracticeTranscript(result.transcript);
-          setPracticeConfidence(result.confidence || 0);
         },
         (error) => {
           console.error('Voice test error:', error);
@@ -386,7 +385,7 @@ export default function VoiceTutorial({
       setIsPracticing(true);
       setPracticeTranscript('');
       setPracticeAudioLevel(0);
-      setPracticeConfidence(0);
+      
       
       // Give instruction
       await speakText("Let's practice! Tell me about yourself in a few sentences. I'll listen and respond.");
@@ -398,7 +397,6 @@ export default function VoiceTutorial({
           const recognition = await startListening(
             (result) => {
               setPracticeTranscript(result.transcript);
-              setPracticeConfidence(result.confidence || 0);
               
               // If we have a final result, provide AI response
               if (result.isFinal && result.transcript.trim().length > 10) {
@@ -632,7 +630,7 @@ export default function VoiceTutorial({
       {practiceTranscript && (
         <div className="tutorial-speech-result">
           <div className="speech-result-label">
-            What we heard (Confidence: {Math.round(practiceConfidence * 100)}%):
+            What we heard:
           </div>
           <div className="speech-result-text">"{practiceTranscript}"</div>
         </div>
@@ -699,11 +697,6 @@ export default function VoiceTutorial({
           {practiceTranscript && (
             <div className="practice-transcript">
               <strong>You said:</strong> "{practiceTranscript}"
-              {practiceConfidence > 0 && (
-                <span className="confidence-score">
-                  (Confidence: {Math.round(practiceConfidence * 100)}%)
-                </span>
-              )}
             </div>
           )}
           

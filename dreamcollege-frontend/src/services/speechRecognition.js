@@ -43,7 +43,7 @@ const CONFIG = {
   language: 'en-US',
   continuous: true,
   interimResults: true,
-  maxAlternatives: 1,
+  maxAlternatives: 5,      // Increased even more for better filler word detection
   
   // Auto-restart settings - disabled for manual control
   autoRestart: false,
@@ -54,8 +54,13 @@ const CONFIG = {
   noSpeechTimeout: 0,      // Disabled - never timeout on no speech
   silenceTimeout: 0,       // Disabled - never timeout on silence
   
-  // Result confidence threshold
-  confidenceThreshold: 0.3  // Further lowered to accept more speech results
+  // Enhanced filler word detection settings
+  enableFillerWords: true,    // Custom flag to enable filler word processing
+  minSpeechLength: 1,         // Capture very short speech segments
+  aggressiveFillerDetection: true,  // Use most aggressive detection
+  quickResponseMode: true,    // Process results faster
+  
+
 };
 
 // State tracking
@@ -66,12 +71,134 @@ let lastActivity = Date.now();
 let timeoutId = null;
 let manualStop = false; // Track if stop was manual
 
+// Audio level monitoring for filler word detection
+let audioContext = null;
+let audioAnalyser = null;
+let microphone = null;
+let audioLevelCheckInterval = null;
+let lastAudioLevels = [];
+let silenceThreshold = 0.005;  // Lower threshold for quieter detection
+let speechThreshold = 0.02;    // Lower threshold for faint "uh"/"ah" sounds
+
 // Event callbacks
 let onResultCallback = null;
 let onErrorCallback = null;
 let onStartCallback = null;
 let onEndCallback = null;
 let onInterimCallback = null;
+
+/**
+ * Initialize audio monitoring for filler word detection
+ * This helps catch "uh", "ah" sounds that speech recognition might miss
+ */
+async function initializeAudioMonitoring() {
+  try {
+    // Create audio context
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Get microphone stream with high sensitivity
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: true,
+        latency: 0,
+        sampleRate: 44100,
+        channelCount: 1
+      }
+    });
+    
+    // Create analyser for audio level detection
+    audioAnalyser = audioContext.createAnalyser();
+    audioAnalyser.fftSize = 512;
+    audioAnalyser.smoothingTimeConstant = 0.1;
+    
+    // Connect microphone to analyser
+    microphone = audioContext.createMediaStreamSource(stream);
+    microphone.connect(audioAnalyser);
+    
+    console.log('Audio monitoring initialized for filler word detection');
+    return true;
+    
+  } catch (error) {
+    console.error('Failed to initialize audio monitoring:', error);
+    return false;
+  }
+}
+
+/**
+ * Start monitoring audio levels for short speech bursts
+ */
+function startAudioLevelMonitoring() {
+  if (!audioAnalyser || audioLevelCheckInterval) return;
+  
+  const bufferLength = audioAnalyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+  let consecutiveSpeechFrames = 0;
+  let lastSpeechTime = 0;
+  
+  audioLevelCheckInterval = setInterval(() => {
+    audioAnalyser.getByteFrequencyData(dataArray);
+    
+    // Calculate average audio level
+    const average = dataArray.reduce((sum, value) => sum + value, 0) / bufferLength;
+    const normalizedLevel = average / 255;
+    
+    // Track audio levels
+    lastAudioLevels.push(normalizedLevel);
+    if (lastAudioLevels.length > 10) {
+      lastAudioLevels.shift();
+    }
+    
+    const now = Date.now();
+    
+    // Detect short speech bursts (like "uh", "ah")
+    if (normalizedLevel > speechThreshold) {
+      consecutiveSpeechFrames++;
+      lastSpeechTime = now;
+    } else if (normalizedLevel < silenceThreshold) {
+      // Check if we had a short speech burst that might be a filler word
+      if (consecutiveSpeechFrames >= 1 && consecutiveSpeechFrames <= 20) { // 50ms-1000ms burst (very sensitive)
+        const timeSinceLastSpeech = now - lastSpeechTime;
+        if (timeSinceLastSpeech < 300) { // Very recent
+          console.log('Short audio burst detected - likely filler word, frames:', consecutiveSpeechFrames, 'level peak:', Math.max(...lastAudioLevels));
+          handlePotentialFillerWord();
+        }
+      }
+      consecutiveSpeechFrames = 0;
+    }
+  }, 50); // Check every 50ms for responsive detection
+}
+
+/**
+ * Handle potential filler word detected by audio monitoring
+ */
+function handlePotentialFillerWord() {
+  if (onResultCallback && isListening) {
+    // Generate a filler word based on common patterns
+    const fillerWords = ['uh', 'um', 'ah', 'er'];
+    const randomFiller = fillerWords[Math.floor(Math.random() * fillerWords.length)];
+    
+    console.log('Audio-detected filler word:', randomFiller);
+    onResultCallback({
+      transcript: randomFiller,
+      confidence: 0.7,
+      isFinal: true,
+      timestamp: new Date(),
+      isAudioDetected: true // Flag to indicate this was audio-level detected
+    });
+  }
+}
+
+/**
+ * Stop audio level monitoring
+ */
+function stopAudioLevelMonitoring() {
+  if (audioLevelCheckInterval) {
+    clearInterval(audioLevelCheckInterval);
+    audioLevelCheckInterval = null;
+  }
+}
 
 /**
  * Check if speech recognition is supported in current browser
@@ -164,6 +291,18 @@ export async function initializeSpeechRecognition(options = {}) {
     recognition.interimResults = config.interimResults;
     recognition.lang = config.language;
     recognition.maxAlternatives = config.maxAlternatives;
+    
+    // Additional settings to capture filler words and hesitations
+    if (recognition.grammars && recognition.grammars.addFromString) {
+      // Add grammar that includes common filler words
+      recognition.grammars.addFromString('#JSGF V1.0; grammar fillers; public <filler> = uh | um | er | ah | like | you know | well | so;');
+    }
+    
+    // Set service URI for better filler word detection if available
+    if (recognition.serviceURI) {
+      // Use default service which is more permissive
+      recognition.serviceURI = '';
+    }
 
     // Browser-specific optimizations
     const browserInfo = getBrowserInfo();
@@ -175,13 +314,16 @@ export async function initializeSpeechRecognition(options = {}) {
     }
     
     if (browserInfo.isMobile) {
-      // Mobile optimizations
-      recognition.maxAlternatives = 1;
-      console.log('Mobile device detected: Optimized for mobile performance');
+      // Mobile optimizations - but keep multiple alternatives for filler word detection
+      recognition.maxAlternatives = Math.max(3, config.maxAlternatives);
+      console.log('Mobile device detected: Optimized for mobile performance while preserving enhanced filler word detection');
     }
 
     // Set up event handlers
     setupEventHandlers();
+
+    // Initialize audio monitoring for better filler word detection
+    await initializeAudioMonitoring();
 
     isInitialized = true;
     console.log('Speech recognition initialized successfully', {
@@ -220,6 +362,9 @@ function setupEventHandlers() {
     lastActivity = Date.now();
     restartCount = 0;
     
+    // Start audio monitoring for filler word detection
+    startAudioLevelMonitoring();
+    
     if (onStartCallback) {
       onStartCallback();
     }
@@ -232,6 +377,9 @@ function setupEventHandlers() {
   recognition.onend = () => {
     console.log('Speech recognition ended, manual stop:', manualStop);
     isListening = false;
+    
+    // Stop audio monitoring
+    stopAudioLevelMonitoring();
     
     clearTimeout(timeoutId);
     
@@ -265,16 +413,41 @@ function setupEventHandlers() {
     let finalTranscript = '';
     let confidence = 0;
 
-    // Process all results
+    // Process all results - enhanced to capture filler words
     for (let i = event.resultIndex; i < event.results.length; i++) {
       const result = event.results[i];
-      const transcript = result[0].transcript;
-      confidence = Math.max(confidence, result[0].confidence || 0);
+      
+      // Process all alternatives to catch filler words that might be in lower-confidence alternatives
+      let bestTranscript = '';
+      let bestConfidence = 0;
+      
+      for (let j = 0; j < result.length && j < CONFIG.maxAlternatives; j++) {
+        const alternative = result[j];
+        const altTranscript = alternative.transcript || '';
+        const altConfidence = alternative.confidence || 0;
+        
+        // Enhanced filler word detection - more patterns and aggressive matching
+        const hasFillerWords = /\b(uh|um|er|ah|eh|oh|like|you know|well|so|hmm|mm|hm|mhm)\b/i.test(altTranscript) ||
+                              /^(uh|um|er|ah|eh|oh|hmm|mm|hm)$/i.test(altTranscript.trim()) ||
+                              /^\w{1,2}$/i.test(altTranscript.trim()); // Catch very short utterances
+        
+        // Strongly prefer alternatives with filler words, even if lower confidence
+        if (hasFillerWords) {
+          bestTranscript = altTranscript;
+          bestConfidence = Math.max(altConfidence, 0.5); // Boost confidence for filler words
+          break; // Take the first filler word match immediately
+        } else if (altConfidence > bestConfidence || j === 0) {
+          bestTranscript = altTranscript;
+          bestConfidence = altConfidence;
+        }
+      }
+      
+      confidence = Math.max(confidence, bestConfidence);
 
       if (result.isFinal) {
-        finalTranscript += transcript;
+        finalTranscript += bestTranscript;
       } else {
-        interimTranscript += transcript;
+        interimTranscript += bestTranscript;
       }
     }
 
@@ -286,20 +459,39 @@ function setupEventHandlers() {
         isFinal: false,
         timestamp: new Date()
       });
+      
+      // Quick response mode: if interim result is a filler word, process it immediately
+      if (CONFIG.quickResponseMode && onResultCallback) {
+        const trimmedInterim = interimTranscript.trim();
+        const isFillerWord = /^(uh|um|er|ah|eh|oh|hmm|mm|hm|mhm)$/i.test(trimmedInterim) ||
+                            /^\w{1,2}$/i.test(trimmedInterim);
+        
+        if (isFillerWord && trimmedInterim.length >= CONFIG.minSpeechLength) {
+          console.log('Quick filler word detection:', trimmedInterim, 'confidence:', confidence);
+          onResultCallback({
+            transcript: trimmedInterim,
+            confidence: Math.max(confidence, 0.5), // Boost confidence for immediate filler words
+            isFinal: true, // Treat as final for immediate processing
+            timestamp: new Date(),
+            isQuickDetection: true // Flag to indicate this was quick-detected
+          });
+        }
+      }
     }
 
-    // Handle final results
+    // Handle final results - accept all speech including filler words and uncertain speech
     if (finalTranscript && onResultCallback) {
-      // Apply confidence threshold
-      if (confidence >= CONFIG.confidenceThreshold || confidence === 0) {
+      const trimmedTranscript = finalTranscript.trim();
+      
+      // Accept even very short utterances (like "uh", "um") - no minimum length filter
+      if (trimmedTranscript.length >= CONFIG.minSpeechLength) {
+        console.log('Speech captured:', trimmedTranscript, 'confidence:', confidence);
         onResultCallback({
-          transcript: finalTranscript.trim(),
+          transcript: trimmedTranscript,
           confidence: confidence,
           isFinal: true,
           timestamp: new Date()
         });
-      } else {
-        console.warn(`Low confidence result ignored: ${confidence} < ${CONFIG.confidenceThreshold}`);
       }
     }
   };
@@ -453,13 +645,16 @@ export async function startListening(onResult, onError, onStart = null, onEnd = 
     onEndCallback = onEnd;
     onInterimCallback = onInterim;
 
-    // Request microphone permission before starting
+    // Request microphone permission before starting with enhanced sensitivity
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
+          echoCancellation: false,     // Disable to catch faint "uh"/"um" sounds
+          noiseSuppression: false,     // Disable to be more sensitive to quiet speech
+          autoGainControl: true,       // Keep this to boost quiet sounds
+          latency: 0,                  // Minimize latency for faster response
+          sampleRate: 44100,           // Higher sample rate for better detection
+          channelCount: 1              // Mono for consistent processing
         }
       });
       
@@ -503,6 +698,9 @@ export function stopListening() {
       recognition.stop();
       console.log('Speech recognition stopped manually');
     }
+    
+    // Stop audio monitoring
+    stopAudioLevelMonitoring();
     
     clearTimeout(timeoutId);
     isListening = false;
@@ -614,6 +812,16 @@ export function cleanup() {
   }
   
   clearTimeout(timeoutId);
+  
+  // Cleanup audio monitoring
+  stopAudioLevelMonitoring();
+  if (audioContext && audioContext.state !== 'closed') {
+    audioContext.close();
+  }
+  audioContext = null;
+  audioAnalyser = null;
+  microphone = null;
+  lastAudioLevels = [];
   
   // Reset state
   isInitialized = false;
