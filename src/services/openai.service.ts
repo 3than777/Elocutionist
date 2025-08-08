@@ -442,7 +442,8 @@ ${mappedDifficulty === 'Easy' ? `**Easy Level Guidelines:**
 - Maintain a professional tone - NEVER provide feedback, tips, or evaluation
 - Simply acknowledge responses with neutral phrases like "I see", "Thank you", "Mm-hmm"
 - NO COACHING OR TEACHING - you are only conducting an interview
-- Example types: "What is your favorite subject?" "Why do you want to attend college?" "Tell me about a hobby you enjoy"` : ''}
+- Focus on basic personal interests, academic goals, and simple experiences
+- Questions should be straightforward and accessible for all students` : ''}
 
 ${mappedDifficulty === 'Advanced' ? `**Advanced Level Guidelines:**
 - Ask standard college interview questions with moderate complexity
@@ -452,7 +453,8 @@ ${mappedDifficulty === 'Advanced' ? `**Advanced Level Guidelines:**
 - Maintain professional tone - NEVER provide feedback or evaluation
 - Simply acknowledge responses neutrally before asking the next question
 - NO COACHING OR MENTORING - you are only conducting an interview
-- Example types: "Describe a challenge you've overcome," "How has a particular book or class changed your thinking?" "What would you contribute to our campus community?"` : ''}
+- Ask about specific experiences, academic interests, and campus contributions
+- Questions should encourage detailed responses and self-reflection` : ''}
 
 ${mappedDifficulty === 'Hard' ? `**Hard Level Guidelines:**
 - Ask complex, thought-provoking questions that require deep reflection
@@ -463,7 +465,9 @@ ${mappedDifficulty === 'Hard' ? `**Hard Level Guidelines:**
 - Expect sophisticated, well-reasoned responses but NEVER evaluate or provide feedback
 - Simply acknowledge responses with brief neutral statements before moving to next question
 - NO COACHING, NO TIPS, NO ADVICE - you are only conducting an interview
-- Example types: "If you could solve one global problem, what would it be and how would your approach differ from current solutions?" "Describe a time when your beliefs were fundamentally challenged"` : ''}
+- Ask complex, thought-provoking questions requiring deep analysis
+- Include hypothetical scenarios, ethical dilemmas, and philosophical inquiries
+- Questions should challenge the student to demonstrate critical thinking` : ''}
 
 ## Question Guidelines
 
@@ -480,17 +484,38 @@ ${mappedDifficulty === 'Hard' ? `**Hard Level Guidelines:**
 - Use "How did that change your perspective?" to explore growth and maturity
 - Follow interesting threads with "Tell me more about..."
 
-${previousQuestions.length > 0 ? `**Avoid Repeating:** These previously asked questions: ${previousQuestions.join('; ')}` : ''}
+${previousQuestions.length > 0 ? `**CRITICAL - AVOID AT ALL COSTS:** These previously asked questions: ${previousQuestions.join('; ')}
+**Also avoid questions that are semantically similar or follow the same pattern as these previous questions.**` : ''}
 ${customPrompt ? `**Additional Context:** ${customPrompt}` : ''}
 
 ## CRITICAL: Original Question Generation
 
-**DO NOT use generic example questions.** Generate original questions by:
-- Creating new questions inspired by the student's specific profile and ${userMajor} interest
-- Combining elements from their background in unexpected ways
-- Developing questions that naturally emerge from the ${interviewType} interview context
-- Formulating questions that feel personalized and authentic to this individual student
-- Building on their specified interests and goals
+**ABSOLUTE REQUIREMENT: Generate completely UNIQUE questions for EVERY interview.**
+
+**FORBIDDEN PATTERNS TO AVOID:**
+- "Tell me about a time when..." (overused - find creative alternatives)
+- "I see from your profile..." (too formulaic - be more natural)
+- "Based on your background..." (repetitive - vary your approach)
+- Questions about combining interests (too predictable)
+- Generic questions about challenges, leadership, or teamwork
+
+**STRATEGIES FOR UNIQUE QUESTIONS:**
+1. **Start from unexpected angles**: Instead of direct questions, use scenarios, hypotheticals, or current events as starting points
+2. **Personalize creatively**: Reference their ${userMajor} in surprising contexts, not obvious connections
+3. **Vary question structures**: Use different formats like "What if...", "Imagine...", "How would you explain...", "Design a...", "If you could change..."
+4. **Time-based variations**: Sometimes ask about future aspirations, sometimes past experiences, sometimes present perspectives
+5. **Connect to current events**: Reference recent developments in their field when relevant
+6. **Use role reversal**: "If you were interviewing someone for...", "As a future leader in..."
+7. **Incorporate thought experiments**: Unique scenarios that test their thinking
+8. **Mix concrete and abstract**: Balance practical questions with philosophical ones
+
+**RANDOMIZATION REQUIREMENTS:**
+- NEVER start with the same type of question twice in a row across interviews
+- Vary your opening question dramatically each time
+- If previous questions exist, ensure NO semantic similarity to them
+- Use different vocabulary, phrasing, and conceptual frameworks each time
+
+**REMEMBER:** Each interview should feel like a completely different conversation, even for students with similar profiles. The goal is to create questions that the student has NEVER encountered before, making the practice genuinely valuable
 
 ## FINAL REMINDER: NO FEEDBACK DURING INTERVIEWS
 
@@ -519,11 +544,11 @@ Return only the questions, numbered 1-${questionCount}, with no additional comme
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      temperature: 0.7, // Balanced creativity and consistency
+      temperature: 0.85, // Increased for more creativity and variety
       max_tokens: 1000, // Sufficient for 5 detailed questions
-      top_p: 0.9,
-      frequency_penalty: 0.3, // Reduce repetition
-      presence_penalty: 0.2 // Encourage diverse topics
+      top_p: 0.95, // Increased for more diverse outputs
+      frequency_penalty: 0.6, // Significantly increased to reduce repetition
+      presence_penalty: 0.5 // Increased to encourage more diverse topics
     });
 
     const response = completion.choices[0]?.message?.content;
@@ -1103,6 +1128,35 @@ export async function createChatCompletion(
   options: IChatCompletionOptions = {}
 ): Promise<string> {
   const client = getOpenAIClient();
+  
+  // Debug: Log what's being sent to OpenAI
+  console.log('\n=== OPENAI API CALL DEBUG ===');
+  console.log(`Model: ${options.model || 'gpt-4'}`);
+  console.log(`Number of messages: ${messages.length}`);
+  
+  // Log system message to check if user content is included
+  const systemMessage = messages.find(m => m.role === 'system');
+  if (systemMessage) {
+    console.log(`System message length: ${systemMessage.content.length} chars`);
+    
+    // Check if user background is present
+    if (systemMessage.content.includes("User's Background Information")) {
+      console.log('✅ User background information FOUND in system message');
+      const bgStart = systemMessage.content.indexOf("User's Background Information");
+      const bgEnd = bgStart + 500; // Show first 500 chars of background
+      console.log(`Background preview: ${systemMessage.content.substring(bgStart, bgEnd)}...`);
+    } else {
+      console.log('❌ User background information NOT FOUND in system message');
+    }
+    
+    // Check for specific keywords
+    const keywords = ['English', 'Literature', 'Ethan Li', 'environmental science', 'computer science'];
+    keywords.forEach(keyword => {
+      if (systemMessage.content.toLowerCase().includes(keyword.toLowerCase())) {
+        console.log(`   Found keyword: "${keyword}"`);
+      }
+    });
+  }
   
   try {
     const completion = await client.chat.completions.create({

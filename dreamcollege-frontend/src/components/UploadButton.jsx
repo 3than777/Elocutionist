@@ -100,11 +100,12 @@ export default function UploadButton() {
       <div
         {...getRootProps()}
         style={{
-          border: `2px dashed ${isDragActive ? '#007bff' : '#ccc'}`,
+          border: `2px dashed ${isDragActive ? 'var(--accent-blue)' : 'var(--border-tertiary)'}`,
           borderRadius: '8px',
           padding: '20px',
           textAlign: 'center',
-          backgroundColor: isDragActive ? '#f0f8ff' : '#fafafa',
+          backgroundColor: isDragActive ? 'var(--checkbox-background)' : 'var(--background-secondary)',
+          color: 'var(--text-primary)',
           cursor: uploading ? 'not-allowed' : 'pointer',
           transition: 'all 0.3s ease',
           opacity: uploading ? 0.6 : 1
@@ -112,8 +113,19 @@ export default function UploadButton() {
       >
         <input {...getInputProps()} />
         
-        <div style={{ fontSize: '24px', marginBottom: '10px' }}>
-          {uploading ? '⏳' : '📤'}
+        <div style={{ marginBottom: '10px', display: 'flex', justifyContent: 'center' }}>
+          {uploading ? (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ animation: 'spin 1s linear infinite' }}>
+              <circle cx="12" cy="12" r="10" stroke="#ddd" strokeWidth="2"/>
+              <path d="M4 12a8 8 0 0 1 8-8" stroke="var(--accent-blue)" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          ) : (
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="var(--text-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <polyline points="7,10 12,5 17,10" stroke="var(--text-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <line x1="12" y1="5" x2="12" y2="15" stroke="var(--text-primary)" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          )}
         </div>
         
         <p style={{ margin: '0 0 10px 0', fontWeight: '500' }}>
@@ -127,14 +139,14 @@ export default function UploadButton() {
         <p style={{ 
           margin: '0', 
           fontSize: '12px', 
-          color: '#666' 
+          color: 'var(--text-tertiary)' 
         }}>
           Supports: Images (JPG, PNG, GIF, WebP), Documents (PDF, TXT, DOCX)
         </p>
         <p style={{ 
           margin: '5px 0 0 0', 
           fontSize: '12px', 
-          color: '#666' 
+          color: 'var(--text-tertiary)' 
         }}>
           Max {MAX_FILES} files, {formatFileSize(MAX_FILE_SIZE)} each
         </p>
@@ -145,11 +157,11 @@ export default function UploadButton() {
         <div style={{
           marginTop: '10px',
           padding: '10px',
-          backgroundColor: '#fee',
-          border: '1px solid #fcc',
+          backgroundColor: 'var(--error-background)',
+          border: '1px solid var(--error-border)',
           borderRadius: '4px',
           fontSize: '14px',
-          color: '#c00'
+          color: 'var(--error-text)'
         }}>
           {errors.map((error, index) => (
             <div key={index}>{error}</div>
@@ -160,7 +172,7 @@ export default function UploadButton() {
       {/* Uploaded Files List */}
       {files.length > 0 && (
         <div style={{ marginTop: '15px' }}>
-          <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', fontWeight: '600' }}>
+          <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', fontWeight: '600', color: 'var(--text-secondary)' }}>
             Uploaded Files ({files.length})
           </h4>
           
@@ -176,8 +188,9 @@ export default function UploadButton() {
                   display: 'flex',
                   alignItems: 'center',
                   padding: '10px',
-                  backgroundColor: '#f8f9fa',
-                  border: '1px solid #dee2e6',
+                  backgroundColor: 'var(--background-quaternary)',
+                  border: '1px solid var(--border-primary)',
+                  color: 'var(--text-primary)',
                   borderRadius: '4px',
                   fontSize: '14px'
                 }}

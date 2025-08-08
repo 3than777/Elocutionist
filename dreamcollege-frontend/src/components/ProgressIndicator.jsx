@@ -91,11 +91,11 @@ const ProgressIndicator = ({
     left: showOverlay ? '50%' : 'auto',
     transform: showOverlay ? 'translate(-50%, -50%)' : 'none',
     zIndex: showOverlay ? 1000 : 'auto',
-    backgroundColor: '#ffffff',
+    backgroundColor: 'var(--background-primary)',
     borderRadius: '12px',
     padding: '30px',
     boxShadow: showOverlay ? '0 10px 40px rgba(0,0,0,0.15)' : '0 4px 20px rgba(0,0,0,0.1)',
-    border: '1px solid #e9ecef',
+    border: '1px solid var(--border-primary)',
     minWidth: '320px',
     maxWidth: '400px',
     textAlign: 'center',
@@ -165,7 +165,7 @@ const ProgressIndicator = ({
         {/* Step Subtitle */}
         <div style={{
           fontSize: '14px',
-          color: '#6c757d',
+          color: 'var(--text-tertiary)',
           marginBottom: '25px',
           lineHeight: '1.4'
         }}>
@@ -176,7 +176,7 @@ const ProgressIndicator = ({
         <div style={{
           width: '100%',
           height: '8px',
-          backgroundColor: '#e9ecef',
+          backgroundColor: 'var(--border-primary)',
           borderRadius: '4px',
           overflow: 'hidden',
           marginBottom: '15px',
@@ -207,7 +207,7 @@ const ProgressIndicator = ({
         {/* Progress Text */}
         <div style={{
           fontSize: '12px',
-          color: '#6c757d',
+          color: 'var(--text-tertiary)',
           marginBottom: '20px'
         }}>
           Step {currentStep} of {totalSteps} • {Math.round(progress)}% complete

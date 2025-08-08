@@ -28,7 +28,8 @@ export default function SettingsPanel({
   aiRating, 
   ratingLoading, 
   ratingError, 
-  onRetryRating 
+  onRetryRating,
+  testVoiceTutorial
 }) {
   const [showDetailedView, setShowDetailedView] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -275,31 +276,32 @@ export default function SettingsPanel({
     }}>
       {/* Expert/Advanced/Beginner */}
       <div style={{
-        backgroundColor: '#ffffff',
+        backgroundColor: 'var(--settings-background)',
         borderRadius: '16px',
         padding: '20px',
         marginBottom: '16px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-        border: '1px solid #F2F2F7'
+        boxShadow: '0 1px 3px var(--shadow-light)',
+        border: '1px solid var(--border-primary)'
       }}>
         <h3 style={{
           fontSize: '20px',
           fontWeight: '600',
-          color: '#1D1D1F',
+          color: 'var(--text-secondary)',
           margin: '0 0 16px 0',
           letterSpacing: '-0.32px'
         }}>Choose Level</h3>
         <LevelSelector onChange={onDifficultyChange} />
       </div>
 
+
       {/* Voice Settings */}
       <div style={{
-        backgroundColor: '#ffffff',
+        backgroundColor: 'var(--settings-background)',
         borderRadius: '16px',
         padding: '20px',
         marginBottom: '16px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-        border: '1px solid #F2F2F7'
+        boxShadow: '0 1px 3px var(--shadow-light)',
+        border: '1px solid var(--border-primary)'
       }}>
         <div style={{
           display: 'flex',
@@ -311,34 +313,61 @@ export default function SettingsPanel({
             margin: 0,
             fontSize: '20px',
             fontWeight: '600',
-            color: '#1D1D1F',
+            color: 'var(--text-secondary)',
             letterSpacing: '-0.32px'
           }}>Voice Settings</h3>
-          <button
-            onClick={() => setShowVoiceSettings(!showVoiceSettings)}
-            style={{
-              padding: '6px 12px',
-              fontSize: '13px',
-              border: 'none',
-              backgroundColor: '#34C759',
-              color: '#ffffff',
-              borderRadius: '12px',
-              cursor: 'pointer',
-              fontWeight: '600',
-              letterSpacing: '-0.08px',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = '#30D158';
-              e.currentTarget.style.transform = 'scale(0.98)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = '#34C759';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
-          >
-            {showVoiceSettings ? 'Hide Settings' : 'Show Settings'}
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={testVoiceTutorial}
+              style={{
+                padding: '6px 12px',
+                fontSize: '13px',
+                backgroundColor: '#FF9500',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                letterSpacing: '-0.08px',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = '#DB7600';
+                e.currentTarget.style.transform = 'scale(0.98)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = '#FF9500';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+            >
+              Test Tutorial
+            </button>
+            <button
+              onClick={() => setShowVoiceSettings(!showVoiceSettings)}
+              style={{
+                padding: '6px 12px',
+                fontSize: '13px',
+                border: 'none',
+                backgroundColor: '#34C759',
+                color: '#ffffff',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                fontWeight: '600',
+                letterSpacing: '-0.08px',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = '#30D158';
+                e.currentTarget.style.transform = 'scale(0.98)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = '#34C759';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+            >
+              {showVoiceSettings ? 'Hide Settings' : 'Show Settings'}
+            </button>
+          </div>
         </div>
 
         {voiceError && (
@@ -366,7 +395,7 @@ export default function SettingsPanel({
                 marginBottom: '8px', 
                 fontWeight: '600',
                 fontSize: '15px',
-                color: '#1D1D1F',
+                color: 'var(--text-primary)',
                 letterSpacing: '-0.24px'
               }}>
                 🎭 Voice Selection
@@ -377,12 +406,13 @@ export default function SettingsPanel({
                 style={{
                   width: '100%',
                   padding: '12px 16px',
-                  border: '1px solid #D1D1D6',
+                  border: '1px solid var(--border-primary)',
+                  color: 'var(--text-primary)',
                   borderRadius: '12px',
                   fontSize: '17px',
                   fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif',
                   letterSpacing: '-0.41px',
-                  backgroundColor: '#F2F2F7',
+                  backgroundColor: 'var(--input-background)',
                   transition: 'all 0.2s ease',
                   outline: 'none',
                   appearance: 'none',
@@ -394,13 +424,13 @@ export default function SettingsPanel({
                 }}
                 disabled={!voiceInitialized || availableVoices.length === 0}
                 onFocus={(e) => {
-                  e.currentTarget.style.backgroundColor = '#ffffff';
-                  e.currentTarget.style.borderColor = '#007AFF';
+                  e.currentTarget.style.backgroundColor = 'var(--background-primary)';
+                  e.currentTarget.style.borderColor = 'var(--accent-blue)';
                   e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,122,255,0.1)';
                 }}
                 onBlur={(e) => {
-                  e.currentTarget.style.backgroundColor = '#F2F2F7';
-                  e.currentTarget.style.borderColor = '#D1D1D6';
+                  e.currentTarget.style.backgroundColor = 'var(--input-background)';
+                  e.currentTarget.style.borderColor = 'var(--border-primary)';
                   e.currentTarget.style.boxShadow = 'none';
                 }}
               >
@@ -419,7 +449,7 @@ export default function SettingsPanel({
                 🏃 Speech Rate: {voiceSettings.rate.toFixed(1)}x
               </label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '12px', color: '#666' }}>Slow (0.5x)</span>
+                <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>Slow (0.5x)</span>
                 <input
                   type="range"
                   min="0.5"
@@ -430,9 +460,9 @@ export default function SettingsPanel({
                   style={{ flex: 1 }}
                   disabled={!voiceInitialized}
                 />
-                <span style={{ fontSize: '12px', color: '#666' }}>Fast (2.0x)</span>
+                <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>Fast (2.0x)</span>
               </div>
-              <div style={{ textAlign: 'center', fontSize: '12px', color: '#666', marginTop: '2px' }}>
+              <div style={{ textAlign: 'center', fontSize: '12px', color: 'var(--text-tertiary)', marginTop: '2px' }}>
                 Normal (1.0x)
               </div>
             </div>
@@ -460,7 +490,7 @@ export default function SettingsPanel({
                 🎵 Pitch: {voiceSettings.pitch.toFixed(1)}
               </label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '12px', color: '#666' }}>Low (0.5)</span>
+                <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>Low (0.5)</span>
                 <input
                   type="range"
                   min="0.5"
@@ -471,9 +501,9 @@ export default function SettingsPanel({
                   style={{ flex: 1 }}
                   disabled={!voiceInitialized}
                 />
-                <span style={{ fontSize: '12px', color: '#666' }}>High (2.0)</span>
+                <span style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>High (2.0)</span>
               </div>
-              <div style={{ textAlign: 'center', fontSize: '12px', color: '#666', marginTop: '2px' }}>
+              <div style={{ textAlign: 'center', fontSize: '12px', color: 'var(--text-tertiary)', marginTop: '2px' }}>
                 Normal (1.0)
               </div>
             </div>
@@ -489,9 +519,11 @@ export default function SettingsPanel({
                 style={{
                   width: '100%',
                   padding: '8px',
-                  border: '1px solid #ddd',
+                  border: '1px solid var(--border-secondary)',
                   borderRadius: '4px',
-                  fontSize: '14px'
+                  fontSize: '14px',
+                  backgroundColor: 'var(--input-background)',
+                  color: 'var(--text-primary)'
                 }}
               >
                 <option value="female">Female</option>
@@ -512,7 +544,7 @@ export default function SettingsPanel({
                 />
                 <span style={{ fontWeight: '600' }}>📢 Auto-play AI responses</span>
               </label>
-              <div style={{ fontSize: '12px', color: '#666', marginTop: '2px', marginLeft: '24px' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginTop: '2px', marginLeft: '24px' }}>
                 Automatically speak AI responses in voice mode
               </div>
             </div>
@@ -599,7 +631,7 @@ export default function SettingsPanel({
               <span style={{
                 marginLeft: '10px',
                 fontSize: '14px',
-                color: '#007bff'
+                color: 'var(--accent-primary)'
               }}>
                 ⚙️ Processing...
               </span>
@@ -612,9 +644,9 @@ export default function SettingsPanel({
               style={{
                 padding: '4px 8px',
                 fontSize: '12px',
-                border: '1px solid #007bff',
-                backgroundColor: '#fff',
-                color: '#007bff',
+                border: '1px solid var(--accent-primary)',
+                backgroundColor: 'var(--background-primary)',
+                color: 'var(--accent-primary)',
                 borderRadius: '4px',
                 cursor: 'pointer'
               }}
@@ -628,11 +660,11 @@ export default function SettingsPanel({
         {stats.totalFiles > 0 && !showDetailedView && (
           <div style={{
             padding: '10px',
-            backgroundColor: '#f8f9fa',
+            backgroundColor: 'var(--background-quaternary)',
             borderRadius: '4px',
             marginBottom: '10px',
             fontSize: '13px',
-            color: '#666'
+            color: 'var(--text-tertiary)'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
               <span>Files: {stats.totalFiles}</span>
@@ -645,7 +677,7 @@ export default function SettingsPanel({
               </span>
             </div>
             {stats.failedFiles > 0 && (
-              <div style={{ marginTop: '5px', color: '#dc3545' }}>
+              <div style={{ marginTop: '5px', color: 'var(--error-text)' }}>
                 ⚠️ {stats.failedFiles} file(s) failed
               </div>
             )}
@@ -667,11 +699,11 @@ export default function SettingsPanel({
           ) : (
             <div style={{
               padding: '20px',
-              backgroundColor: '#f8f9fa',
-              border: '1px dashed #ccc',
+              backgroundColor: 'var(--background-quaternary)',
+              border: '1px dashed var(--border-tertiary)',
               borderRadius: '8px',
               textAlign: 'center',
-              color: '#666'
+              color: 'var(--text-tertiary)'
             }}>
               <div style={{ fontSize: '24px', marginBottom: '10px' }}>🔒</div>
               <p style={{ margin: '0 0 10px 0', fontWeight: '500' }}>
@@ -689,7 +721,7 @@ export default function SettingsPanel({
           <div style={{
             marginTop: '15px',
             padding: '10px',
-            backgroundColor: '#e7f3ff',
+            backgroundColor: 'var(--checkbox-background)',
             borderRadius: '4px',
             fontSize: '13px'
           }}>
@@ -700,28 +732,28 @@ export default function SettingsPanel({
             <p style={{ 
               margin: '5px 0 0 20px', 
               fontSize: '12px', 
-              color: '#666' 
+              color: 'var(--text-tertiary)' 
             }}>
               AI will reference your uploaded files when answering questions
             </p>
           </div>
         )}
 
-        {/* Instruction for Refresh Files */}
+        {/* Automatic Refresh Information */}
         <div style={{
           padding: '8px 12px',
-          backgroundColor: '#fff3cd',
-          border: '1px solid #ffeaa7',
+          backgroundColor: 'var(--tip-background)',
+          border: '1px solid var(--tip-border)',
           borderRadius: '4px',
           marginBottom: '10px',
           marginTop: '10px',
           fontSize: '12px',
-          color: '#856404'
+          color: 'var(--tip-text)'
         }}>
-          💡 <strong>Tip:</strong> Make sure to press "Refresh Files" whenever adding or removing any files before an interview!
+          ✨ <strong>Auto-Refresh:</strong> Files are automatically refreshed when you switch tabs, upload files, or every 30 seconds.
         </div>
 
-        {/* Refresh Files Button */}
+        {/* Manual Refresh Button (Optional Override) */}
         <div style={{ marginBottom: '10px' }}>
           <button
             onClick={handleRefreshFiles}
@@ -729,7 +761,7 @@ export default function SettingsPanel({
             style={{
               padding: '8px 12px',
               fontSize: '13px',
-              backgroundColor: isRefreshing ? '#28a745' : '#17a2b8',
+              backgroundColor: isRefreshing ? '#28a745' : '#6c757d',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
@@ -738,8 +770,9 @@ export default function SettingsPanel({
               transition: 'background-color 0.2s ease',
               opacity: isRefreshing ? 0.9 : 1
             }}
+            title="Force an immediate refresh of your uploaded files"
           >
-            {isRefreshing ? '✅ Refreshed!' : '🔄 Refresh Files'}
+            {isRefreshing ? '✅ Refreshed!' : '🔄 Manual Refresh'}
           </button>
         </div>
       </div>

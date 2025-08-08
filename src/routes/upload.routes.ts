@@ -380,7 +380,7 @@ router.get('/', authenticateToken, async (req: AuthenticatedRequest, res: Respon
     }
     
     // Get total count for pagination
-    const userId = (req.user!._id as Types.ObjectId).toString();
+    const userId = req.user!._id as Types.ObjectId;
     const totalQuery: any = { userId };
     if (queryOptions.status) totalQuery.processingStatus = queryOptions.status;
     if (queryOptions.fileType) totalQuery.fileType = queryOptions.fileType;

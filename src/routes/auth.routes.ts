@@ -466,6 +466,7 @@ async function registerUser(req: Request, res: Response): Promise<void> {
     // Prepare user data for response (exclude sensitive information)
     const userResponse = {
       id: userId,
+      _id: userId, // Include both id and _id for compatibility
       email: savedUser.email,
       name: savedUser.name,
       ...(savedUser.grade && { grade: savedUser.grade }),
@@ -682,6 +683,7 @@ async function loginUser(req: Request, res: Response): Promise<void> {
     // Prepare user data for response (exclude sensitive information)
     const userResponse = {
       id: userId,
+      _id: userId, // Include both id and _id for compatibility
       email: updatedUser.email,
       name: updatedUser.name,
       ...(updatedUser.grade && { grade: updatedUser.grade }),

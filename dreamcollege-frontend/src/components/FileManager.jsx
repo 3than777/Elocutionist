@@ -22,10 +22,10 @@ const FILE_TYPE_CONFIG = {
 
 // Processing status config
 const STATUS_CONFIG = {
-  pending: { label: 'Waiting', color: '#ffa500', icon: '⏳' },
-  processing: { label: 'Processing', color: '#007bff', icon: '⚙️' },
-  completed: { label: 'Completed', color: '#28a745', icon: '✅' },
-  failed: { label: 'Failed', color: '#dc3545', icon: '❌' }
+  pending: { label: 'Waiting', color: 'var(--accent-warning)', icon: '⏳' },
+  processing: { label: 'Processing', color: 'var(--accent-primary)', icon: '⚙️' },
+  completed: { label: 'Completed', color: 'var(--accent-success)', icon: '✅' },
+  failed: { label: 'Failed', color: 'var(--accent-error)', icon: '❌' }
 };
 
 export default function FileManager({ 
@@ -146,7 +146,7 @@ export default function FileManager({
       <div style={{
         textAlign: 'center',
         padding: '40px',
-        color: '#666'
+        color: 'var(--text-tertiary)'
       }}>
         <div style={{ fontSize: '48px', marginBottom: '10px' }}>📁</div>
         <p>No files uploaded yet</p>
@@ -162,25 +162,25 @@ export default function FileManager({
         gap: '15px',
         marginBottom: '20px',
         padding: '15px',
-        backgroundColor: '#f8f9fa',
+        backgroundColor: 'var(--background-secondary)',
         borderRadius: '8px',
         flexWrap: 'wrap'
       }}>
         <div>
           <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{files.length}</div>
-          <div style={{ fontSize: '12px', color: '#666' }}>Total Files</div>
+          <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>Total Files</div>
         </div>
         <div>
           <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
             {formatFileSize(stats.totalSize)}
           </div>
-          <div style={{ fontSize: '12px', color: '#666' }}>Total Size</div>
+          <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>Total Size</div>
         </div>
         <div>
           <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
             {stats.totalWords.toLocaleString()}
           </div>
-          <div style={{ fontSize: '12px', color: '#666' }}>Total Words</div>
+          <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>Total Words</div>
         </div>
       </div>
 
@@ -201,9 +201,11 @@ export default function FileManager({
             flex: 1,
             minWidth: '200px',
             padding: '8px 12px',
-            border: '1px solid #ddd',
+            border: '1px solid var(--border-primary)',
             borderRadius: '4px',
-            fontSize: '14px'
+            fontSize: '14px',
+            backgroundColor: 'var(--input-background)',
+            color: 'var(--text-primary)'
           }}
         />
 
@@ -213,10 +215,11 @@ export default function FileManager({
           onChange={(e) => setSelectedFileType(e.target.value)}
           style={{
             padding: '8px 12px',
-            border: '1px solid #ddd',
+            border: '1px solid var(--border-primary)',
             borderRadius: '4px',
             fontSize: '14px',
-            backgroundColor: '#fff'
+            backgroundColor: 'var(--input-background)',
+            color: 'var(--text-primary)'
           }}
         >
           <option value="all">All Types</option>
@@ -233,10 +236,11 @@ export default function FileManager({
           onChange={(e) => setSelectedStatus(e.target.value)}
           style={{
             padding: '8px 12px',
-            border: '1px solid #ddd',
+            border: '1px solid var(--border-primary)',
             borderRadius: '4px',
             fontSize: '14px',
-            backgroundColor: '#fff'
+            backgroundColor: 'var(--input-background)',
+            color: 'var(--text-primary)'
           }}
         >
           <option value="all">All Status</option>
@@ -255,7 +259,7 @@ export default function FileManager({
           alignItems: 'center',
           gap: '10px',
           padding: '10px',
-          backgroundColor: '#e3f2fd',
+          backgroundColor: 'var(--background-info)',
           borderRadius: '4px',
           marginBottom: '10px'
         }}>
@@ -265,9 +269,9 @@ export default function FileManager({
             style={{
               padding: '6px 12px',
               fontSize: '12px',
-              border: '1px solid #dc3545',
-              backgroundColor: '#fff',
-              color: '#dc3545',
+              border: '1px solid var(--error-text)',
+              backgroundColor: 'var(--background-primary)',
+              color: 'var(--error-text)',
               borderRadius: '4px',
               cursor: 'pointer'
             }}
@@ -310,10 +314,10 @@ export default function FileManager({
             <div
               key={fileId}
               style={{
-                border: '1px solid #dee2e6',
+                border: '1px solid var(--border-primary)',
                 borderRadius: '6px',
                 overflow: 'hidden',
-                backgroundColor: isSelected ? '#f0f8ff' : '#fff'
+                backgroundColor: isSelected ? 'var(--background-selected)' : 'var(--background-primary)'
               }}
             >
               {/* File Header */}
@@ -343,7 +347,7 @@ export default function FileManager({
                     display: 'flex', 
                     gap: '10px', 
                     fontSize: '12px', 
-                    color: '#666' 
+                    color: 'var(--text-tertiary)' 
                   }}>
                     <span>{formatFileSize(file.size)}</span>
                     <span>•</span>
@@ -362,7 +366,7 @@ export default function FileManager({
                 {/* Status Badge */}
                 <div style={{
                   padding: '4px 8px',
-                  backgroundColor: statusConfig.color + '20',
+                  backgroundColor: `color-mix(in srgb, ${statusConfig.color} 15%, transparent)`,
                   color: statusConfig.color,
                   borderRadius: '4px',
                   fontSize: '12px',
@@ -386,9 +390,9 @@ export default function FileManager({
                       style={{
                         padding: '6px',
                         fontSize: '16px',
-                        border: '1px solid #007bff',
-                        backgroundColor: '#fff',
-                        color: '#007bff',
+                        border: '1px solid var(--accent-primary)',
+                        backgroundColor: 'var(--background-primary)',
+                        color: 'var(--accent-primary)',
                         borderRadius: '4px',
                         cursor: 'pointer'
                       }}
@@ -404,9 +408,9 @@ export default function FileManager({
                       style={{
                         padding: '6px',
                         fontSize: '16px',
-                        border: '1px solid #6c757d',
-                        backgroundColor: '#fff',
-                        color: '#6c757d',
+                        border: '1px solid var(--text-tertiary)',
+                        backgroundColor: 'var(--background-primary)',
+                        color: 'var(--text-tertiary)',
                         borderRadius: '4px',
                         cursor: 'pointer'
                       }}
@@ -425,9 +429,9 @@ export default function FileManager({
                       style={{
                         padding: '6px',
                         fontSize: '16px',
-                        border: '1px solid #dc3545',
-                        backgroundColor: '#fff',
-                        color: '#dc3545',
+                        border: '1px solid var(--error-text)',
+                        backgroundColor: 'var(--background-primary)',
+                        color: 'var(--error-text)',
                         borderRadius: '4px',
                         cursor: 'pointer'
                       }}
@@ -443,27 +447,27 @@ export default function FileManager({
               {isExpanded && file.extractedText && (
                 <div style={{
                   padding: '12px',
-                  backgroundColor: '#f8f9fa',
-                  borderTop: '1px solid #dee2e6'
+                  backgroundColor: 'var(--background-secondary)',
+                  borderTop: '1px solid var(--border-primary)'
                 }}>
                   <div style={{
                     fontSize: '12px',
                     fontWeight: '600',
                     marginBottom: '8px',
-                    color: '#495057'
+                    color: 'var(--text-secondary)'
                   }}>
                     Extracted Text Preview:
                   </div>
                   <div style={{
                     fontSize: '14px',
                     lineHeight: '1.5',
-                    color: '#333',
+                    color: 'var(--text-primary)',
                     whiteSpace: 'pre-wrap',
                     maxHeight: '200px',
                     overflow: 'auto',
                     padding: '8px',
-                    backgroundColor: '#fff',
-                    border: '1px solid #dee2e6',
+                    backgroundColor: 'var(--background-tertiary)',
+                    border: '1px solid var(--border-primary)',
                     borderRadius: '4px'
                   }}>
                     {file.extractedText.length > maxPreviewLength

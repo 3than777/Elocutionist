@@ -23,7 +23,7 @@ export default function CheckboxInput({ label, defaultChecked = false }) {
       fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif',
       fontSize: '15px',
       fontWeight: '400',
-      color: '#1D1D1F',
+      color: 'var(--checkbox-text)',
       letterSpacing: '-0.24px',
       lineHeight: '1.47',
       transition: 'color 0.2s ease'
@@ -33,8 +33,8 @@ export default function CheckboxInput({ label, defaultChecked = false }) {
         width: '20px',
         height: '20px',
         borderRadius: '6px',
-        border: checked ? 'none' : '2px solid #D1D1D6',
-        backgroundColor: checked ? '#007AFF' : 'transparent',
+        border: checked ? 'none' : '2px solid var(--border-primary)',
+        backgroundColor: checked ? 'var(--accent-blue)' : 'transparent',
         transition: 'all 0.2s ease',
         display: 'flex',
         alignItems: 'center',
@@ -54,13 +54,15 @@ export default function CheckboxInput({ label, defaultChecked = false }) {
           }}
         />
         {checked && (
-          <div style={{
-            color: 'white',
-            fontSize: '12px',
-            fontWeight: '600'
-          }}>
-            ✓
-          </div>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path
+              d="M10 3L4.5 8.5L2 6"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         )}
       </div>
       {label}

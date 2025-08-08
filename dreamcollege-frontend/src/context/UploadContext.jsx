@@ -7,7 +7,7 @@
  * persistent state and cross-component communication.
  */
 
-import React, { createContext, useContext, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useCallback, useRef } from 'react';
 import { useFileUpload } from '../hooks/useFileUpload';
 
 // Create the context
@@ -19,6 +19,8 @@ const UploadContext = createContext(null);
  */
 export function UploadProvider({ children, user }) {
   const fileUpload = useFileUpload();
+  const refreshIntervalRef = useRef(null);
+  const lastRefreshTimeRef = useRef(null);
   
   // Load files when user changes (login/logout)
   useEffect(() => {
@@ -26,6 +28,7 @@ export function UploadProvider({ children, user }) {
     if (user) {
       console.log('[UploadProvider] User authenticated, loading uploaded files...');
       fileUpload.loadUploadedFiles();
+      lastRefreshTimeRef.current = Date.now();
     } else {
       console.log('[UploadProvider] No user, skipping file load');
     }
@@ -35,6 +38,105 @@ export function UploadProvider({ children, user }) {
       fileUpload.cleanup();
     };
   }, [user?.id]); // Only re-run when user ID changes
+  
+  // Automatic refresh functionality
+  useEffect(() => {
+    if (!user) {
+      console.log('[UploadProvider] No user - skipping automatic refresh setup');
+      return;
+    }
+    
+    console.log('[UploadProvider] Setting up automatic file refresh...');
+    
+    // Refresh files with debouncing to prevent excessive API calls
+    const refreshFiles = () => {
+      const now = Date.now();
+      const timeSinceLastRefresh = now - (lastRefreshTimeRef.current || 0);
+      const MIN_REFRESH_INTERVAL = 10000; // 10 seconds minimum between refreshes
+      
+      if (timeSinceLastRefresh < MIN_REFRESH_INTERVAL) {
+        console.log('[UploadProvider] Skipping refresh - too soon since last refresh');
+        return;
+      }
+      
+      console.log('[UploadProvider] Auto-refreshing files...');
+      fileUpload.loadUploadedFiles();
+      lastRefreshTimeRef.current = now;
+    };
+    
+    // 1. Page Visibility API - refresh when user returns to tab
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('[UploadProvider] Page became visible - checking for file updates');
+        refreshFiles();
+      }
+    };
+    
+    // 2. Window focus event - refresh when window regains focus
+    const handleWindowFocus = () => {
+      console.log('[UploadProvider] Window focused - checking for file updates');
+      refreshFiles();
+    };
+    
+    // 3. Periodic refresh - check every 30 seconds (when tab is active)
+    const startPeriodicRefresh = () => {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
+      
+      refreshIntervalRef.current = setInterval(() => {
+        if (!document.hidden) {
+          console.log('[UploadProvider] Periodic refresh triggered');
+          refreshFiles();
+        }
+      }, 30000); // 30 seconds
+    };
+    
+    // 4. Storage event listener - refresh if localStorage changes (indicating potential file changes)
+    const handleStorageChange = (event) => {
+      // Only refresh if it's a relevant storage change
+      if (event.key === 'token' || event.key === 'user' || event.key?.includes('file')) {
+        console.log('[UploadProvider] Storage change detected - refreshing files');
+        refreshFiles();
+      }
+    };
+    
+    // 5. Custom file events - listen for file upload/removal events
+    const handleFileUploadComplete = (event) => {
+      console.log('[UploadProvider] File upload completed - auto-refreshing files');
+      refreshFiles();
+    };
+    
+    const handleFileRemoved = (event) => {
+      console.log('[UploadProvider] File removed - auto-refreshing files');
+      refreshFiles();
+    };
+    
+    // Set up event listeners
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleWindowFocus);
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('fileUploadComplete', handleFileUploadComplete);
+    window.addEventListener('fileRemoved', handleFileRemoved);
+    
+    // Start periodic refresh
+    startPeriodicRefresh();
+    
+    // Cleanup function
+    return () => {
+      console.log('[UploadProvider] Cleaning up automatic refresh...');
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleWindowFocus);
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('fileUploadComplete', handleFileUploadComplete);
+      window.removeEventListener('fileRemoved', handleFileRemoved);
+      
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+        refreshIntervalRef.current = null;
+      }
+    };
+  }, [user?.id, fileUpload.loadUploadedFiles]); // Re-setup when user changes
 
   // Enhanced file stats
   const getFileStats = useCallback(() => {

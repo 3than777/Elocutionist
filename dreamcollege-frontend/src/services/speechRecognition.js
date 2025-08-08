@@ -43,7 +43,7 @@ const CONFIG = {
   language: 'en-US',
   continuous: true,
   interimResults: true,
-  maxAlternatives: 5,      // Increased even more for better filler word detection
+  maxAlternatives: 3,      // Reduced to focus on top alternatives for better accuracy
   
   // Auto-restart settings - disabled for manual control
   autoRestart: false,
@@ -54,13 +54,18 @@ const CONFIG = {
   noSpeechTimeout: 0,      // Disabled - never timeout on no speech
   silenceTimeout: 0,       // Disabled - never timeout on silence
   
-  // Enhanced filler word detection settings
-  enableFillerWords: true,    // Custom flag to enable filler word processing
-  minSpeechLength: 1,         // Capture very short speech segments
-  aggressiveFillerDetection: true,  // Use most aggressive detection
-  quickResponseMode: true,    // Process results faster
+  // Balanced filler word detection settings
+  enableFillerWords: true,     // Enable to capture natural speech patterns
+  minSpeechLength: 2,          // Allow shorter utterances including filler words
+  aggressiveFillerDetection: false,  // Keep disabled to avoid false positives
+  quickResponseMode: false,    // Disabled to prioritize accuracy over speed
+  treatFillersAsNormalSpeech: true,  // New: treat filler words with normal priority
   
-
+  // Enhanced accuracy features
+  confidenceThreshold: 0.7,    // Minimum confidence required for final results
+  enableGrammarHints: true,    // Enable grammar hints for better context
+  technicalVocabulary: true,   // Enable technical vocabulary optimization
+  contextualProcessing: true   // Enable contextual word processing
 };
 
 // State tracking
@@ -86,6 +91,160 @@ let onErrorCallback = null;
 let onStartCallback = null;
 let onEndCallback = null;
 let onInterimCallback = null;
+
+// Session context for better contextual corrections
+let sessionContext = {
+  technicalTermsUsed: new Set(),
+  conversationHistory: [],
+  maxHistoryLength: 10
+};
+
+// Safe word corrections for technical context - only non-words or clear compound separations
+const WORD_CORRECTIONS = {
+  // Compound word separations (safe - these aren't real single words)
+  'java script': 'javascript',
+  'type script': 'typescript',
+  'pie thon': 'python',
+  'no js': 'nodejs',
+  'node js': 'nodejs',
+  'get hub': 'github',
+  'git hub': 'github',
+  'data base': 'database',
+  'algo rhythm': 'algorithm',
+  'front end': 'frontend',
+  'back end': 'backend',
+  'full stack': 'fullstack',
+  'web pack': 'webpack',
+  'view js': 'vue.js',
+  'angular js': 'angularjs',
+  'my sequel': 'mysql',
+  'post gress': 'postgres',
+  'mongo db': 'mongodb',
+  'rest api': 'REST API',
+  'graph ql': 'graphql',
+  
+  // Clear technical misnomers that aren't real words
+  'reactjs': 'react',
+  'vuejs': 'vue.js',
+  'nodejs': 'node.js'
+};
+
+/**
+ * Enhance transcript accuracy by correcting common misheard technical terms
+ * @param {string} transcript - The original transcript
+ * @returns {string} Enhanced transcript with corrections
+ */
+function enhanceTranscriptAccuracy(transcript) {
+  if (!transcript || typeof transcript !== 'string') {
+    return transcript;
+  }
+  
+  let enhanced = transcript.toLowerCase();
+  
+  // Apply safe word corrections (only compound words and clear misnomers)
+  Object.keys(WORD_CORRECTIONS).forEach(incorrect => {
+    const correct = WORD_CORRECTIONS[incorrect];
+    // Use word boundaries to avoid partial matches
+    const regex = new RegExp(`\\b${incorrect}\\b`, 'gi');
+    enhanced = enhanced.replace(regex, correct);
+  });
+  
+  // Context-aware corrections for ambiguous words like "coat" vs "code"
+  // Only replace when in technical context
+  enhanced = applyContextualCorrections(enhanced);
+  
+  // Context-specific corrections for interview scenarios - only safe transformations
+  enhanced = enhanced
+    // Only fix clear compound word separations and technical misnomers
+    .replace(/\bpie thon\b/gi, 'python')
+    .replace(/\bjava script\b/gi, 'javascript')
+    .replace(/\btype script\b/gi, 'typescript')
+    .replace(/\bget hub\b/gi, 'github')
+    .replace(/\bgit hub\b/gi, 'github')
+    .replace(/\bno js\b/gi, 'nodejs')
+    .replace(/\bnode js\b/gi, 'nodejs')
+    .replace(/\bdata base\b/gi, 'database')
+    .replace(/\balgo rhythm\b/gi, 'algorithm')
+    .replace(/\bfront end\b/gi, 'frontend')
+    .replace(/\bback end\b/gi, 'backend')
+    .replace(/\bfull stack\b/gi, 'fullstack')
+    .replace(/\bweb pack\b/gi, 'webpack')
+    .replace(/\bview js\b/gi, 'vue.js')
+    .replace(/\bangular js\b/gi, 'angularjs')
+    .replace(/\bmy sequel\b/gi, 'mysql')
+    .replace(/\bpost gress\b/gi, 'postgres')
+    .replace(/\bmongo db\b/gi, 'mongodb')
+    .replace(/\brest api\b/gi, 'REST API')
+    .replace(/\bgraph ql\b/gi, 'graphql')
+    // Common acronym standardization (safe since these maintain meaning)
+    .replace(/\bapi\b/gi, 'API')
+    .replace(/\bhtml\b/gi, 'HTML')
+    .replace(/\bcss\b/gi, 'CSS')
+    .replace(/\bui\b/gi, 'UI')
+    .replace(/\bux\b/gi, 'UX');
+  
+  // Preserve original casing for the final result
+  if (transcript === transcript.toUpperCase()) {
+    return enhanced.toUpperCase();
+  } else if (transcript[0] === transcript[0].toUpperCase()) {
+    return enhanced.charAt(0).toUpperCase() + enhanced.slice(1);
+  }
+  
+  return enhanced;
+}
+
+/**
+ * Apply contextual corrections for ambiguous words
+ * Only replaces words when they appear in technical context
+ * @param {string} text - The text to process
+ * @returns {string} Text with contextual corrections applied
+ */
+function applyContextualCorrections(text) {
+  // Technical context indicators
+  const technicalKeywords = [
+    'programming', 'software', 'development', 'computer', 'algorithm',
+    'function', 'variable', 'class', 'method', 'javascript', 'python',
+    'react', 'framework', 'library', 'database', 'api', 'web', 'app',
+    'application', 'system', 'server', 'client', 'frontend', 'backend',
+    'coding', 'debug', 'test', 'repository', 'github', 'git', 'commit',
+    'technology', 'tech', 'developer', 'engineer', 'interview', 'technical'
+  ];
+  
+  // Check current text for technical context
+  const currentHasTechnicalContext = technicalKeywords.some(keyword => 
+    text.toLowerCase().includes(keyword.toLowerCase())
+  );
+  
+  // Check session history for technical context
+  const sessionHasTechnicalContext = sessionContext.technicalTermsUsed.size > 0;
+  
+  // Apply contextual corrections if either current text or session history indicates technical context
+  if (currentHasTechnicalContext || sessionHasTechnicalContext) {
+    const corrected = text
+      // Safe replacements when in technical context
+      .replace(/\bcoat\b/gi, 'code')
+      .replace(/\bcoats\b/gi, 'codes')
+      .replace(/\bcold\b(?=\s+(review|base|coverage|quality|style))/gi, 'code') // Only when followed by technical terms
+      .replace(/\bcold\b(?=\s+(is|was|will|can|should|must))/gi, 'code'); // Only when followed by verbs (likely "code is...")
+    
+    // Update session context with technical terms found
+    technicalKeywords.forEach(keyword => {
+      if (text.toLowerCase().includes(keyword.toLowerCase())) {
+        sessionContext.technicalTermsUsed.add(keyword);
+      }
+    });
+    
+    // Update conversation history
+    sessionContext.conversationHistory.push(text.toLowerCase());
+    if (sessionContext.conversationHistory.length > sessionContext.maxHistoryLength) {
+      sessionContext.conversationHistory.shift();
+    }
+    
+    return corrected;
+  }
+  
+  return text;
+}
 
 /**
  * Initialize audio monitoring for filler word detection
@@ -152,19 +311,19 @@ function startAudioLevelMonitoring() {
     
     const now = Date.now();
     
-    // Detect short speech bursts (like "uh", "ah")
+    // Detect short speech bursts (like "uh", "ah") - disabled for now to reduce false positives
     if (normalizedLevel > speechThreshold) {
       consecutiveSpeechFrames++;
       lastSpeechTime = now;
     } else if (normalizedLevel < silenceThreshold) {
-      // Check if we had a short speech burst that might be a filler word
-      if (consecutiveSpeechFrames >= 1 && consecutiveSpeechFrames <= 20) { // 50ms-1000ms burst (very sensitive)
-        const timeSinceLastSpeech = now - lastSpeechTime;
-        if (timeSinceLastSpeech < 300) { // Very recent
-          console.log('Short audio burst detected - likely filler word, frames:', consecutiveSpeechFrames, 'level peak:', Math.max(...lastAudioLevels));
-          handlePotentialFillerWord();
-        }
-      }
+      // Disabled: Audio-level filler detection was too aggressive
+      // if (consecutiveSpeechFrames >= 3 && consecutiveSpeechFrames <= 15) {
+      //   const timeSinceLastSpeech = now - lastSpeechTime;
+      //   if (timeSinceLastSpeech < 200) {
+      //     console.log('Short audio burst detected - likely filler word, frames:', consecutiveSpeechFrames);
+      //     handlePotentialFillerWord();
+      //   }
+      // }
       consecutiveSpeechFrames = 0;
     }
   }, 50); // Check every 50ms for responsive detection
@@ -172,22 +331,12 @@ function startAudioLevelMonitoring() {
 
 /**
  * Handle potential filler word detected by audio monitoring
+ * Disabled for now as it was generating false positives
  */
 function handlePotentialFillerWord() {
-  if (onResultCallback && isListening) {
-    // Generate a filler word based on common patterns
-    const fillerWords = ['uh', 'um', 'ah', 'er'];
-    const randomFiller = fillerWords[Math.floor(Math.random() * fillerWords.length)];
-    
-    console.log('Audio-detected filler word:', randomFiller);
-    onResultCallback({
-      transcript: randomFiller,
-      confidence: 0.7,
-      isFinal: true,
-      timestamp: new Date(),
-      isAudioDetected: true // Flag to indicate this was audio-level detected
-    });
-  }
+  // Disabled: Audio-level detection was too aggressive and generated false positives
+  // Only rely on actual speech recognition results
+  console.log('Audio burst detected but not processed - using speech recognition only');
 }
 
 /**
@@ -292,16 +441,33 @@ export async function initializeSpeechRecognition(options = {}) {
     recognition.lang = config.language;
     recognition.maxAlternatives = config.maxAlternatives;
     
-    // Additional settings to capture filler words and hesitations
-    if (recognition.grammars && recognition.grammars.addFromString) {
-      // Add grammar that includes common filler words
-      recognition.grammars.addFromString('#JSGF V1.0; grammar fillers; public <filler> = uh | um | er | ah | like | you know | well | so;');
+    // Enhanced grammar hints for technical vocabulary and natural speech
+    if (recognition.grammars && recognition.grammars.addFromString && config.enableGrammarHints) {
+      // Add comprehensive grammar including technical terms and natural speech patterns
+      const comprehensiveGrammar = `
+        #JSGF V1.0; 
+        grammar comprehensive; 
+        public <speech> = <technical> | <fillers> | <common>;
+        public <technical> = code | coding | program | programming | developer | development | 
+                           software | hardware | database | algorithm | function | variable | 
+                           class | object | method | api | framework | library | debug | test |
+                           javascript | python | java | react | node | git | github | css | html |
+                           computer science | technology | application | system | server | client |
+                           frontend | backend | fullstack | mobile | web | design | user interface;
+        public <fillers> = uh | um | er | ah | hmm | well | like | you know | so | actually;
+        public <common> = the | and | or | but | if | then | when | where | how | what | why;
+      `;
+      try {
+        recognition.grammars.addFromString(comprehensiveGrammar);
+        console.log('Comprehensive vocabulary grammar loaded (technical + natural speech)');
+      } catch (error) {
+        console.warn('Grammar hints not supported:', error);
+      }
     }
     
-    // Set service URI for better filler word detection if available
-    if (recognition.serviceURI) {
-      // Use default service which is more permissive
-      recognition.serviceURI = '';
+    // Configure for optimal accuracy
+    if (recognition.serviceURI !== undefined) {
+      recognition.serviceURI = ''; // Use default Google service for best accuracy
     }
 
     // Browser-specific optimizations
@@ -314,9 +480,10 @@ export async function initializeSpeechRecognition(options = {}) {
     }
     
     if (browserInfo.isMobile) {
-      // Mobile optimizations - but keep multiple alternatives for filler word detection
-      recognition.maxAlternatives = Math.max(3, config.maxAlternatives);
-      console.log('Mobile device detected: Optimized for mobile performance while preserving enhanced filler word detection');
+      // Mobile optimizations for better accuracy
+      recognition.maxAlternatives = 1; // Single best result on mobile for clarity
+      recognition.continuous = false; // Better mobile compatibility
+      console.log('Mobile device detected: Optimized for mobile accuracy and performance');
     }
 
     // Set up event handlers
@@ -417,7 +584,7 @@ function setupEventHandlers() {
     for (let i = event.resultIndex; i < event.results.length; i++) {
       const result = event.results[i];
       
-      // Process all alternatives to catch filler words that might be in lower-confidence alternatives
+      // Balanced processing - treat all speech including filler words equally
       let bestTranscript = '';
       let bestConfidence = 0;
       
@@ -426,19 +593,34 @@ function setupEventHandlers() {
         const altTranscript = alternative.transcript || '';
         const altConfidence = alternative.confidence || 0;
         
-        // Enhanced filler word detection - more patterns and aggressive matching
-        const hasFillerWords = /\b(uh|um|er|ah|eh|oh|like|you know|well|so|hmm|mm|hm|mhm)\b/i.test(altTranscript) ||
-                              /^(uh|um|er|ah|eh|oh|hmm|mm|hm)$/i.test(altTranscript.trim()) ||
-                              /^\w{1,2}$/i.test(altTranscript.trim()); // Catch very short utterances
+        // Apply contextual processing for technical terms
+        let processedTranscript = altTranscript;
+        if (CONFIG.contextualProcessing) {
+          processedTranscript = enhanceTranscriptAccuracy(altTranscript);
+        }
         
-        // Strongly prefer alternatives with filler words, even if lower confidence
-        if (hasFillerWords) {
-          bestTranscript = altTranscript;
-          bestConfidence = Math.max(altConfidence, 0.5); // Boost confidence for filler words
-          break; // Take the first filler word match immediately
-        } else if (altConfidence > bestConfidence || j === 0) {
-          bestTranscript = altTranscript;
-          bestConfidence = altConfidence;
+        // Check if this is a natural filler word
+        const isFillerWord = /^(uh|um|er|ah|hmm|well)$/i.test(processedTranscript.trim());
+        
+        // Select best alternative - treat filler words with same priority as regular speech
+        if (CONFIG.treatFillersAsNormalSpeech) {
+          // Use natural confidence without artificial boosting
+          if (altConfidence > bestConfidence) {
+            bestTranscript = processedTranscript;
+            bestConfidence = altConfidence;
+          } else if (j === 0 && bestConfidence === 0) {
+            bestTranscript = processedTranscript;
+            bestConfidence = altConfidence;
+          }
+        } else {
+          // Legacy behavior with confidence threshold
+          if (altConfidence > bestConfidence && altConfidence >= CONFIG.confidenceThreshold) {
+            bestTranscript = processedTranscript;
+            bestConfidence = altConfidence;
+          } else if (j === 0 && bestConfidence === 0) {
+            bestTranscript = processedTranscript;
+            bestConfidence = altConfidence;
+          }
         }
       }
       
@@ -460,38 +642,40 @@ function setupEventHandlers() {
         timestamp: new Date()
       });
       
-      // Quick response mode: if interim result is a filler word, process it immediately
-      if (CONFIG.quickResponseMode && onResultCallback) {
-        const trimmedInterim = interimTranscript.trim();
-        const isFillerWord = /^(uh|um|er|ah|eh|oh|hmm|mm|hm|mhm)$/i.test(trimmedInterim) ||
-                            /^\w{1,2}$/i.test(trimmedInterim);
-        
-        if (isFillerWord && trimmedInterim.length >= CONFIG.minSpeechLength) {
-          console.log('Quick filler word detection:', trimmedInterim, 'confidence:', confidence);
-          onResultCallback({
-            transcript: trimmedInterim,
-            confidence: Math.max(confidence, 0.5), // Boost confidence for immediate filler words
-            isFinal: true, // Treat as final for immediate processing
-            timestamp: new Date(),
-            isQuickDetection: true // Flag to indicate this was quick-detected
-          });
-        }
-      }
+      // Skip quick response mode - prioritize accuracy over speed
     }
 
-    // Handle final results - accept all speech including filler words and uncertain speech
+    // Handle final results with balanced filtering for natural speech
     if (finalTranscript && onResultCallback) {
       const trimmedTranscript = finalTranscript.trim();
       
-      // Accept even very short utterances (like "uh", "um") - no minimum length filter
-      if (trimmedTranscript.length >= CONFIG.minSpeechLength) {
-        console.log('Speech captured:', trimmedTranscript, 'confidence:', confidence);
+      // Check if this is a filler word
+      const isFillerWord = /^(uh|um|er|ah|hmm|well)$/i.test(trimmedTranscript);
+      
+      // Apply balanced confidence thresholds
+      let confidenceThreshold;
+      if (CONFIG.treatFillersAsNormalSpeech) {
+        // Use lower threshold for natural speech patterns including filler words
+        confidenceThreshold = isFillerWord ? 0.4 : 0.5; // More lenient for natural speech
+      } else {
+        // Use original high threshold
+        confidenceThreshold = CONFIG.confidenceThreshold * 0.6;
+      }
+      
+      // Accept speech that meets minimum length and confidence requirements
+      if (trimmedTranscript.length >= CONFIG.minSpeechLength && confidence >= confidenceThreshold) {
+        console.log('Speech captured:', trimmedTranscript, 'confidence:', confidence, 'filler:', isFillerWord);
         onResultCallback({
           transcript: trimmedTranscript,
           confidence: confidence,
           isFinal: true,
-          timestamp: new Date()
+          timestamp: new Date(),
+          isEnhanced: CONFIG.contextualProcessing,
+          isFillerWord: isFillerWord
         });
+      } else if (trimmedTranscript.length >= CONFIG.minSpeechLength) {
+        // Log low confidence results but don't process them
+        console.warn('Low confidence speech ignored:', trimmedTranscript, 'confidence:', confidence, 'threshold:', confidenceThreshold);
       }
     }
   };
@@ -645,16 +829,22 @@ export async function startListening(onResult, onError, onStart = null, onEnd = 
     onEndCallback = onEnd;
     onInterimCallback = onInterim;
 
-    // Request microphone permission before starting with enhanced sensitivity
+    // Request microphone permission with optimal settings for accuracy
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
-          echoCancellation: false,     // Disable to catch faint "uh"/"um" sounds
-          noiseSuppression: false,     // Disable to be more sensitive to quiet speech
-          autoGainControl: true,       // Keep this to boost quiet sounds
-          latency: 0,                  // Minimize latency for faster response
-          sampleRate: 44100,           // Higher sample rate for better detection
-          channelCount: 1              // Mono for consistent processing
+          echoCancellation: true,      // Enable to improve clarity
+          noiseSuppression: true,      // Enable to filter background noise
+          autoGainControl: true,       // Normalize volume levels
+          latency: 0.01,               // Low latency for responsiveness
+          sampleRate: 48000,           // High sample rate for better accuracy
+          channelCount: 1,             // Mono for consistent processing
+          // Additional constraints for better quality
+          googEchoCancellation: true,
+          googAutoGainControl: true,
+          googNoiseSuppression: true,
+          googHighpassFilter: true,
+          googTypingNoiseDetection: true
         }
       });
       
@@ -755,6 +945,95 @@ export function configureSpeechRecognition(newConfig) {
 }
 
 /**
+ * Enable high accuracy mode for technical vocabulary
+ * @returns {void}
+ */
+export function enableHighAccuracyMode() {
+  configureSpeechRecognition({
+    confidenceThreshold: 0.8,
+    enableGrammarHints: true,
+    technicalVocabulary: true,
+    contextualProcessing: true,
+    maxAlternatives: 1,
+    quickResponseMode: false,
+    enableFillerWords: true,
+    treatFillersAsNormalSpeech: true,
+    minSpeechLength: 2
+  });
+  console.log('High accuracy mode enabled for technical vocabulary with balanced filler word detection');
+}
+
+/**
+ * Enable balanced mode for general conversation
+ * @returns {void}
+ */
+export function enableBalancedMode() {
+  configureSpeechRecognition({
+    confidenceThreshold: 0.6,
+    enableGrammarHints: true,
+    technicalVocabulary: true,
+    contextualProcessing: true,
+    maxAlternatives: 2,
+    quickResponseMode: false,
+    enableFillerWords: true,
+    treatFillersAsNormalSpeech: true,
+    minSpeechLength: 2
+  });
+  console.log('Balanced accuracy mode enabled with natural filler word detection');
+}
+
+/**
+ * Configure filler word detection sensitivity
+ * @param {string} mode - 'natural' (balanced), 'sensitive' (more detection), 'strict' (less detection), 'disabled'
+ * @returns {void}
+ */
+export function configureFillerWordDetection(mode = 'natural') {
+  const modes = {
+    natural: {
+      enableFillerWords: true,
+      treatFillersAsNormalSpeech: true,
+      minSpeechLength: 2,
+      confidenceThreshold: 0.6
+    },
+    sensitive: {
+      enableFillerWords: true,
+      treatFillersAsNormalSpeech: true,
+      minSpeechLength: 1,
+      confidenceThreshold: 0.4
+    },
+    strict: {
+      enableFillerWords: true,
+      treatFillersAsNormalSpeech: false,
+      minSpeechLength: 3,
+      confidenceThreshold: 0.7
+    },
+    disabled: {
+      enableFillerWords: false,
+      treatFillersAsNormalSpeech: false,
+      minSpeechLength: 3,
+      confidenceThreshold: 0.7
+    }
+  };
+  
+  if (modes[mode]) {
+    configureSpeechRecognition(modes[mode]);
+    console.log(`Filler word detection configured to '${mode}' mode`);
+  } else {
+    console.warn(`Unknown filler word mode: ${mode}. Available modes: ${Object.keys(modes).join(', ')}`);
+  }
+}
+
+/**
+ * Reset session context for contextual corrections
+ * @returns {void}
+ */
+export function resetSessionContext() {
+  sessionContext.technicalTermsUsed.clear();
+  sessionContext.conversationHistory = [];
+  console.log('Session context reset for contextual corrections');
+}
+
+/**
  * Get current speech recognition status
  * @returns {Object} Current status information
  */
@@ -834,6 +1113,10 @@ export function cleanup() {
   onStartCallback = null;
   onEndCallback = null;
   onInterimCallback = null;
+  
+  // Reset session context
+  sessionContext.technicalTermsUsed.clear();
+  sessionContext.conversationHistory = [];
   
   console.log('Speech recognition cleanup completed');
 }

@@ -71,9 +71,25 @@ export async function selectRelevantContent(
   context: string,
   maxTokens: number = 2000
 ): Promise<string | null> {
+  console.log('\n=== SELECT RELEVANT CONTENT DEBUG ===');
+  console.log(`Files passed: ${files.length}`);
+  console.log(`Context: "${context.substring(0, 100)}..."`);
+  console.log(`Max tokens: ${maxTokens}`);
+  
   if (files.length === 0) {
+    console.log('No files provided, returning null');
     return null;
   }
+
+  // Log file details
+  files.forEach((file, index) => {
+    console.log(`File ${index + 1}: ${file.originalName}`);
+    console.log(`  - Has extracted text: ${!!file.extractedText}`);
+    console.log(`  - Text length: ${file.extractedText?.length || 0}`);
+    if (file.extractedText) {
+      console.log(`  - Text preview: "${file.extractedText.substring(0, 100)}..."`);
+    }
+  });
 
   // For now, combine all content (can be enhanced with relevance scoring later)
   const allContent = files
@@ -81,7 +97,10 @@ export async function selectRelevantContent(
     .map(file => `=== ${file.originalName} ===\n${file.extractedText || ''}`)
     .join('\n\n');
 
+  console.log(`Combined content length: ${allContent.length} chars`);
+
   if (!allContent.trim()) {
+    console.log('All content is empty after filtering, returning null');
     return null;
   }
 

@@ -175,6 +175,16 @@ export function useFileUpload() {
         }
       });
       
+      // Trigger a broadcast event to notify other components/tabs about file changes
+      try {
+        window.dispatchEvent(new CustomEvent('fileUploadComplete', {
+          detail: { files: newFiles }
+        }));
+        console.log('[useFileUpload] Broadcasted file upload complete event');
+      } catch (eventError) {
+        console.warn('[useFileUpload] Could not broadcast upload event:', eventError);
+      }
+      
     } catch (error) {
       console.error('Upload error:', error);
       setErrors([error.message || 'Failed to upload files']);
@@ -209,6 +219,16 @@ export function useFileUpload() {
       
       // Remove from state
       setFiles(prevFiles => prevFiles.filter(f => f.id !== fileId));
+      
+      // Trigger a broadcast event to notify about file removal
+      try {
+        window.dispatchEvent(new CustomEvent('fileRemoved', {
+          detail: { fileId }
+        }));
+        console.log('[useFileUpload] Broadcasted file removal event');
+      } catch (eventError) {
+        console.warn('[useFileUpload] Could not broadcast removal event:', eventError);
+      }
       
     } catch (error) {
       console.error('Error removing file:', error);

@@ -40,9 +40,9 @@ const AIRatingDisplay = ({
     return (
       <div style={{
         padding: '20px',
-        backgroundColor: '#f8f9fa',
+        backgroundColor: 'var(--settings-background)',
         borderRadius: '8px',
-        border: '1px solid #dee2e6',
+        border: '1px solid var(--border-primary)',
         position: 'relative',
         overflow: 'hidden'
       }}>
@@ -53,7 +53,7 @@ const AIRatingDisplay = ({
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+          background: 'linear-gradient(90deg, transparent, var(--ai-separator), transparent)',
           animation: 'shimmer 2s infinite',
           pointerEvents: 'none'
         }}></div>
@@ -68,12 +68,13 @@ const AIRatingDisplay = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '10px'
+            gap: '10px',
+            color: 'var(--text-primary)'
           }}>
             <div style={{
               width: '20px',
               height: '20px',
-              border: '2px solid #007bff',
+              border: '2px solid var(--accent-blue)',
               borderTop: '2px solid transparent',
               borderRadius: '50%',
               animation: 'spin 1s linear infinite'
@@ -82,7 +83,7 @@ const AIRatingDisplay = ({
           </div>
           <div style={{
             fontSize: '14px',
-            color: '#666',
+            color: 'var(--text-tertiary)',
             marginBottom: '15px'
           }}>
             This may take a few moments
@@ -94,7 +95,7 @@ const AIRatingDisplay = ({
           {/* Overall rating skeleton */}
           <div style={{
             height: '60px',
-            backgroundColor: '#e9ecef',
+            backgroundColor: 'var(--toggle-inactive)',
             borderRadius: '8px',
             marginBottom: '15px',
             display: 'flex',
@@ -105,7 +106,7 @@ const AIRatingDisplay = ({
             <div style={{
               width: '80px',
               height: '20px',
-              backgroundColor: '#dee2e6',
+              backgroundColor: 'var(--ai-skeleton)',
               borderRadius: '4px'
             }}></div>
           </div>
@@ -115,27 +116,27 @@ const AIRatingDisplay = ({
             <div key={i} style={{
               marginBottom: '15px',
               padding: '15px',
-              backgroundColor: '#e9ecef',
+              backgroundColor: 'var(--toggle-inactive)',
               borderRadius: '6px'
             }}>
               <div style={{
                 width: '120px',
                 height: '16px',
-                backgroundColor: '#dee2e6',
+                backgroundColor: 'var(--ai-skeleton)',
                 borderRadius: '4px',
                 marginBottom: '10px'
               }}></div>
               <div style={{
                 width: '100%',
                 height: '12px',
-                backgroundColor: '#dee2e6',
+                backgroundColor: 'var(--ai-skeleton)',
                 borderRadius: '4px',
                 marginBottom: '6px'
               }}></div>
               <div style={{
                 width: '80%',
                 height: '12px',
-                backgroundColor: '#dee2e6',
+                backgroundColor: 'var(--ai-skeleton)',
                 borderRadius: '4px'
               }}></div>
             </div>
@@ -161,14 +162,14 @@ const AIRatingDisplay = ({
     return (
       <div style={{
         padding: '20px',
-        backgroundColor: '#f8d7da',
+        backgroundColor: 'var(--error-background)',
         borderRadius: '8px',
-        border: '1px solid #f5c6cb',
+        border: '1px solid var(--error-border)',
         textAlign: 'center'
       }}>
         <div style={{
           fontSize: '20px',
-          color: '#721c24',
+          color: 'var(--error-text)',
           marginBottom: '10px',
           display: 'flex',
           alignItems: 'center',
@@ -179,7 +180,7 @@ const AIRatingDisplay = ({
         </div>
         <div style={{
           fontSize: '14px',
-          color: '#721c24',
+          color: 'var(--error-text)',
           marginBottom: '15px',
           lineHeight: '1.4'
         }}>
@@ -190,7 +191,7 @@ const AIRatingDisplay = ({
             onClick={onRetry}
             style={{
               padding: '10px 20px',
-              backgroundColor: '#dc3545',
+              backgroundColor: 'var(--error-text)',
               color: 'white',
               border: 'none',
               borderRadius: '6px',
@@ -203,8 +204,8 @@ const AIRatingDisplay = ({
               gap: '8px',
               margin: '0 auto'
             }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#c82333'}
-            onMouseOut={(e) => e.target.style.backgroundColor = '#dc3545'}
+            onMouseOver={(e) => e.target.style.backgroundColor = 'var(--accent-blue-hover)'}
+            onMouseOut={(e) => e.target.style.backgroundColor = 'var(--error-text)'}
           >
             🔄 Try Again
           </button>
@@ -218,24 +219,29 @@ const AIRatingDisplay = ({
     return (
       <div style={{
         padding: '30px',
-        backgroundColor: '#f8f9fa',
+        backgroundColor: 'var(--background-secondary)',
         borderRadius: '8px',
-        border: '2px dashed #dee2e6',
+        border: '2px dashed var(--border-primary)',
         textAlign: 'center',
-        color: '#6c757d'
+        color: 'var(--text-tertiary)'
       }}>
         <div style={{
-          fontSize: '48px',
           marginBottom: '15px',
-          opacity: 0.7
+          opacity: 0.7,
+          display: 'flex',
+          justifyContent: 'center'
         }}>
-          🎯
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="21" stroke="var(--text-tertiary)" strokeWidth="2"/>
+            <circle cx="24" cy="24" r="12" stroke="var(--text-tertiary)" strokeWidth="2"/>
+            <circle cx="24" cy="24" r="4.5" fill="var(--text-tertiary)"/>
+          </svg>
         </div>
         <div style={{
           fontSize: '18px',
           fontWeight: '600',
           marginBottom: '8px',
-          color: '#495057'
+          color: 'var(--text-secondary)'
         }}>
           AI Rating Coming Soon
         </div>
@@ -304,7 +310,7 @@ const AIRatingDisplay = ({
       case 'low': 
         return { color: '#34C759', icon: '●', bgColor: '#F0FFF4' };
       default: 
-        return { color: '#8E8E93', icon: '●', bgColor: '#F2F2F7' };
+        return { color: 'var(--ai-text-tertiary)', icon: '●', bgColor: '#F2F2F7' };
     }
   };
 
@@ -346,7 +352,7 @@ const AIRatingDisplay = ({
             justifyContent: 'space-between',
             cursor: 'pointer',
             padding: '16px 20px',
-            backgroundColor: '#F2F2F7',
+            backgroundColor: 'var(--toggle-inactive)',
             borderRadius: '16px',
             border: 'none',
             transition: 'all 0.2s ease',
@@ -395,7 +401,7 @@ const AIRatingDisplay = ({
           </div>
           <div style={{
             fontSize: '14px',
-            color: '#8E8E93',
+            color: 'var(--ai-text-tertiary)',
             transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
             transition: 'transform 0.2s ease'
           }}>
@@ -420,17 +426,17 @@ const AIRatingDisplay = ({
 
   return (
     <div style={{
-      backgroundColor: '#ffffff',
+      backgroundColor: 'var(--settings-background)',
       borderRadius: '20px',
       border: 'none',
       overflow: 'hidden',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)',
+      boxShadow: '0 8px 32px var(--shadow-light), 0 4px 16px var(--shadow-medium)',
       fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif'
     }}>
       {/* Overall Rating Header - Apple Style */}
       <div style={{
         padding: '40px 32px',
-        background: 'linear-gradient(135deg, #007AFF 0%, #5856D6 100%)',
+        background: 'linear-gradient(135deg, var(--accent-blue) 0%, #5856D6 100%)',
         color: 'white',
         textAlign: 'center',
         position: 'relative',
@@ -505,7 +511,7 @@ const AIRatingDisplay = ({
             count={rating.strengths.length}
           >
             <div style={{
-              backgroundColor: '#F0FFF4',
+              backgroundColor: 'var(--success-background)',
               borderRadius: '16px',
               padding: '20px',
               border: 'none',
@@ -515,7 +521,7 @@ const AIRatingDisplay = ({
                 <div key={index} style={{
                   marginBottom: index < rating.strengths.length - 1 ? '12px' : '0',
                   fontSize: '15px',
-                  color: '#1D1D1F',
+                  color: 'var(--ai-text-primary)',
                   display: 'flex',
                   alignItems: 'flex-start',
                   gap: '12px',
@@ -547,7 +553,7 @@ const AIRatingDisplay = ({
             count={rating.weaknesses.length}
           >
             <div style={{
-              backgroundColor: '#FFF2F2',
+              backgroundColor: 'var(--error-background)',
               borderRadius: '16px',
               padding: '20px',
               border: 'none',
@@ -557,7 +563,7 @@ const AIRatingDisplay = ({
                 <div key={index} style={{
                   marginBottom: index < rating.weaknesses.length - 1 ? '12px' : '0',
                   fontSize: '15px',
-                  color: '#1D1D1F',
+                  color: 'var(--ai-text-primary)',
                   display: 'flex',
                   alignItems: 'flex-start',
                   gap: '12px',
@@ -593,7 +599,7 @@ const AIRatingDisplay = ({
                 const priorityStyle = getPriorityStyle(rec.priority);
                 return (
                   <div key={index} style={{
-                    backgroundColor: '#F2F2F7',
+                    backgroundColor: 'var(--toggle-inactive)',
                     borderRadius: '16px',
                     padding: '20px',
                     marginBottom: index < rating.recommendations.length - 1 ? '12px' : '0',
@@ -609,7 +615,7 @@ const AIRatingDisplay = ({
                       <div style={{
                         fontSize: '16px',
                         fontWeight: '600',
-                        color: '#1D1D1F',
+                        color: 'var(--ai-text-primary)',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '12px',
@@ -639,7 +645,7 @@ const AIRatingDisplay = ({
                     </div>
                     <div style={{
                       fontSize: '15px',
-                      color: '#1D1D1F',
+                      color: 'var(--ai-text-primary)',
                       lineHeight: '1.47',
                       marginBottom: rec.examples ? '16px' : '0',
                       fontWeight: '400',
@@ -650,15 +656,15 @@ const AIRatingDisplay = ({
                     {rec.examples && rec.examples.length > 0 && (
                       <div style={{
                         fontSize: '14px',
-                        color: '#8E8E93',
+                        color: 'var(--ai-text-tertiary)',
                         fontStyle: 'italic',
                         padding: '12px 16px',
-                        backgroundColor: 'rgba(255,255,255,0.7)',
+                        backgroundColor: 'var(--background-tertiary)',
                         borderRadius: '12px',
                         border: 'none',
                         letterSpacing: '-0.15px'
                       }}>
-                        <strong style={{ color: '#1D1D1F' }}>Examples:</strong> {rec.examples.join(', ')}
+                        <strong style={{ color: 'var(--ai-text-primary)' }}>Examples:</strong> {rec.examples.join(', ')}
                       </div>
                     )}
                   </div>
@@ -690,7 +696,7 @@ const AIRatingDisplay = ({
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '16px 20px',
-                    backgroundColor: '#F2F2F7',
+                    backgroundColor: 'var(--toggle-inactive)',
                     borderRadius: '16px',
                     border: 'none',
                     transition: 'all 0.2s ease'
@@ -720,7 +726,7 @@ const AIRatingDisplay = ({
                         <div style={{
                           fontSize: '16px',
                           fontWeight: '600',
-                          color: '#1D1D1F',
+                          color: 'var(--ai-text-primary)',
                           marginBottom: '2px',
                           letterSpacing: '-0.32px'
                         }}>
@@ -780,14 +786,14 @@ const AIRatingDisplay = ({
           will-change: transform, background-color;
         }
         .collapsible-header:hover {
-          background-color: #E5E5EA !important;
+          background-color: var(--toggle-track-inactive) !important;
           transform: scale(0.98);
         }
         .score-item {
           will-change: transform, background-color;
         }
         .score-item:hover {
-          background-color: #E5E5EA !important;
+          background-color: var(--toggle-track-inactive) !important;
           transform: scale(0.98);
         }
         @keyframes starPop {

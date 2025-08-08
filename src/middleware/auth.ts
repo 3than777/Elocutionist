@@ -129,8 +129,14 @@ export async function authenticateToken(
     }
 
     // Attach user to request object for downstream use
-    // Ensure _id is accessible by using the Mongoose document's _id property
-    (req as any).user = user;
+    // Ensure both _id and id are accessible for compatibility
+    const userObject = user.toObject();
+    const userId = (user as any)._id;
+    (req as any).user = {
+      ...userObject,
+      _id: userId,
+      id: userId.toString()
+    };
 
     // Continue to next middleware/route handler
     next();
@@ -205,8 +211,15 @@ export async function optionalAuth(
       console.log(`[OptionalAuth] User lookup: ${user ? 'Found' : 'Not found'}, Active: ${user?.isActive}`);
       
       if (user && user.isActive) {
-        (req as any).user = user;
-        console.log(`[OptionalAuth] User attached to request: ${user._id}`);
+        // Ensure both _id and id are accessible for compatibility
+        const userObject = user.toObject();
+        const userId = (user as any)._id;
+        (req as any).user = {
+          ...userObject,
+          _id: userId,
+          id: userId.toString()
+        };
+        console.log(`[OptionalAuth] User attached to request: ${userId}`);
       }
     }
 

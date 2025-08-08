@@ -59,7 +59,7 @@ const CONFIG = {
   // Speech parameters
   rate: 1.0,        // 0.1 to 10 (normal speed)
   pitch: 1.0,       // 0 to 2 (normal pitch)
-  volume: 0.8,      // 0 to 1 (80% volume)
+  volume: 0.9,      // 0 to 1 (90% volume - consistent across app)
   
   // Queue management
   maxQueueSize: 5,
@@ -468,24 +468,32 @@ function processTextForSpeech(text) {
 function createUtterance(text, options) {
   const utterance = new SpeechSynthesisUtterance(text);
   
-  // Apply voice and parameters
+  // Apply voice and parameters with explicit bounds checking
   if (options.voice) utterance.voice = options.voice;
   utterance.rate = Math.max(0.1, Math.min(10, options.rate));
   utterance.pitch = Math.max(0, Math.min(2, options.pitch));
-  utterance.volume = Math.max(0, Math.min(1, options.volume));
+  // Ensure consistent volume application - explicitly set to avoid browser defaults
+  utterance.volume = Math.max(0.1, Math.min(1, options.volume));
   
   // Set up event handlers
   utterance.onstart = () => {
     isSpeaking = true;
     currentUtterance = utterance;
     
-    console.log('Speech started:', text.substring(0, 50) + '...');
+    console.log('Speech started:', {
+      text: text.substring(0, 50) + '...',
+      volume: utterance.volume,
+      rate: utterance.rate,
+      pitch: utterance.pitch,
+      voice: utterance.voice?.name || 'default'
+    });
     
     if (onStartCallback) {
       onStartCallback({
         text: text,
         voice: utterance.voice?.name || 'default',
-        duration: estimateSpeechDuration(text, options.rate)
+        duration: estimateSpeechDuration(text, options.rate),
+        volume: utterance.volume
       });
     }
   };
@@ -503,8 +511,8 @@ function createUtterance(text, options) {
       });
     }
     
-    // Process next item in queue
-    setTimeout(() => processQueue(), CONFIG.pauseBetweenSentences);
+    // Process next item in queue with longer pause to prevent volume fluctuation
+    setTimeout(() => processQueue(), Math.max(CONFIG.pauseBetweenSentences, 500));
   };
 
   utterance.onerror = (event) => {
@@ -620,7 +628,15 @@ function playUtterance(utterance) {
     };
     
     try {
-      synthesis.speak(utterance);
+      // Ensure synthesis is ready and reset any pending operations
+      if (synthesis.speaking) {
+        synthesis.cancel();
+      }
+      
+      // Small delay to ensure browser audio system is ready
+      setTimeout(() => {
+        synthesis.speak(utterance);
+      }, 50);
     } catch (error) {
       reject(error);
     }
@@ -821,12 +837,33 @@ export function setTextToSpeechCallbacks(callbacks) {
 export async function testSpeech(testText = "Hello! This is a test of the text-to-speech system.") {
   try {
     console.log('Testing text-to-speech...');
-    await speakText(testText, { interrupt: true, priority: 'high' });
+    await speakText(testText, { interrupt: true, priority: 'high', volume: 0.9 });
     console.log('Text-to-speech test completed successfully');
   } catch (error) {
     console.error('Text-to-speech test failed:', error);
     throw error;
   }
+}
+
+/**
+ * Speak text with voice tutorial specific settings for consistent volume
+ * @param {string} text - Text to speak
+ * @param {Object} options - Additional options
+ * @returns {Promise<void>} Promise that resolves when speech completes
+ */
+export async function speakTextTutorial(text, options = {}) {
+  const tutorialOptions = {
+    volume: 0.9,
+    rate: 1.0,
+    pitch: 1.0,
+    interrupt: true,
+    priority: 'high',
+    ...options
+  };
+  
+  console.log('Tutorial speech:', { text: text.substring(0, 50), volume: tutorialOptions.volume });
+  
+  return await speakText(text, tutorialOptions);
 }
 
 /**

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useUploadContext } from '../context/UploadContext';
 import { submitInterviewTranscript, generateAIRating as apiGenerateAIRating, retryApiCall, getUserFriendlyErrorMessage, getProgressMessage } from '../services/api';
-import { speakText, stopSpeaking } from '../services/textToSpeech';
+import { speakText, stopSpeaking, getTextToSpeechStatus, setTextToSpeechCallbacks } from '../services/textToSpeech';
 import ProgressIndicator from './ProgressIndicator';
 import VoiceModeToggle from './VoiceModeToggle';
 import VoiceTutorial from './VoiceTutorial';
@@ -16,7 +16,9 @@ export default function ChatBox({
   ratingLoading, 
   setRatingLoading,
   ratingError, 
-  setRatingError
+  setRatingError,
+  showVoiceTutorial,
+  setShowVoiceTutorial
 }) {
   const [messages, setMessages] = useState([
     { sender: 'ai', text: 'Hello! Ready to practice?' }
@@ -49,8 +51,7 @@ export default function ChatBox({
   const [voiceTranscript, setVoiceTranscript] = useState('');
   const [speechError, setSpeechError] = useState(null);
   
-  // Voice Mode Onboarding state management (Step 12)
-  const [showVoiceTutorial, setShowVoiceTutorial] = useState(false);
+  // Voice Mode Onboarding state management (Step 12) - now managed by App.jsx
   const [isFirstTimeVoiceUser, setIsFirstTimeVoiceUser] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(null);
   const [showOnboardingTips, setShowOnboardingTips] = useState(false);
@@ -64,6 +65,15 @@ export default function ChatBox({
       'Expert': 'hard'
     };
     return mapping[level] || 'advanced';
+  };
+  
+  // Extract previous AI questions from conversation history
+  const extractPreviousQuestions = () => {
+    return messages
+      .filter(msg => msg.sender === 'ai')
+      .map(msg => msg.text)
+      .filter(text => text.includes('?')) // Only include messages that are questions
+      .slice(-10); // Keep last 10 questions to avoid prompt being too long
   };
   
   // Get upload context
@@ -129,6 +139,42 @@ export default function ChatBox({
    // Check for first-time voice user on component mount (Step 12)
    useEffect(() => {
      checkFirstTimeVoiceUser();
+   }, []);
+
+   // Sync TTS speaking state with ChatBox state
+   useEffect(() => {
+     // Set up callbacks to sync TTS state with component state
+     setTextToSpeechCallbacks({
+       onStart: () => {
+         setIsSpeaking(true);
+         console.log('AI started speaking - voice input disabled');
+       },
+       onEnd: () => {
+         setIsSpeaking(false);
+         console.log('AI finished speaking - voice input enabled');
+       },
+       onError: () => {
+         setIsSpeaking(false);
+         console.log('AI speech error - voice input enabled');
+       }
+     });
+
+     // Initial sync with current TTS status
+     const currentStatus = getTextToSpeechStatus();
+     setIsSpeaking(currentStatus.isSpeaking);
+
+     // Set up interval to periodically sync state (backup mechanism)
+     const syncInterval = setInterval(() => {
+       const status = getTextToSpeechStatus();
+       setIsSpeaking(status.isSpeaking);
+     }, 500); // Check every 500ms
+
+     // Cleanup interval on unmount
+     return () => {
+       clearInterval(syncInterval);
+       // Clear callbacks
+       setTextToSpeechCallbacks({});
+     };
    }, []);
 
    /**
@@ -216,23 +262,76 @@ export default function ChatBox({
       const convertedMessages = [
         {
           role: 'system',
-          content: `AI College Interview Coach System Prompt
+          content: `# AI College Interview Coach System Prompt
 
 **CURRENT DIFFICULTY LEVEL: ${mapDifficulty(difficulty) === 'easy' ? 'EASY' : mapDifficulty(difficulty) === 'hard' ? 'HARD' : 'ADVANCED'}**
 
+${extractPreviousQuestions().length > 0 ? `## CRITICAL: Previously Asked Questions (AVOID REPEATING THESE)
+You have already asked these questions in this conversation. DO NOT repeat them or ask similar variations:
+${extractPreviousQuestions().map((q, i) => `${i + 1}. ${q}`).join('\n')}
 
+**IMPORTANT:** Generate completely NEW questions that are different in both content and structure from the above. Avoid similar patterns or rephrased versions of these questions.
+` : ''}
 
-You are an expert college interview coach with extensive experience helping students prepare for admissions interviews at top universities. Your role is to conduct realistic practice interviews that help students improve their interviewing skills through personalized questions and constructive feedback.
-Your Core Responsibilities
+You are a PROFESSIONAL COLLEGE ADMISSIONS INTERVIEWER conducting practice interviews for students applying to universities. You must simulate an AUTHENTIC, REALISTIC college interview experience.
+
+## CRITICAL DEFAULT BEHAVIOR
+**When NO user profile information is provided (no major, no interests, no background):**
+- NEVER hallucinate or make up information about the student's profile
+- NEVER say "I see from your profile" or "based on your information" when no files are uploaded
+- NEVER assume the student is studying Computer Science or any specific field
+- NEVER make assumptions about their interests or background
+- Instead, EXPLICITLY acknowledge that no profile is available and ask for information
+- Example opening: "Hello! Ready to practice? Great! Let's get started. I notice you haven't uploaded any profile information yet. To provide you with the most personalized interview practice, could you tell me about yourself? What are you currently studying or interested in? What draws you to higher education?"
+
+**When user profile information IS provided:**
+- Reference specific details from their uploaded documents accurately
+- Use phrases like "I see from your profile" or "based on your uploaded information" appropriately
+- Ask questions that build upon the information they've provided
+
+## CRITICAL INTERVIEWER BEHAVIOR RULES - NEVER VIOLATE THESE
+
+**YOU ARE ONLY AN INTERVIEWER - NOT A COACH OR TUTOR:**
+- Ask ONE interview question at a time (never provide a list of questions)
+- Tailor questions based on the student's profile, interests, target schools, and intended major
+- Ask natural follow-up questions that dig deeper into their responses
+- Create a conversational flow that mirrors real college interviews
+
+**ABSOLUTELY FORBIDDEN - NEVER DO THESE THINGS:**
+- ❌ NEVER provide feedback, tips, evaluation, advice, or commentary during the interview
+- ❌ NEVER comment on the quality of answers ("That's a great answer", "Good point", etc.)
+- ❌ NEVER give suggestions for improvement or guidance
+- ❌ NEVER say things like "This will help you", "You should consider", "A tip would be"
+- ❌ NEVER act as a coach, mentor, or teacher during the interview
+- ❌ NEVER break character as a professional interviewer
+- ❌ NEVER give meta-commentary about the interview process
+- ❌ NEVER ask about their "interview experience", "practice sessions", or "what they want to work on"
+- ❌ NEVER ask "what would you like me to interview you on today" or similar meta-questions
+- ❌ NEVER reference this being a "practice" or "simulation" - treat it as a real interview
+
+**WHAT A REAL INTERVIEWER DOES:**
+- ✅ Ask thoughtful, relevant questions
+- ✅ Use neutral acknowledgments: "I see", "Thank you", "Mm-hmm", "Interesting"
+- ✅ Ask follow-up questions to clarify or explore responses deeper
+- ✅ Move naturally between topics
+- ✅ Maintain professional, courteous demeanor
+- ✅ Focus entirely on gathering information about the candidate
+
+**REMEMBER: You are NOT their coach. You are conducting a realistic interview simulation. Real interviewers do NOT give tips or feedback during interviews. Stay strictly in character as a professional interviewer.**
+
+## Core Responsibilities
+
 Conduct Practice Interviews:
-Ask ONE interview question at a time (never provide a list of questions)
-Tailor questions based on the student's profile, interests, target schools, and intended major
-Ask natural follow-up questions that dig deeper into their responses
-Create a conversational flow that mirrors real college interviews
-Track Performance:
-Continuously observe and mentally note the student's interviewing strengths and areas for improvement
-Pay attention to their communication style, depth of responses, authenticity, and ability to articulate their thoughts
-Remember patterns in their answers throughout the session
+- Ask ONE interview question at a time (never provide a list of questions)
+- Tailor questions based on the student's profile, interests, target schools, and intended major
+- Ask natural follow-up questions that dig deeper into their responses
+- Create a conversational flow that mirrors real college interviews
+
+Track Performance (SILENTLY):
+- Continuously observe and mentally note the student's interviewing strengths and areas for improvement
+- Pay attention to their communication style, depth of responses, authenticity, and ability to articulate their thoughts
+- Remember patterns in their answers throughout the session
+- DO NOT share these observations during the interview
 
 Dynamic Interview Approach (Enhancement for Variety)
 To make each interview feel unique and realistic, vary your approach by:
@@ -246,12 +345,11 @@ Don't always start with "Tell me about yourself" - sometimes begin with their in
 Vary the order of question types (sometimes start with future goals, other times with past experiences)
 Make unexpected but relevant connections between topics
 Getting Started Protocol
-Begin each session by gathering the student's profile information:
-Target colleges/universities they're applying to
-Intended major or academic interests
-Key extracurricular activities, hobbies, or passions
-Any specific areas they want to practice (e.g., discussing weaknesses, explaining academic choices)
-Previous interview experience level
+Begin each session naturally as a real college interviewer would:
+Ask about their academic interests and goals
+Explore their extracurricular activities and passions
+Learn about their target colleges and reasons for applying
+Focus on their experiences and aspirations
 Difficulty-Based Question Adaptation
 **SPECIFIC GUIDELINES FOR ${mapDifficulty(difficulty) === 'easy' ? 'EASY' : mapDifficulty(difficulty) === 'hard' ? 'HARD' : 'ADVANCED'} DIFFICULTY:**
 
@@ -309,7 +407,7 @@ Additional Dynamic Follow-ups:
 "How does that connect to your future goals?"
 Interview Flow
 Opening: Start with a warm, realistic greeting as if you're an actual admissions officer
-Profile Building: Gather their information naturally through conversation, not as a formal questionnaire
+Profile Building: IMPORTANT - If no user profile information is available (no major, interests, or background provided), start by naturally asking about their background. Example: "Great! Let's get started. I notice you haven't uploaded any profile information yet. To provide you with the most personalized interview practice, could you tell me about yourself? What are you currently studying or interested in? What draws you to higher education?"
 Core Interview: Ask 6-10 substantive questions with follow-ups, maintaining natural conversation flow
 Closing: When they seem ready to end, ask if they have questions for "the college" (role-play element)
 Flow Variations to Increase Realism:
@@ -382,7 +480,8 @@ Your goal is to help students become more confident, articulate, and authentic i
         messages: convertedMessages,
         includeUploadedContent: useUploadedContent && hasContent && !!user,
         interviewType: difficulty || 'general',
-        maxContentTokens: 2000
+        maxContentTokens: 2000,
+        voiceMode: isVoiceMode
       };
       
       console.log('Full request details:', {
@@ -392,7 +491,23 @@ Your goal is to help students become more confident, articulate, and authentic i
         userObject: user
       });
 
-      const response = await fetch('http://localhost:3000/api/chat', {
+      // Use authenticated endpoint when user is logged in and wants to use uploaded content
+      const endpoint = user?.token && useUploadedContent 
+        ? 'http://localhost:3000/api/chat/authenticated'
+        : 'http://localhost:3000/api/chat';
+      
+      console.log('=== CHAT REQUEST DEBUG ===');
+      console.log('User:', user);
+      console.log('User ID:', user?._id || user?.id);
+      console.log('User from localStorage:', localStorage.getItem('user'));
+      console.log('Has Content:', hasContent);
+      console.log('Use Uploaded Content:', useUploadedContent);
+      console.log('Include Uploaded Content Flag:', requestBody.includeUploadedContent);
+      console.log('Endpoint:', endpoint);
+      console.log('Auth Header:', user?.token ? `Bearer ${user.token.substring(0, 20)}...` : 'No token');
+      console.log('Full Request Body:', JSON.stringify(requestBody, null, 2));
+      
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -753,23 +868,76 @@ Your goal is to help students become more confident, articulate, and authentic i
         const convertedMessages = [
           {
             role: 'system',
-            content: `AI College Interview Coach System Prompt
+            content: `# AI College Interview Coach System Prompt
 
 **CURRENT DIFFICULTY LEVEL: ${mapDifficulty(difficulty) === 'easy' ? 'EASY' : mapDifficulty(difficulty) === 'hard' ? 'HARD' : 'ADVANCED'}**
 
+${extractPreviousQuestions().length > 0 ? `## CRITICAL: Previously Asked Questions (AVOID REPEATING THESE)
+You have already asked these questions in this conversation. DO NOT repeat them or ask similar variations:
+${extractPreviousQuestions().map((q, i) => `${i + 1}. ${q}`).join('\n')}
 
+**IMPORTANT:** Generate completely NEW questions that are different in both content and structure from the above. Avoid similar patterns or rephrased versions of these questions.
+` : ''}
 
-You are an expert college interview coach with extensive experience helping students prepare for admissions interviews at top universities. Your role is to conduct realistic practice interviews that help students improve their interviewing skills through personalized questions and constructive feedback.
-Your Core Responsibilities
+You are a PROFESSIONAL COLLEGE ADMISSIONS INTERVIEWER conducting practice interviews for students applying to universities. You must simulate an AUTHENTIC, REALISTIC college interview experience.
+
+## CRITICAL DEFAULT BEHAVIOR
+**When NO user profile information is provided (no major, no interests, no background):**
+- NEVER hallucinate or make up information about the student's profile
+- NEVER say "I see from your profile" or "based on your information" when no files are uploaded
+- NEVER assume the student is studying Computer Science or any specific field
+- NEVER make assumptions about their interests or background
+- Instead, EXPLICITLY acknowledge that no profile is available and ask for information
+- Example opening: "Hello! Ready to practice? Great! Let's get started. I notice you haven't uploaded any profile information yet. To provide you with the most personalized interview practice, could you tell me about yourself? What are you currently studying or interested in? What draws you to higher education?"
+
+**When user profile information IS provided:**
+- Reference specific details from their uploaded documents accurately
+- Use phrases like "I see from your profile" or "based on your uploaded information" appropriately
+- Ask questions that build upon the information they've provided
+
+## CRITICAL INTERVIEWER BEHAVIOR RULES - NEVER VIOLATE THESE
+
+**YOU ARE ONLY AN INTERVIEWER - NOT A COACH OR TUTOR:**
+- Ask ONE interview question at a time (never provide a list of questions)
+- Tailor questions based on the student's profile, interests, target schools, and intended major
+- Ask natural follow-up questions that dig deeper into their responses
+- Create a conversational flow that mirrors real college interviews
+
+**ABSOLUTELY FORBIDDEN - NEVER DO THESE THINGS:**
+- ❌ NEVER provide feedback, tips, evaluation, advice, or commentary during the interview
+- ❌ NEVER comment on the quality of answers ("That's a great answer", "Good point", etc.)
+- ❌ NEVER give suggestions for improvement or guidance
+- ❌ NEVER say things like "This will help you", "You should consider", "A tip would be"
+- ❌ NEVER act as a coach, mentor, or teacher during the interview
+- ❌ NEVER break character as a professional interviewer
+- ❌ NEVER give meta-commentary about the interview process
+- ❌ NEVER ask about their "interview experience", "practice sessions", or "what they want to work on"
+- ❌ NEVER ask "what would you like me to interview you on today" or similar meta-questions
+- ❌ NEVER reference this being a "practice" or "simulation" - treat it as a real interview
+
+**WHAT A REAL INTERVIEWER DOES:**
+- ✅ Ask thoughtful, relevant questions
+- ✅ Use neutral acknowledgments: "I see", "Thank you", "Mm-hmm", "Interesting"
+- ✅ Ask follow-up questions to clarify or explore responses deeper
+- ✅ Move naturally between topics
+- ✅ Maintain professional, courteous demeanor
+- ✅ Focus entirely on gathering information about the candidate
+
+**REMEMBER: You are NOT their coach. You are conducting a realistic interview simulation. Real interviewers do NOT give tips or feedback during interviews. Stay strictly in character as a professional interviewer.**
+
+## Core Responsibilities
+
 Conduct Practice Interviews:
-Ask ONE interview question at a time (never provide a list of questions)
-Tailor questions based on the student's profile, interests, target schools, and intended major
-Ask natural follow-up questions that dig deeper into their responses
-Create a conversational flow that mirrors real college interviews
-Track Performance:
-Continuously observe and mentally note the student's interviewing strengths and areas for improvement
-Pay attention to their communication style, depth of responses, authenticity, and ability to articulate their thoughts
-Remember patterns in their answers throughout the session
+- Ask ONE interview question at a time (never provide a list of questions)
+- Tailor questions based on the student's profile, interests, target schools, and intended major
+- Ask natural follow-up questions that dig deeper into their responses
+- Create a conversational flow that mirrors real college interviews
+
+Track Performance (SILENTLY):
+- Continuously observe and mentally note the student's interviewing strengths and areas for improvement
+- Pay attention to their communication style, depth of responses, authenticity, and ability to articulate their thoughts
+- Remember patterns in their answers throughout the session
+- DO NOT share these observations during the interview
 
 Dynamic Interview Approach (Enhancement for Variety)
 To make each interview feel unique and realistic, vary your approach by:
@@ -783,12 +951,11 @@ Don't always start with "Tell me about yourself" - sometimes begin with their in
 Vary the order of question types (sometimes start with future goals, other times with past experiences)
 Make unexpected but relevant connections between topics
 Getting Started Protocol
-Begin each session by gathering the student's profile information:
-Target colleges/universities they're applying to
-Intended major or academic interests
-Key extracurricular activities, hobbies, or passions
-Any specific areas they want to practice (e.g., discussing weaknesses, explaining academic choices)
-Previous interview experience level
+Begin each session naturally as a real college interviewer would:
+Ask about their academic interests and goals
+Explore their extracurricular activities and passions
+Learn about their target colleges and reasons for applying
+Focus on their experiences and aspirations
 Difficulty-Based Question Adaptation
 **SPECIFIC GUIDELINES FOR ${mapDifficulty(difficulty) === 'easy' ? 'EASY' : mapDifficulty(difficulty) === 'hard' ? 'HARD' : 'ADVANCED'} DIFFICULTY:**
 
@@ -846,7 +1013,7 @@ Additional Dynamic Follow-ups:
 "How does that connect to your future goals?"
 Interview Flow
 Opening: Start with a warm, realistic greeting as if you're an actual admissions officer
-Profile Building: Gather their information naturally through conversation, not as a formal questionnaire
+Profile Building: IMPORTANT - If no user profile information is available (no major, interests, or background provided), start by naturally asking about their background. Example: "Great! Let's get started. I notice you haven't uploaded any profile information yet. To provide you with the most personalized interview practice, could you tell me about yourself? What are you currently studying or interested in? What draws you to higher education?"
 Core Interview: Ask 6-10 substantive questions with follow-ups, maintaining natural conversation flow
 Closing: When they seem ready to end, ask if they have questions for "the college" (role-play element)
 Flow Variations to Increase Realism:
@@ -919,10 +1086,16 @@ Your goal is to help students become more confident, articulate, and authentic i
           messages: convertedMessages,
           includeUploadedContent: useUploadedContent && hasContent && !!user,
           interviewType: difficulty || 'general',
-          maxContentTokens: 2000
+          maxContentTokens: 2000,
+        voiceMode: isVoiceMode
         };
 
-        const response = await fetch('http://localhost:3000/api/chat', {
+        // Use authenticated endpoint when user is logged in and wants to use uploaded content
+        const endpoint = user?.token && useUploadedContent 
+          ? 'http://localhost:3000/api/chat/authenticated'
+          : 'http://localhost:3000/api/chat';
+        
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1091,23 +1264,76 @@ Your goal is to help students become more confident, articulate, and authentic i
       const convertedMessages = [
         {
           role: 'system',
-          content: `AI College Interview Coach System Prompt
+          content: `# AI College Interview Coach System Prompt
 
 **CURRENT DIFFICULTY LEVEL: ${mapDifficulty(difficulty) === 'easy' ? 'EASY' : mapDifficulty(difficulty) === 'hard' ? 'HARD' : 'ADVANCED'}**
 
+${extractPreviousQuestions().length > 0 ? `## CRITICAL: Previously Asked Questions (AVOID REPEATING THESE)
+You have already asked these questions in this conversation. DO NOT repeat them or ask similar variations:
+${extractPreviousQuestions().map((q, i) => `${i + 1}. ${q}`).join('\n')}
 
+**IMPORTANT:** Generate completely NEW questions that are different in both content and structure from the above. Avoid similar patterns or rephrased versions of these questions.
+` : ''}
 
-You are an expert college interview coach with extensive experience helping students prepare for admissions interviews at top universities. Your role is to conduct realistic practice interviews that help students improve their interviewing skills through personalized questions and constructive feedback.
-Your Core Responsibilities
+You are a PROFESSIONAL COLLEGE ADMISSIONS INTERVIEWER conducting practice interviews for students applying to universities. You must simulate an AUTHENTIC, REALISTIC college interview experience.
+
+## CRITICAL DEFAULT BEHAVIOR
+**When NO user profile information is provided (no major, no interests, no background):**
+- NEVER hallucinate or make up information about the student's profile
+- NEVER say "I see from your profile" or "based on your information" when no files are uploaded
+- NEVER assume the student is studying Computer Science or any specific field
+- NEVER make assumptions about their interests or background
+- Instead, EXPLICITLY acknowledge that no profile is available and ask for information
+- Example opening: "Hello! Ready to practice? Great! Let's get started. I notice you haven't uploaded any profile information yet. To provide you with the most personalized interview practice, could you tell me about yourself? What are you currently studying or interested in? What draws you to higher education?"
+
+**When user profile information IS provided:**
+- Reference specific details from their uploaded documents accurately
+- Use phrases like "I see from your profile" or "based on your uploaded information" appropriately
+- Ask questions that build upon the information they've provided
+
+## CRITICAL INTERVIEWER BEHAVIOR RULES - NEVER VIOLATE THESE
+
+**YOU ARE ONLY AN INTERVIEWER - NOT A COACH OR TUTOR:**
+- Ask ONE interview question at a time (never provide a list of questions)
+- Tailor questions based on the student's profile, interests, target schools, and intended major
+- Ask natural follow-up questions that dig deeper into their responses
+- Create a conversational flow that mirrors real college interviews
+
+**ABSOLUTELY FORBIDDEN - NEVER DO THESE THINGS:**
+- ❌ NEVER provide feedback, tips, evaluation, advice, or commentary during the interview
+- ❌ NEVER comment on the quality of answers ("That's a great answer", "Good point", etc.)
+- ❌ NEVER give suggestions for improvement or guidance
+- ❌ NEVER say things like "This will help you", "You should consider", "A tip would be"
+- ❌ NEVER act as a coach, mentor, or teacher during the interview
+- ❌ NEVER break character as a professional interviewer
+- ❌ NEVER give meta-commentary about the interview process
+- ❌ NEVER ask about their "interview experience", "practice sessions", or "what they want to work on"
+- ❌ NEVER ask "what would you like me to interview you on today" or similar meta-questions
+- ❌ NEVER reference this being a "practice" or "simulation" - treat it as a real interview
+
+**WHAT A REAL INTERVIEWER DOES:**
+- ✅ Ask thoughtful, relevant questions
+- ✅ Use neutral acknowledgments: "I see", "Thank you", "Mm-hmm", "Interesting"
+- ✅ Ask follow-up questions to clarify or explore responses deeper
+- ✅ Move naturally between topics
+- ✅ Maintain professional, courteous demeanor
+- ✅ Focus entirely on gathering information about the candidate
+
+**REMEMBER: You are NOT their coach. You are conducting a realistic interview simulation. Real interviewers do NOT give tips or feedback during interviews. Stay strictly in character as a professional interviewer.**
+
+## Core Responsibilities
+
 Conduct Practice Interviews:
-Ask ONE interview question at a time (never provide a list of questions)
-Tailor questions based on the student's profile, interests, target schools, and intended major
-Ask natural follow-up questions that dig deeper into their responses
-Create a conversational flow that mirrors real college interviews
-Track Performance:
-Continuously observe and mentally note the student's interviewing strengths and areas for improvement
-Pay attention to their communication style, depth of responses, authenticity, and ability to articulate their thoughts
-Remember patterns in their answers throughout the session
+- Ask ONE interview question at a time (never provide a list of questions)
+- Tailor questions based on the student's profile, interests, target schools, and intended major
+- Ask natural follow-up questions that dig deeper into their responses
+- Create a conversational flow that mirrors real college interviews
+
+Track Performance (SILENTLY):
+- Continuously observe and mentally note the student's interviewing strengths and areas for improvement
+- Pay attention to their communication style, depth of responses, authenticity, and ability to articulate their thoughts
+- Remember patterns in their answers throughout the session
+- DO NOT share these observations during the interview
 
 Dynamic Interview Approach (Enhancement for Variety)
 To make each interview feel unique and realistic, vary your approach by:
@@ -1121,12 +1347,11 @@ Don't always start with "Tell me about yourself" - sometimes begin with their in
 Vary the order of question types (sometimes start with future goals, other times with past experiences)
 Make unexpected but relevant connections between topics
 Getting Started Protocol
-Begin each session by gathering the student's profile information:
-Target colleges/universities they're applying to
-Intended major or academic interests
-Key extracurricular activities, hobbies, or passions
-Any specific areas they want to practice (e.g., discussing weaknesses, explaining academic choices)
-Previous interview experience level
+Begin each session naturally as a real college interviewer would:
+Ask about their academic interests and goals
+Explore their extracurricular activities and passions
+Learn about their target colleges and reasons for applying
+Focus on their experiences and aspirations
 Difficulty-Based Question Adaptation
 Adjust complexity and expectations based on user-selected difficulty:
 Beginner: Start with basic questions and provide more guidance
@@ -1135,12 +1360,22 @@ Expert: Use challenging follow-ups and expect detailed responses
 Remember: Let the student ask for a specific difficulty level if they haven't specified one yet.
 Custom Question Creation Protocol (Enhanced System)
 For every question you ask, create completely original questions using these guidelines:
-NEVER copy example questions exactly as written - always create variations
-Use the example questions only as inspiration for structure and topic areas
-Personalize every question based on the student's specific interests, background, and goals
-Integrate details from their previous responses to create connected, flowing conversations
-Base questions on current events, recent developments, or real-world applications relevant to their field
-Create hypothetical scenarios that connect to their experiences and interests
+
+**ABSOLUTE REQUIREMENTS FOR QUESTION ORIGINALITY:**
+- NEVER repeat the same question twice, even across different interview sessions
+- AVOID common patterns like "Tell me about a time when..." or "I see from your profile..."
+- Create UNIQUE opening phrases for each question - vary your approach dramatically
+- If you've asked about challenges, next time ask about successes, innovations, or perspectives
+- Use different conceptual frameworks for each topic area
+- Draw from current events, emerging trends, or specific contexts relevant to their field
+
+**STRATEGIES FOR GENERATING UNIQUE QUESTIONS:**
+- Start with unexpected angles: scenarios, hypotheticals, role reversals
+- Connect disparate topics in creative ways
+- Reference specific details from their responses to craft personalized follow-ups
+- Use time-based variations (past reflections, present analysis, future projections)
+- Incorporate thought experiments or "what if" scenarios
+- Ask process-oriented questions ("How do you approach...") instead of outcome questions
 Key Skills for Question Development:
 Drawing insights from the student's previous responses to create connected follow-ups
 Developing questions that naturally emerge from the conversation flow
@@ -1170,7 +1405,8 @@ Your goal is to help students become more confident, articulate, and authentic i
         messages: convertedMessages,
         includeUploadedContent: useUploadedContent && hasContent && !!user,
         interviewType: difficulty || 'general',
-        maxContentTokens: 2000
+        maxContentTokens: 2000,
+        voiceMode: isVoiceMode
       };
       
       console.log('Full request details:', {
@@ -1180,7 +1416,23 @@ Your goal is to help students become more confident, articulate, and authentic i
         userObject: user
       });
 
-      const response = await fetch('http://localhost:3000/api/chat', {
+      // Use authenticated endpoint when user is logged in and wants to use uploaded content
+      const endpoint = user?.token && useUploadedContent 
+        ? 'http://localhost:3000/api/chat/authenticated'
+        : 'http://localhost:3000/api/chat';
+      
+      console.log('=== CHAT REQUEST DEBUG ===');
+      console.log('User:', user);
+      console.log('User ID:', user?._id || user?.id);
+      console.log('User from localStorage:', localStorage.getItem('user'));
+      console.log('Has Content:', hasContent);
+      console.log('Use Uploaded Content:', useUploadedContent);
+      console.log('Include Uploaded Content Flag:', requestBody.includeUploadedContent);
+      console.log('Endpoint:', endpoint);
+      console.log('Auth Header:', user?.token ? `Bearer ${user.token.substring(0, 20)}...` : 'No token');
+      console.log('Full Request Body:', JSON.stringify(requestBody, null, 2));
+      
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1231,7 +1483,20 @@ Your goal is to help students become more confident, articulate, and authentic i
     console.error('Voice input error:', error);
     setSpeechError(error.message || 'Voice recognition failed');
     
-    // Show error message to user
+    // Filter out benign errors that shouldn't be shown to user
+    const benignErrors = ['aborted', 'no-speech', 'network'];
+    const errorType = error.type || error.error || '';
+    const errorMessage = error.message || '';
+    
+    // Don't show system messages for normal speech recognition lifecycle events
+    if (benignErrors.includes(errorType) || 
+        errorMessage.includes('aborted') ||
+        errorMessage.includes('Speech recognition error: aborted')) {
+      console.log('Suppressing benign voice error:', errorType, errorMessage);
+      return; // Don't show these errors to the user
+    }
+    
+    // Only show error message to user for genuine problems
     setMessages(prev => [...prev, { 
       sender: 'system', 
       text: `⚠️ Voice input error: ${error.message || 'Please try again or switch to text mode.'}` 
@@ -1291,6 +1556,8 @@ Your goal is to help students become more confident, articulate, and authentic i
     }
   };
 
+  // testVoiceTutorial function moved to App.jsx and passed as prop
+
   return (
     <div className="chat-container" style={{
       fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif'
@@ -1299,8 +1566,8 @@ Your goal is to help students become more confident, articulate, and authentic i
       {(hasContent || user) && (
         <div style={{
           padding: '16px 20px',
-          backgroundColor: '#F2F2F7',
-          borderBottom: '1px solid #E5E5EA',
+          backgroundColor: 'var(--background-tertiary)',
+          borderBottom: '1px solid var(--border-primary)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -1314,8 +1581,8 @@ Your goal is to help students become more confident, articulate, and authentic i
                 width: '20px',
                 height: '20px',
                 borderRadius: '6px',
-                border: useUploadedContent ? 'none' : '2px solid #D1D1D6',
-                backgroundColor: useUploadedContent ? '#007AFF' : 'transparent',
+                border: useUploadedContent ? 'none' : '2px solid var(--border-primary)',
+                backgroundColor: useUploadedContent ? 'var(--accent-blue)' : 'transparent',
                 transition: 'all 0.2s ease',
                 display: 'flex',
                 alignItems: 'center',
@@ -1341,7 +1608,7 @@ Your goal is to help students become more confident, articulate, and authentic i
               </div>
               <span style={{
                 fontWeight: '400',
-                color: '#1D1D1F'
+                color: 'var(--text-primary)'
               }}>Use uploaded content</span>
             </label>
             {showContentIndicator && (
@@ -1361,7 +1628,7 @@ Your goal is to help students become more confident, articulate, and authentic i
               style={{
                 padding: '6px 12px',
                 fontSize: '13px',
-                backgroundColor: '#8E8E93',
+                backgroundColor: 'var(--text-quaternary)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '12px',
@@ -1371,16 +1638,17 @@ Your goal is to help students become more confident, articulate, and authentic i
                 transition: 'all 0.2s ease'
               }}
               onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = '#6D6D70';
+                e.currentTarget.style.backgroundColor = 'var(--text-tertiary)';
                 e.currentTarget.style.transform = 'scale(0.98)';
               }}
               onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = '#8E8E93';
+                e.currentTarget.style.backgroundColor = 'var(--text-quaternary)';
                 e.currentTarget.style.transform = 'scale(1)';
               }}
             >
               Debug Files
             </button>
+
 
             <button
               onClick={async () => {
@@ -1505,17 +1773,16 @@ Your goal is to help students become more confident, articulate, and authentic i
       </div>
 
       {/* Interview Control Buttons */}
-      {user && (
-        <div style={{
-          position: 'absolute',
-          bottom: '70px',
-          right: '20px',
-          display: 'flex',
-          gap: '8px',
-          zIndex: 10
-        }}>
+      <div style={{
+        position: 'absolute',
+        bottom: '70px',
+        right: '20px',
+        display: 'flex',
+        gap: '8px',
+        zIndex: 10
+      }}>
 
-          {isInterviewActive && (
+        {user && isInterviewActive && (
             <button
               onClick={handleEndInterviewClick}
               disabled={endInterviewButtonState === 'processing'}
@@ -1575,36 +1842,41 @@ Your goal is to help students become more confident, articulate, and authentic i
             </button>
           )}
 
-          {isInterviewCompleted && (
-            <button
-              onClick={newInterview}
-              style={{
-                padding: '12px 20px',
-                fontSize: '15px',
-                backgroundColor: '#007AFF',
-                color: 'white',
-                border: 'none',
-                borderRadius: '16px',
-                cursor: 'pointer',
-                fontWeight: '600',
-                letterSpacing: '-0.24px',
-                transition: 'all 0.2s ease',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-              }}
-              onMouseOver={(e) => {
+        {isInterviewCompleted && (
+          <button
+            onClick={user ? newInterview : undefined}
+            disabled={!user}
+            style={{
+              padding: '12px 20px',
+              fontSize: '15px',
+              backgroundColor: user ? '#007AFF' : '#8E8E93',
+              color: 'white',
+              border: 'none',
+              borderRadius: '16px',
+              cursor: user ? 'pointer' : 'not-allowed',
+              fontWeight: '600',
+              letterSpacing: '-0.24px',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              opacity: user ? 1 : 0.7
+            }}
+            onMouseOver={(e) => {
+              if (user) {
                 e.currentTarget.style.backgroundColor = '#0051D5';
                 e.currentTarget.style.transform = 'scale(0.98)';
-              }}
-              onMouseOut={(e) => {
+              }
+            }}
+            onMouseOut={(e) => {
+              if (user) {
                 e.currentTarget.style.backgroundColor = '#007AFF';
                 e.currentTarget.style.transform = 'scale(1)';
-              }}
-            >
-              🔄 New Interview
-            </button>
-          )}
-        </div>
-      )}
+              }
+            }}
+          >
+            {user ? '🔄 New Interview' : '🔒 Login Required'}
+          </button>
+        )}
+      </div>
 
       {/* Progress Indicator for AI Rating Generation (Step 14) */}
       <ProgressIndicator
@@ -1639,32 +1911,37 @@ Your goal is to help students become more confident, articulate, and authentic i
             left: '50%',
             transform: 'translate(-50%, -50%)',
             zIndex: 1002,
-            backgroundColor: '#ffffff',
+            backgroundColor: 'var(--background-primary)',
             borderRadius: '12px',
             padding: '30px',
-            boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
-            border: '1px solid #e9ecef',
+            boxShadow: '0 10px 40px var(--shadow-medium)',
+            border: '1px solid var(--border-primary)',
             minWidth: '320px',
             maxWidth: '450px',
             textAlign: 'center'
           }}>
             <div style={{
-              fontSize: '24px',
-              marginBottom: '15px'
+              marginBottom: '15px',
+              display: 'flex',
+              justifyContent: 'center'
             }}>
-              🎯
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10.5" stroke="var(--text-primary)" strokeWidth="1.5"/>
+                <circle cx="12" cy="12" r="6" stroke="var(--text-primary)" strokeWidth="1.5"/>
+                <circle cx="12" cy="12" r="2.25" fill="var(--text-primary)"/>
+              </svg>
             </div>
             <div style={{
               fontSize: '20px',
               fontWeight: '600',
-              color: '#495057',
+              color: 'var(--text-primary)',
               marginBottom: '10px'
             }}>
               End Interview?
             </div>
             <div style={{
               fontSize: '14px',
-              color: '#6c757d',
+              color: 'var(--text-secondary)',
               marginBottom: '25px',
               lineHeight: '1.4'
             }}>
@@ -1673,7 +1950,7 @@ Your goal is to help students become more confident, articulate, and authentic i
             
             {/* Interview Summary */}
             <div style={{
-              backgroundColor: '#f8f9fa',
+              backgroundColor: 'var(--background-secondary)',
               borderRadius: '8px',
               padding: '15px',
               marginBottom: '25px',
@@ -1682,39 +1959,39 @@ Your goal is to help students become more confident, articulate, and authentic i
               <div style={{
                 fontSize: '14px',
                 fontWeight: '600',
-                color: '#495057',
+                color: 'var(--text-primary)',
                 marginBottom: '8px'
               }}>
                 📊 Interview Summary
               </div>
               <div style={{
                 fontSize: '13px',
-                color: '#6c757d',
+                color: 'var(--text-secondary)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 marginBottom: '4px'
               }}>
                 <span>Messages exchanged:</span>
-                <span style={{ fontWeight: '500' }}>{messages.length - 1}</span>
+                <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>{messages.length - 1}</span>
               </div>
               <div style={{
                 fontSize: '13px',
-                color: '#6c757d',
+                color: 'var(--text-secondary)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 marginBottom: '4px'
               }}>
                 <span>Difficulty level:</span>
-                <span style={{ fontWeight: '500' }}>{difficulty || 'Not set'}</span>
+                <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>{difficulty || 'Not set'}</span>
               </div>
               <div style={{
                 fontSize: '13px',
-                color: '#6c757d',
+                color: 'var(--text-secondary)',
                 display: 'flex',
                 justifyContent: 'space-between'
               }}>
                 <span>Duration:</span>
-                <span style={{ fontWeight: '500' }}>
+                <span style={{ fontWeight: '500', color: 'var(--text-primary)' }}>
                   {interviewStartTime ? 
                     `${Math.floor((Date.now() - interviewStartTime.getTime()) / (1000 * 60))} minutes` : 
                     'Unknown'
@@ -1820,11 +2097,12 @@ Your goal is to help students become more confident, articulate, and authentic i
           <VoiceInput
             onVoiceInput={handleVoiceInput}
             onError={handleVoiceError}
-            disabled={isLoading || isInterviewCompleted}
+            disabled={isLoading || isInterviewCompleted || isSpeaking}
             autoSubmit={false}
             showConfirmation={false}
             placeholder={
               isInterviewCompleted ? "Interview completed" : 
+              isSpeaking ? "AI is speaking... Please wait" :
               "Click to speak, click again to stop and send..."
             }
             className="voice-input-chat"
@@ -1844,12 +2122,13 @@ Your goal is to help students become more confident, articulate, and authentic i
               disabled={isLoading || isInterviewCompleted}
               style={{
                 padding: '12px 16px',
-                border: '1px solid #D1D1D6',
+                border: '1px solid var(--border-primary)',
                 borderRadius: '20px',
                 fontSize: '17px',
                 fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif',
                 letterSpacing: '-0.41px',
-                backgroundColor: isInterviewCompleted ? '#F2F2F7' : '#ffffff',
+                backgroundColor: isInterviewCompleted ? 'var(--toggle-inactive)' : 'var(--input-background)',
+                color: 'var(--text-primary)',
                 transition: 'all 0.2s ease',
                 outline: 'none',
                 flex: 1,
@@ -1857,12 +2136,12 @@ Your goal is to help students become more confident, articulate, and authentic i
               }}
               onFocus={(e) => {
                 if (!isInterviewCompleted) {
-                  e.currentTarget.style.borderColor = '#007AFF';
+                  e.currentTarget.style.borderColor = 'var(--accent-blue)';
                   e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,122,255,0.1)';
                 }
               }}
               onBlur={(e) => {
-                e.currentTarget.style.borderColor = '#D1D1D6';
+                e.currentTarget.style.borderColor = 'var(--border-primary)';
                 e.currentTarget.style.boxShadow = 'none';
               }}
             />
@@ -1871,8 +2150,8 @@ Your goal is to help students become more confident, articulate, and authentic i
               disabled={isLoading || !input.trim() || isInterviewCompleted}
               style={{
                 padding: '12px 20px',
-                backgroundColor: (isLoading || !input.trim() || isInterviewCompleted) ? '#D1D1D6' : '#007AFF',
-                color: (isLoading || !input.trim() || isInterviewCompleted) ? '#8E8E93' : 'white',
+                backgroundColor: (isLoading || !input.trim() || isInterviewCompleted) ? 'var(--border-primary)' : 'var(--accent-blue)',
+                color: (isLoading || !input.trim() || isInterviewCompleted) ? 'var(--text-quaternary)' : 'white',
                 border: 'none',
                 borderRadius: '20px',
                 fontSize: '15px',
@@ -1884,13 +2163,13 @@ Your goal is to help students become more confident, articulate, and authentic i
               }}
               onMouseOver={(e) => {
                 if (!isLoading && input.trim() && !isInterviewCompleted) {
-                  e.currentTarget.style.backgroundColor = '#0051D5';
+                  e.currentTarget.style.backgroundColor = 'var(--accent-blue-hover)';
                   e.currentTarget.style.transform = 'scale(0.98)';
                 }
               }}
               onMouseOut={(e) => {
                 if (!isLoading && input.trim() && !isInterviewCompleted) {
-                  e.currentTarget.style.backgroundColor = '#007AFF';
+                  e.currentTarget.style.backgroundColor = 'var(--accent-blue)';
                   e.currentTarget.style.transform = 'scale(1)';
                 }
               }}

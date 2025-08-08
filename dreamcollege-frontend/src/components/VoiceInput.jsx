@@ -311,6 +311,16 @@ export default function VoiceInput({
   }, [stopVoiceInput]);
 
   /**
+   * Reset/clear the current transcript without stopping recording
+   */
+  const handleResetTranscript = useCallback(() => {
+    setTranscript('');
+    setInterimTranscript('');
+    lastTranscriptRef.current = '';
+    setError(null);
+  }, []);
+
+  /**
    * Retry voice input after error
    */
   const handleRetry = useCallback(() => {
@@ -344,11 +354,22 @@ export default function VoiceInput({
       boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
     };
 
+    // Special styling when AI is speaking
+    if (disabled && placeholder?.includes('AI is speaking')) {
+      return {
+        ...baseStyle,
+        backgroundColor: 'var(--accent-blue)', // Blue color for AI speaking
+        color: 'white',
+        opacity: 0.8,
+        animation: 'pulse 2s infinite'
+      };
+    }
+
     switch (inputState) {
       case 'listening':
         return {
           ...baseStyle,
-          backgroundColor: '#dc3545',
+          backgroundColor: 'var(--error-text)',
           color: 'white',
           transform: 'scale(1.1)',
           boxShadow: `0 0 0 ${Math.max(4, audioLevel * 20)}px rgba(220, 53, 69, 0.3)`
@@ -363,30 +384,34 @@ export default function VoiceInput({
       case 'confirming':
         return {
           ...baseStyle,
-          backgroundColor: '#17a2b8',
+          backgroundColor: 'var(--accent-blue)',
           color: 'white'
         };
       case 'error':
         return {
           ...baseStyle,
-          backgroundColor: '#dc3545',
+          backgroundColor: 'var(--error-text)',
           color: 'white',
           opacity: 0.7
         };
       default:
         return {
           ...baseStyle,
-          backgroundColor: disabled ? '#6c757d' : '#28a745',
+          backgroundColor: disabled ? 'var(--text-tertiary)' : '#28a745',
           color: 'white',
           opacity: disabled ? 0.6 : 1
         };
     }
-  }, [inputState, audioLevel, disabled]);
+  }, [inputState, audioLevel, disabled, placeholder]);
 
   /**
    * Get microphone icon based on state
    */
   const getMicIcon = useCallback(() => {
+    if (disabled && placeholder?.includes('AI is speaking')) {
+      return '🔊'; // Speaker icon when AI is speaking
+    }
+    
     switch (inputState) {
       case 'listening':
         return '🔴'; // Recording indicator
@@ -399,7 +424,7 @@ export default function VoiceInput({
       default:
         return '🎤'; // Default microphone
     }
-  }, [inputState]);
+  }, [inputState, disabled, placeholder]);
 
   /**
    * Get status text based on current state
@@ -477,9 +502,9 @@ export default function VoiceInput({
         alignItems: 'center',
         gap: '16px',
         padding: '20px',
-        backgroundColor: '#f8f9fa',
+        backgroundColor: 'var(--background-secondary)',
         borderRadius: '12px',
-        border: '2px solid #e9ecef',
+        border: '2px solid var(--ai-separator)',
         minHeight: '200px',
         justifyContent: 'center'
       }}
@@ -512,7 +537,7 @@ export default function VoiceInput({
               key={i}
               style={{
                 width: '4px',
-                backgroundColor: '#dc3545',
+                backgroundColor: 'var(--error-text)',
                 borderRadius: '2px',
                 height: `${Math.max(4, audioLevel * 24 * (0.5 + Math.random() * 0.5))}px`,
                 transition: 'height 0.1s ease',
@@ -528,7 +553,7 @@ export default function VoiceInput({
         textAlign: 'center',
         fontSize: '16px',
         fontWeight: '500',
-        color: inputState === 'error' ? '#dc3545' : '#495057',
+        color: inputState === 'error' ? 'var(--error-text)' : 'var(--text-secondary)',
         minHeight: '24px'
       }}>
         {getStatusText()}
@@ -538,23 +563,51 @@ export default function VoiceInput({
       {inputState === 'listening' && (transcript || interimTranscript) && (
         <div style={{
           padding: '12px 16px',
-          backgroundColor: '#f8f9fa',
+          backgroundColor: 'var(--background-secondary)',
           borderRadius: '8px',
           fontSize: '14px',
-          color: '#495057',
+          color: 'var(--text-secondary)',
           maxWidth: '400px',
           textAlign: 'left',
           border: '2px solid #28a745',
           minHeight: '60px',
           wordWrap: 'break-word'
         }}>
-          <div style={{ fontWeight: '600', marginBottom: '4px', color: '#28a745' }}>
-            🎤 Recording... (Click red button to stop and send)
+          <div style={{ 
+            fontWeight: '600', 
+            marginBottom: '4px', 
+            color: '#28a745',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <span>🎤 Recording... (Natural speech detection - Click red button to stop and send)</span>
+            {(transcript || interimTranscript) && (
+              <button
+                onClick={handleResetTranscript}
+                style={{
+                  background: 'var(--error-text)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '4px 8px',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  fontWeight: '500',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseOver={(e) => e.target.style.opacity = '0.8'}
+                onMouseOut={(e) => e.target.style.opacity = '1'}
+                title="Clear transcript and start over"
+              >
+                🗑️ Reset
+              </button>
+            )}
           </div>
           <div>
-            {transcript && <span style={{ color: '#212529' }}>{transcript}</span>}
+            {transcript && <span style={{ color: 'var(--text-primary)' }}>{transcript}</span>}
             {transcript && interimTranscript && <span> </span>}
-            {interimTranscript && <span style={{ color: '#6c757d', fontStyle: 'italic' }}>{interimTranscript}</span>}
+            {interimTranscript && <span style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>{interimTranscript}</span>}
           </div>
         </div>
       )}
@@ -563,16 +616,16 @@ export default function VoiceInput({
       {inputState === 'confirming' && transcript && (
         <div style={{
           padding: '16px',
-          backgroundColor: 'white',
+          backgroundColor: 'var(--background-primary)',
           borderRadius: '8px',
-          border: '2px solid #17a2b8',
+          border: '2px solid var(--accent-blue)',
           maxWidth: '400px',
           textAlign: 'center'
         }}>
           <div style={{
             fontSize: '14px',
             fontWeight: '600',
-            color: '#17a2b8',
+            color: 'var(--accent-blue)',
             marginBottom: '8px',
             display: 'flex',
             justifyContent: 'space-between',
@@ -600,7 +653,7 @@ export default function VoiceInput({
               style={{
                 padding: '8px 16px',
                 fontSize: '14px',
-                backgroundColor: '#6c757d',
+                backgroundColor: 'var(--text-tertiary)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '6px',
@@ -633,16 +686,16 @@ export default function VoiceInput({
       {inputState === 'error' && error && (
         <div style={{
           padding: '16px',
-          backgroundColor: '#f8d7da',
+          backgroundColor: 'var(--error-background)',
           borderRadius: '8px',
-          border: '1px solid #f5c6cb',
+          border: '1px solid var(--error-border)',
           maxWidth: '400px',
           textAlign: 'center'
         }}>
           <div style={{
             fontSize: '14px',
             fontWeight: '600',
-            color: '#721c24',
+            color: 'var(--error-text)',
             marginBottom: '8px'
           }}>
             ⚠️ Voice Input Error
@@ -650,7 +703,7 @@ export default function VoiceInput({
           
           <div style={{
             fontSize: '14px',
-            color: '#721c24',
+            color: 'var(--error-text)',
             marginBottom: '12px'
           }}>
             {error.message}
@@ -663,7 +716,7 @@ export default function VoiceInput({
               style={{
                 padding: '8px 16px',
                 fontSize: '14px',
-                backgroundColor: isRetrying ? '#6c757d' : '#007bff',
+                backgroundColor: isRetrying ? 'var(--text-tertiary)' : 'var(--accent-blue)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '6px',
@@ -680,7 +733,7 @@ export default function VoiceInput({
       {/* Keyboard Shortcuts Help */}
       <div style={{
         fontSize: '12px',
-        color: '#6c757d',
+        color: 'var(--text-tertiary)',
         textAlign: 'center',
         marginTop: '8px'
       }}>

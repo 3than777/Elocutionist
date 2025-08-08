@@ -144,7 +144,7 @@ export default function VoiceModeToggle({
             justifyContent: 'space-between',
             gap: '8px',
             padding: '8px 12px',
-            backgroundColor: '#F2F2F7',
+            backgroundColor: 'var(--toggle-inactive)',
             borderRadius: '20px',
             border: 'none',
             cursor: (!isVoiceSupported || disabled || isChecking) ? 'not-allowed' : 'pointer',
@@ -157,7 +157,7 @@ export default function VoiceModeToggle({
           <span style={{
             fontSize: '15px',
             fontWeight: !isVoiceMode ? '600' : '400',
-            color: !isVoiceMode ? '#007AFF' : '#8E8E93',
+            color: !isVoiceMode ? 'var(--toggle-active)' : 'var(--text-quaternary)',
             letterSpacing: '-0.24px',
             transition: 'all 0.2s ease'
           }}>
@@ -169,7 +169,7 @@ export default function VoiceModeToggle({
           position: 'relative',
           width: '40px',
           height: '24px',
-          backgroundColor: isVoiceMode ? '#007AFF' : '#D1D1D6',
+          backgroundColor: isVoiceMode ? 'var(--toggle-active)' : 'var(--toggle-track-inactive)',
           borderRadius: '12px',
           transition: 'background-color 0.3s ease',
           cursor: (!isVoiceSupported || disabled || isChecking) ? 'not-allowed' : 'pointer'
@@ -218,7 +218,7 @@ export default function VoiceModeToggle({
           <span style={{
             fontSize: '15px',
             fontWeight: isVoiceMode ? '600' : '400',
-            color: isVoiceMode ? '#007AFF' : '#8E8E93',
+            color: isVoiceMode ? 'var(--toggle-active)' : 'var(--text-quaternary)',
             letterSpacing: '-0.24px',
             transition: 'all 0.2s ease'
           }}>
@@ -231,13 +231,13 @@ export default function VoiceModeToggle({
       {voiceError && !isVoiceSupported && (
         <div style={{
           padding: '12px 16px',
-          backgroundColor: '#FFF2F2',
+          backgroundColor: 'var(--error-background)',
           borderRadius: '12px',
-          border: '1px solid #FECACA'
+          border: '1px solid var(--error-border)'
         }}>
           <div style={{
             fontSize: '13px',
-            color: '#DC2626',
+            color: 'var(--error-text)',
             letterSpacing: '-0.08px',
             marginBottom: voiceError.includes('HTTPS') ? '8px' : '0'
           }}>
@@ -246,8 +246,9 @@ export default function VoiceModeToggle({
           {voiceError.includes('HTTPS') && (
             <div style={{
               fontSize: '12px',
-              color: '#7F1D1D',
-              letterSpacing: '-0.05px'
+              color: 'var(--error-text)',
+              letterSpacing: '-0.05px',
+              opacity: 0.8
             }}>
               Voice features require a secure connection. 
               {window.location.hostname === 'localhost' 
@@ -262,13 +263,13 @@ export default function VoiceModeToggle({
       {voiceError && isVoiceSupported && (
         <div style={{
           padding: '12px 16px',
-          backgroundColor: '#FFF8E6',
+          backgroundColor: 'var(--warning-background)',
           borderRadius: '12px',
-          border: '1px solid #FDE68A'
+          border: '1px solid var(--warning-border)'
         }}>
           <div style={{
             fontSize: '13px',
-            color: '#92400E',
+            color: 'var(--warning-text)',
             letterSpacing: '-0.08px'
           }}>
             ⚠️ {voiceError}
@@ -280,13 +281,13 @@ export default function VoiceModeToggle({
       {isVoiceSupported && !voiceError && (
         <div style={{
           padding: '12px 16px',
-          backgroundColor: '#F0FDF4',
+          backgroundColor: 'var(--success-background)',
           borderRadius: '12px',
-          border: '1px solid #BBF7D0'
+          border: '1px solid var(--success-border)'
         }}>
           <div style={{
             fontSize: '13px',
-            color: '#166534',
+            color: 'var(--success-text)',
             letterSpacing: '-0.08px'
           }}>
             ✅ Voice mode available

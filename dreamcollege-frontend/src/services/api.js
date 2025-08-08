@@ -392,6 +392,63 @@ export const retryApiCall = async (apiCall, args, maxRetries = 3, baseDelay = 10
 };
 
 /**
+ * Get AI ratings history for the authenticated user
+ * 
+ * @param {string} token - User authentication token
+ * @param {number} limit - Number of ratings to fetch (default: 10)
+ * @param {number} offset - Pagination offset (default: 0)
+ * @returns {Promise<Object>} Ratings history with statistics
+ * @throws {Error} Validation, network, or API errors
+ * 
+ * @example
+ * ```javascript
+ * const history = await getAIRatingsHistory(userToken, 10, 0);
+ * console.log('Latest rating:', history.data.statistics.latestRating);
+ * ```
+ */
+export const getAIRatingsHistory = async (token, limit = 10, offset = 0) => {
+  // Validate inputs
+  if (!token) {
+    throw new Error('Authentication token is required');
+  }
+
+  try {
+    console.log('API: Fetching AI ratings history', { limit, offset });
+
+    const response = await fetchWithTimeout(
+      `${API_BASE_URL}/api/chat/ratings/history?limit=${limit}&offset=${offset}`,
+      {
+        method: 'GET'
+      },
+      token
+    );
+
+    const data = await handleApiResponse(response);
+
+    // Validate response structure
+    if (!data.success || !data.data) {
+      throw new Error('Invalid response: Missing ratings data');
+    }
+
+    console.log('API: AI ratings history retrieved successfully', {
+      totalRatings: data.data.statistics?.totalRatings,
+      avgRating: data.data.statistics?.averageRating
+    });
+
+    return data;
+
+  } catch (error) {
+    // Handle specific error types
+    if (error.name === 'AbortError') {
+      throw new Error('Request timed out. Please check your connection and try again.');
+    }
+    
+    console.error('API: Error fetching ratings history:', error);
+    throw error;
+  }
+};
+
+/**
  * Test API connectivity and authentication
  * 
  * @param {string} token - User authentication token (optional)

@@ -109,7 +109,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
       zIndex: 1000
     }}>
       <div style={{
-        backgroundColor: 'white',
+        backgroundColor: 'var(--background-primary, white)',
         borderRadius: '8px',
         padding: '24px',
         width: '90%',
@@ -123,7 +123,12 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
           alignItems: 'center',
           marginBottom: '20px'
         }}>
-          <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '600' }}>
+          <h2 style={{ 
+            margin: 0, 
+            fontSize: '24px', 
+            fontWeight: '600',
+            color: 'var(--text-primary, #000000)'
+          }}>
             {isLogin ? 'Login' : 'Sign Up'}
           </h2>
           <button
@@ -133,7 +138,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
               border: 'none',
               fontSize: '24px',
               cursor: 'pointer',
-              color: '#666'
+              color: 'var(--text-tertiary, #666)'
             }}
           >
             ×
@@ -142,9 +147,9 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
 
         {error && (
           <div style={{
-            backgroundColor: '#fee',
-            border: '1px solid #fcc',
-            color: '#c00',
+            backgroundColor: 'var(--error-background, #fee)',
+            border: '1px solid var(--error-border, #fcc)',
+            color: 'var(--error-text, #c00)',
             padding: '12px',
             borderRadius: '4px',
             marginBottom: '16px',
@@ -156,8 +161,14 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
-              Email
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px', 
+              fontWeight: '500',
+              fontSize: '14px',
+              color: 'var(--text-secondary, #333333)'
+            }}>
+              Email:
             </label>
             <input
               type="email"
@@ -168,16 +179,25 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
               style={{
                 width: '100%',
                 padding: '8px 12px',
-                border: '1px solid #ddd',
+                border: '1px solid var(--border-primary, #ddd)',
                 borderRadius: '4px',
-                fontSize: '14px'
+                fontSize: '14px',
+                backgroundColor: 'var(--background-tertiary, #ffffff)',
+                color: 'var(--text-primary, #000000)',
+                boxSizing: 'border-box'
               }}
             />
           </div>
 
           <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
-              Password
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px', 
+              fontWeight: '500',
+              fontSize: '14px',
+              color: 'var(--text-secondary, #333333)'
+            }}>
+              Password:
             </label>
             <input
               type="password"
@@ -188,9 +208,12 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
               style={{
                 width: '100%',
                 padding: '8px 12px',
-                border: '1px solid #ddd',
+                border: '1px solid var(--border-primary, #ddd)',
                 borderRadius: '4px',
-                fontSize: '14px'
+                fontSize: '14px',
+                backgroundColor: 'var(--background-tertiary, #ffffff)',
+                color: 'var(--text-primary, #000000)',
+                boxSizing: 'border-box'
               }}
             />
           </div>
@@ -198,8 +221,14 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
           {!isLogin && (
             <>
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
-                  Full Name
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '8px', 
+                  fontWeight: '500',
+                  fontSize: '14px',
+                  color: 'var(--text-secondary, #333333)'
+                }}>
+                  Full Name:
                 </label>
                 <input
                   type="text"
@@ -210,16 +239,25 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                   style={{
                     width: '100%',
                     padding: '8px 12px',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--border-primary, #ddd)',
                     borderRadius: '4px',
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    backgroundColor: 'var(--background-tertiary, #ffffff)',
+                    color: 'var(--text-primary, #000000)',
+                    boxSizing: 'border-box'
                   }}
                 />
               </div>
 
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
-                  Grade (Optional)
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '8px', 
+                  fontWeight: '500',
+                  fontSize: '14px',
+                  color: 'var(--text-secondary, #333333)'
+                }}>
+                  Grade (Optional):
                 </label>
                 <select
                   name="grade"
@@ -228,9 +266,12 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                   style={{
                     width: '100%',
                     padding: '8px 12px',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--border-primary, #ddd)',
                     borderRadius: '4px',
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    backgroundColor: 'var(--background-tertiary, #ffffff)',
+                    color: 'var(--text-primary, #000000)',
+                    boxSizing: 'border-box'
                   }}
                 >
                   <option value="">Select grade</option>
@@ -241,8 +282,14 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
               </div>
 
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
-                  Target Major (Optional)
+                <label style={{ 
+                  display: 'block', 
+                  marginBottom: '8px', 
+                  fontWeight: '500',
+                  fontSize: '14px',
+                  color: 'var(--text-secondary, #333333)'
+                }}>
+                  Target Major (Optional):
                 </label>
                 <input
                   type="text"
@@ -253,9 +300,12 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                   style={{
                     width: '100%',
                     padding: '8px 12px',
-                    border: '1px solid #ddd',
+                    border: '1px solid var(--border-primary, #ddd)',
                     borderRadius: '4px',
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    backgroundColor: 'var(--background-tertiary, #ffffff)',
+                    color: 'var(--text-primary, #000000)',
+                    boxSizing: 'border-box'
                   }}
                 />
               </div>

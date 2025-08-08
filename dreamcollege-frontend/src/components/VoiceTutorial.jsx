@@ -32,7 +32,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { getVoiceCapabilities, getBrowserRecommendation } from '../utils/voiceCompatibility';
 import { validateHTTPSRequirement } from '../services/httpsHandler';
 import { initializeSpeechRecognition, startListening, stopListening } from '../services/speechRecognition';
-import { initializeTextToSpeech, speakText, stopSpeaking, getAvailableVoices } from '../services/textToSpeech';
+import { initializeTextToSpeech, speakText, speakTextTutorial, stopSpeaking, getAvailableVoices } from '../services/textToSpeech';
 
 export default function VoiceTutorial({ 
   isOpen, 
@@ -303,12 +303,8 @@ export default function VoiceTutorial({
       setIsTestingVoice(true);
       setTestResult(null);
       
-      // Test speech synthesis
-      await speakText("Hello! This is a test of your speakers. Can you hear me clearly?", {
-        rate: 1.0,
-        pitch: 1.0,
-        volume: 0.8
-      });
+      // Test speech synthesis with consistent volume using tutorial-specific function
+      await speakTextTutorial("Hello! This is a test of your speakers. Can you hear me clearly?");
       
       // Test speech recognition
       const recognition = await startListening(
@@ -387,8 +383,8 @@ export default function VoiceTutorial({
       setPracticeAudioLevel(0);
       
       
-      // Give instruction
-      await speakText("Let's practice! Tell me about yourself in a few sentences. I'll listen and respond.");
+      // Give instruction with consistent volume using tutorial-specific function
+      await speakTextTutorial("Let's practice! Tell me about yourself in a few sentences. I'll listen and respond.");
       
       // Wait a moment for the speech to finish
       setTimeout(async () => {
@@ -447,8 +443,8 @@ export default function VoiceTutorial({
         aiResponse = "Thank you for practicing with me! Your voice quality is good and I understood you clearly. In a real interview, I would ask follow-up questions based on your response. Great job!";
       }
       
-      // Speak the AI response
-      await speakText(aiResponse);
+      // Speak the AI response with consistent volume using tutorial-specific function
+      await speakTextTutorial(aiResponse);
       
       // End the practice session after response
       setTimeout(() => {
@@ -513,7 +509,13 @@ export default function VoiceTutorial({
           <span>Audio feedback from AI</span>
         </div>
         <div className="tutorial-benefit">
-          <span className="tutorial-benefit__icon">🎯</span>
+          <span className="tutorial-benefit__icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="7" stroke="var(--accent-primary)" strokeWidth="1.5"/>
+              <circle cx="8" cy="8" r="4" stroke="var(--accent-primary)" strokeWidth="1.5"/>
+              <circle cx="8" cy="8" r="1.5" fill="var(--accent-primary)"/>
+            </svg>
+          </span>
           <span>Realistic interview experience</span>
         </div>
         <div className="tutorial-benefit">

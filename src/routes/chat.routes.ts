@@ -178,13 +178,33 @@ router.post('/', optionalAuth, async (req: AuthenticatedRequest, res: Response):
           
           try {
         // Get user's uploaded files
+        // Ensure userId is properly formatted as ObjectId
+        let userObjectId;
+        try {
+          if (typeof userId === 'string') {
+            const cleanUserId = userId.replace(/['"]/g, '').trim();
+            if (!Types.ObjectId.isValid(cleanUserId)) {
+              console.error(`Invalid ObjectId format in non-auth route: "${cleanUserId}"`);
+              throw new Error('Invalid user ID format');
+            }
+            userObjectId = new Types.ObjectId(cleanUserId);
+          } else if (userId instanceof Types.ObjectId) {
+            userObjectId = userId;
+          } else {
+            throw new Error(`Unexpected userId type: ${typeof userId}`);
+          }
+        } catch (conversionError) {
+          console.error(`Error converting userId to ObjectId:`, conversionError);
+          throw conversionError;
+        }
+        
         console.log(`Querying UploadedFile with criteria:`, {
-          userId: userId.toString(),
+          userId: userObjectId.toString(),
           processingStatus: PROCESSING_STATUS.COMPLETED
         });
         
         const userFiles = await UploadedFile.find({
-          userId: userId as Types.ObjectId,
+          userId: userObjectId,
           processingStatus: PROCESSING_STATUS.COMPLETED,
           extractedText: { $exists: true, $ne: null }
         }).sort({ uploadedAt: -1 });
@@ -193,11 +213,30 @@ router.post('/', optionalAuth, async (req: AuthenticatedRequest, res: Response):
         
         // Debug: Check if there are ANY files in the database
         if (userFiles.length === 0) {
-          const allFiles = await UploadedFile.find({}).limit(5);
-          console.log(`DEBUG: Total files in DB: ${allFiles.length}`);
+          console.log(`\n=== DEBUG: NO FILES FOUND FOR USER ${userId} ===`);
+          console.log(`Checking what files exist in the database...`);
+          
+          const allFiles = await UploadedFile.find({}).limit(10);
+          console.log(`Total files in DB (showing first 10): ${allFiles.length}`);
           allFiles.forEach(f => {
-            console.log(`  File: ${f.originalName}, userId: ${f.userId}, status: ${f.processingStatus}`);
+            console.log(`  File: ${f.originalName}`);
+            console.log(`    - userId: ${f.userId} (type: ${typeof f.userId})`);
+            console.log(`    - status: ${f.processingStatus}`);
+            console.log(`    - hasText: ${!!f.extractedText}`);
+            console.log(`    - uploadedAt: ${f.uploadedAt}`);
           });
+          
+          // Check if it's a type mismatch issue
+          console.log(`\n=== TYPE CHECK ===`);
+          console.log(`Looking for userId: ${userId} (type: ${typeof userId})`);
+          console.log(`As string: "${userId.toString()}"`);
+          
+          // Try different queries to debug
+          const byString = await UploadedFile.find({ userId: userId.toString() }).limit(1);
+          console.log(`Files found with string userId: ${byString.length}`);
+          
+          const byObjectId = await UploadedFile.find({ userId: new Types.ObjectId(userId) }).limit(1);
+          console.log(`Files found with ObjectId userId: ${byObjectId.length}`);
         }
 
         if (userFiles.length > 0) {
@@ -268,8 +307,28 @@ router.post('/', optionalAuth, async (req: AuthenticatedRequest, res: Response):
     if (includeUploadedContent && user) {
       try {
         const userId = user._id || user.id;
+        let userObjectId;
+        
+        try {
+          if (typeof userId === 'string') {
+            const cleanUserId = userId.replace(/['"]/g, '').trim();
+            if (!Types.ObjectId.isValid(cleanUserId)) {
+              console.error(`Invalid ObjectId format for metadata: "${cleanUserId}"`);
+              throw new Error('Invalid user ID format');
+            }
+            userObjectId = new Types.ObjectId(cleanUserId);
+          } else if (userId instanceof Types.ObjectId) {
+            userObjectId = userId;
+          } else {
+            throw new Error(`Unexpected userId type: ${typeof userId}`);
+          }
+        } catch (conversionError) {
+          console.error(`Error converting userId to ObjectId for metadata:`, conversionError);
+          throw conversionError;
+        }
+        
         const userFiles = await UploadedFile.find({
-          userId: userId as Types.ObjectId,
+          userId: userObjectId,
           processingStatus: PROCESSING_STATUS.COMPLETED,
           extractedText: { $exists: true, $ne: null }
         });
@@ -372,8 +431,13 @@ router.post('/authenticated', authenticateToken, async (req: AuthenticatedReques
     const user = (req as any).user;
     const userId = user._id || user.id;
     
-    // Log usage analytics with real user
-    console.log(`Authenticated chat - User: ${userId}, Content: ${includeUploadedContent}, Type: ${interviewType}`);
+    // Enhanced debugging
+    console.log('\n=== AUTHENTICATED CHAT REQUEST DEBUG ===');
+    console.log(`User ID: ${userId}`);
+    console.log(`User Object:`, user);
+    console.log(`Include Uploaded Content: ${includeUploadedContent}`);
+    console.log(`Interview Type: ${interviewType}`);
+    console.log(`Voice Mode: ${voiceMode}`);
 
     // Process messages
     let enhancedMessages = [...messages];
@@ -387,11 +451,64 @@ router.post('/authenticated', authenticateToken, async (req: AuthenticatedReques
     if (includeUploadedContent) {
       try {
         // Get user's uploaded files
+        console.log(`\n=== FETCHING USER FILES ===`);
+        console.log(`Looking for files with userId: ${userId}`);
+        console.log(`UserId type: ${typeof userId}`);
+        console.log(`UserId value: "${userId}"`);
+        
+        // Ensure userId is properly formatted as ObjectId
+        let userObjectId;
+        try {
+          if (typeof userId === 'string') {
+            // Remove any quotes from the userId string
+            const cleanUserId = userId.replace(/['"]/g, '').trim();
+            console.log(`Cleaned userId: "${cleanUserId}"`);
+            
+            // Check if it's a valid ObjectId format
+            if (!Types.ObjectId.isValid(cleanUserId)) {
+              console.error(`Invalid ObjectId format: "${cleanUserId}"`);
+              console.log(`Files will not be found due to invalid user ID format`);
+              // Continue without uploaded content rather than failing
+              console.log('WARNING: Skipping content integration due to invalid user ID');
+              return;
+            }
+            
+            userObjectId = new Types.ObjectId(cleanUserId);
+          } else if (userId instanceof Types.ObjectId) {
+            userObjectId = userId;
+          } else {
+            console.error(`Unexpected userId type: ${typeof userId}`);
+            console.log('WARNING: Skipping content integration due to unexpected user ID type');
+            return;
+          }
+          console.log(`Converted userId: ${userObjectId} (type: ${typeof userObjectId})`);
+        } catch (error) {
+          console.error(`Error converting userId to ObjectId:`, error);
+          console.log('WARNING: Skipping content integration due to ObjectId conversion error');
+          return;
+        }
+        
         const userFiles = await UploadedFile.find({
-          userId: userId as Types.ObjectId,
+          userId: userObjectId,
           processingStatus: PROCESSING_STATUS.COMPLETED,
           extractedText: { $exists: true, $ne: null }
         }).sort({ uploadedAt: -1 });
+
+        console.log(`Found ${userFiles.length} files for user`);
+        
+        if (userFiles.length === 0) {
+          console.log(`\n=== DEBUG: NO FILES FOUND IN AUTHENTICATED ROUTE ===`);
+          const allFiles = await UploadedFile.find({}).limit(5);
+          console.log(`Total files in DB: ${allFiles.length}`);
+          allFiles.forEach(f => {
+            console.log(`  File: ${f.originalName}, userId: ${f.userId}, status: ${f.processingStatus}`);
+          });
+          console.log(`Current userId: ${userId} (type: ${typeof userId})`);
+        } else {
+          userFiles.forEach(file => {
+            console.log(`- File: ${file.originalName}, Text Length: ${file.extractedText?.length || 0}`);
+          });
+        }
 
         if (userFiles.length > 0) {
           // Get conversation context
@@ -421,8 +538,18 @@ router.post('/authenticated', authenticateToken, async (req: AuthenticatedReques
 
             // Enhance system message
             const systemMessageIndex = enhancedMessages.findIndex(m => m.role === 'system');
+            console.log(`\n=== CONTENT INTEGRATION ===`);
+            console.log(`System message index: ${systemMessageIndex}`);
+            console.log(`Content to add (first 500 chars): ${contentToAdd.substring(0, 500)}...`);
+            
             if (systemMessageIndex >= 0 && enhancedMessages[systemMessageIndex]) {
+              const originalLength = enhancedMessages[systemMessageIndex].content.length;
               enhancedMessages[systemMessageIndex].content += `\n\n## User's Background Information\n\nThe user has uploaded the following documents. Use this information to personalize the interview and ask relevant questions:\n\n${contentToAdd}\n\n**Instructions for using this content:**\n- Reference the user's background naturally in your questions\n- Ask follow-up questions about experiences mentioned in their documents\n- Don't reveal specific details unless the user mentions them first\n- Use phrases like "I see you have experience with..." or "Based on your background..."\n`;
+              
+              const newLength = enhancedMessages[systemMessageIndex].content.length;
+              console.log(`System message updated: ${originalLength} -> ${newLength} chars`);
+            } else {
+              console.log(`WARNING: Could not find system message to enhance!`);
             }
 
             // Collect metadata
@@ -438,6 +565,18 @@ router.post('/authenticated', authenticateToken, async (req: AuthenticatedReques
         }
       } catch (error) {
         console.error('Error integrating uploaded content:', error);
+      }
+    }
+
+    // Log final system message before sending to OpenAI
+    console.log('\n=== FINAL SYSTEM MESSAGE CHECK ===');
+    const finalSystemMsg = enhancedMessages.find(m => m.role === 'system');
+    if (finalSystemMsg) {
+      console.log(`System message length: ${finalSystemMsg.content.length}`);
+      console.log(`Contains "User's Background Information": ${finalSystemMsg.content.includes("User's Background Information")}`);
+      if (finalSystemMsg.content.includes("User's Background Information")) {
+        const bgIndex = finalSystemMsg.content.indexOf("User's Background Information");
+        console.log(`Background section preview: ${finalSystemMsg.content.substring(bgIndex, bgIndex + 500)}...`);
       }
     }
 
@@ -1058,6 +1197,81 @@ router.get('/voice-analytics', authenticateToken, async (req: AuthenticatedReque
       error: err.message || 'Failed to retrieve voice analytics',
       timestamp: new Date().toISOString()
     });
+  }
+});
+
+/**
+ * GET /api/chat/ratings/history - Get all AI ratings for the authenticated user
+ * 
+ * @route GET /api/chat/ratings/history
+ * @access Private (requires JWT authentication)
+ * @returns {Object} List of all AI ratings for the user
+ */
+router.get('/ratings/history', authenticateToken, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const user = (req as any).user;
+    const userId = user._id || user.id;
+    const { limit = 10, offset = 0 } = req.query;
+
+    // Find all rated transcripts for the user
+    const transcripts = await InterviewTranscript.find({
+      userId,
+      status: 'rated',
+      aiRating: { $exists: true }
+    })
+    .sort({ ratingGeneratedAt: -1 })
+    .limit(Number(limit))
+    .skip(Number(offset))
+    .select('aiRating ratingGeneratedAt interviewContext createdAt');
+
+    // Get total count for pagination
+    const totalCount = await InterviewTranscript.countDocuments({
+      userId,
+      status: 'rated',
+      aiRating: { $exists: true }
+    });
+
+    // Calculate statistics
+    const ratings = transcripts.map(t => t.aiRating?.overallRating || 0).filter(r => r > 0);
+    const avgRating = ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
+    
+    // Get latest rating for dashboard
+    const latestRating = transcripts.length > 0 ? transcripts[0] : null;
+
+    console.log(`Retrieved ${transcripts.length} AI ratings for user ${userId}`);
+
+    res.json({
+      success: true,
+      message: 'AI ratings history retrieved successfully',
+      data: {
+        ratings: transcripts.map(t => ({
+          id: t._id,
+          rating: t.aiRating,
+          generatedAt: t.ratingGeneratedAt,
+          interviewContext: t.interviewContext,
+          createdAt: t.createdAt
+        })),
+        statistics: {
+          totalRatings: totalCount,
+          averageRating: Math.round(avgRating * 10) / 10,
+          latestRating: latestRating ? {
+            rating: latestRating.aiRating,
+            generatedAt: latestRating.ratingGeneratedAt,
+            context: latestRating.interviewContext
+          } : null
+        },
+        pagination: {
+          limit: Number(limit),
+          offset: Number(offset),
+          total: totalCount,
+          hasMore: Number(offset) + Number(limit) < totalCount
+        }
+      }
+    });
+
+  } catch (err: any) {
+    console.error('Get ratings history error:', err);
+    res.status(500).json({ error: err.message || 'Failed to retrieve ratings history' });
   }
 });
 
