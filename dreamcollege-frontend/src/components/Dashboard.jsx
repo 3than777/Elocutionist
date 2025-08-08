@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { getAIRatingsHistory } from '../services/api';
+import { useTheme } from '../context/ThemeContext';
 
 // InterviewSkillsGraph component
-const InterviewSkillsGraph = () => {
+const InterviewSkillsGraph = ({ isDark }) => {
   // Hardcoded data for now
   const interviewData = [
     { interview: 1, contentRelevance: 45, communication: 50, confidence: 60, structure: 40, engagement: 65 },
@@ -11,6 +12,10 @@ const InterviewSkillsGraph = () => {
     { interview: 4, contentRelevance: 68, communication: 65, confidence: 70, structure: 62, engagement: 75 },
     { interview: 5, contentRelevance: 75, communication: 70, confidence: 78, structure: 68, engagement: 80 },
     { interview: 6, contentRelevance: 78, communication: 75, confidence: 82, structure: 72, engagement: 85 },
+    { interview: 7, contentRelevance: 80, communication: 77, confidence: 85, structure: 74, engagement: 87 },
+    { interview: 8, contentRelevance: 82, communication: 79, confidence: 86, structure: 76, engagement: 89 },
+    { interview: 9, contentRelevance: 84, communication: 81, confidence: 88, structure: 78, engagement: 90 },
+    { interview: 10, contentRelevance: 85, communication: 83, confidence: 89, structure: 80, engagement: 92 },
   ];
 
   const skills = [
@@ -22,9 +27,9 @@ const InterviewSkillsGraph = () => {
   ];
 
   // Chart dimensions
-  const width = 700;
+  const width = 750;
   const height = 300;
-  const margin = { top: 20, right: 160, bottom: 40, left: 50 };
+  const margin = { top: 20, right: 150, bottom: 60, left: 70 };
   const graphWidth = width - margin.left - margin.right;
   const graphHeight = height - margin.top - margin.bottom;
 
@@ -60,7 +65,7 @@ const InterviewSkillsGraph = () => {
                 y1={yScale(value)}
                 x2={graphWidth}
                 y2={yScale(value)}
-                stroke="#E5E7EB"
+                stroke={isDark ? "#404040" : "#E5E7EB"}
                 strokeDasharray="2,2"
               />
               <text
@@ -68,7 +73,7 @@ const InterviewSkillsGraph = () => {
                 y={yScale(value) + 4}
                 textAnchor="end"
                 fontSize="12"
-                fill="#6B7280"
+                fill={isDark ? "#a0a0a0" : "#6B7280"}
               >
                 {value}
               </text>
@@ -83,11 +88,36 @@ const InterviewSkillsGraph = () => {
               y={graphHeight + 25}
               textAnchor="middle"
               fontSize="12"
-              fill="#6B7280"
+              fill={isDark ? "#a0a0a0" : "#6B7280"}
             >
-              Interview {data.interview}
+              {data.interview}
             </text>
           ))}
+
+          {/* X-axis title */}
+          <text
+            x={graphWidth / 2}
+            y={graphHeight + 50}
+            textAnchor="middle"
+            fontSize="14"
+            fill={isDark ? "#e0e0e0" : "#374151"}
+            fontWeight="500"
+          >
+            Interview
+          </text>
+
+          {/* Y-axis title */}
+          <text
+            x={-35}
+            y={graphHeight / 2}
+            textAnchor="middle"
+            fontSize="14"
+            fill={isDark ? "#e0e0e0" : "#374151"}
+            fontWeight="500"
+            transform={`rotate(-90, -35, ${graphHeight / 2})`}
+          >
+            Score
+          </text>
 
           {/* Skill lines */}
           {skills.map((skill) => (
@@ -127,7 +157,7 @@ const InterviewSkillsGraph = () => {
                   x={25}
                   y={4}
                   fontSize="12"
-                  fill="#374151"
+                  fill={isDark ? "#e0e0e0" : "#374151"}
                 >
                   {skill.label}
                 </text>
@@ -141,7 +171,7 @@ const InterviewSkillsGraph = () => {
 };
 
 // SkillsDistributionPieChart component
-const SkillsDistributionPieChart = () => {
+const SkillsDistributionPieChart = ({ isDark }) => {
   // Hardcoded data for now - can be made dynamic later
   const skillsData = [
     { name: 'Content Relevance', percentage: 22, color: '#EF4444' },
@@ -208,7 +238,7 @@ const SkillsDistributionPieChart = () => {
               <path
                 d={createSlicePath(slice.startAngle, slice.endAngle)}
                 fill={slice.color}
-                stroke="white"
+                stroke={isDark ? "#2a2a2a" : "white"}
                 strokeWidth="2"
               />
               
@@ -243,7 +273,7 @@ const SkillsDistributionPieChart = () => {
             alignItems: 'center', 
             gap: '8px',
             fontSize: '12px',
-            color: '#374151'
+            color: isDark ? '#e0e0e0' : '#374151'
           }}>
             <div style={{
               width: '12px',
@@ -261,6 +291,7 @@ const SkillsDistributionPieChart = () => {
 };
 
 const Dashboard = ({ aiRating }) => {
+  const { isDark } = useTheme();
   const [ratingsHistory, setRatingsHistory] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [totalInterviews, setTotalInterviews] = useState(0);
@@ -332,7 +363,7 @@ const Dashboard = ({ aiRating }) => {
   return (
     <div style={{ 
       padding: '24px',
-      backgroundColor: 'var(--background-primary)',
+      backgroundColor: isDark ? '#1a1a1a' : 'var(--background-primary)',
       minHeight: 'calc(100vh - 48px)',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       flex: 1
@@ -340,23 +371,24 @@ const Dashboard = ({ aiRating }) => {
       {/* Top Stats Section */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 2fr',
+        gridTemplateColumns: '1fr 1fr 2fr',
         gap: '20px',
         marginBottom: '32px'
       }}>
         {/* Combined Stats Card */}
         <div style={{
-          backgroundColor: 'white',
+          backgroundColor: isDark ? '#2a2a2a' : 'white',
           borderRadius: '12px',
           padding: '32px',
           boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+          border: isDark ? '1px solid #404040' : 'none',
           position: 'relative',
           overflow: 'hidden'
         }}>
           <h3 style={{ 
             fontSize: '20px', 
             fontWeight: '600', 
-            color: '#1F2937', 
+            color: isDark ? '#ffffff' : '#1F2937', 
             marginBottom: '24px',
             margin: '0 0 24px 0'
           }}>
@@ -379,10 +411,10 @@ const Dashboard = ({ aiRating }) => {
                   <span style={{ fontSize: '20px' }}>⭐</span>
                 </div>
                 <div>
-                  <div style={{ fontSize: '28px', fontWeight: '700', color: '#1F2937', lineHeight: '1' }}>
+                  <div style={{ fontSize: '28px', fontWeight: '700', color: isDark ? '#ffffff' : '#1F2937', lineHeight: '1' }}>
                     N/A
                   </div>
-                  <div style={{ fontSize: '13px', color: '#6B7280' }}>Overall Rating</div>
+                  <div style={{ fontSize: '13px', color: isDark ? '#a0a0a0' : '#6B7280' }}>Overall Rating</div>
                 </div>
               </div>
             </div>
@@ -402,10 +434,10 @@ const Dashboard = ({ aiRating }) => {
                   <span style={{ fontSize: '20px' }}>🎤</span>
                 </div>
                 <div>
-                  <div style={{ fontSize: '28px', fontWeight: '700', color: '#1F2937', lineHeight: '1' }}>
+                  <div style={{ fontSize: '28px', fontWeight: '700', color: isDark ? '#ffffff' : '#1F2937', lineHeight: '1' }}>
                     {totalInterviews}
                   </div>
-                  <div style={{ fontSize: '13px', color: '#6B7280' }}>Total Interviews</div>
+                  <div style={{ fontSize: '13px', color: isDark ? '#a0a0a0' : '#6B7280' }}>Total Interviews</div>
                 </div>
               </div>
             </div>
@@ -425,10 +457,10 @@ const Dashboard = ({ aiRating }) => {
                   <span style={{ fontSize: '20px' }}>📊</span>
                 </div>
                 <div>
-                  <div style={{ fontSize: '28px', fontWeight: '700', color: '#1F2937', lineHeight: '1' }}>
+                  <div style={{ fontSize: '28px', fontWeight: '700', color: isDark ? '#ffffff' : '#1F2937', lineHeight: '1' }}>
                     N/A
                   </div>
-                  <div style={{ fontSize: '13px', color: '#6B7280' }}>Average Score</div>
+                  <div style={{ fontSize: '13px', color: isDark ? '#a0a0a0' : '#6B7280' }}>Average Score</div>
                 </div>
               </div>
             </div>
@@ -448,11 +480,192 @@ const Dashboard = ({ aiRating }) => {
                   <span style={{ fontSize: '20px' }}>🕐</span>
                 </div>
                 <div>
-                  <div style={{ fontSize: '28px', fontWeight: '700', color: '#1F2937', lineHeight: '1' }}>
+                  <div style={{ fontSize: '28px', fontWeight: '700', color: isDark ? '#ffffff' : '#1F2937', lineHeight: '1' }}>
                     N/A
                   </div>
-                  <div style={{ fontSize: '13px', color: '#6B7280' }}>Hours Spent</div>
+                  <div style={{ fontSize: '13px', color: isDark ? '#a0a0a0' : '#6B7280' }}>Hours Spent</div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Elocutionist Score Card */}
+        <div style={{
+          backgroundColor: isDark ? '#2a2a2a' : 'white',
+          borderRadius: '12px',
+          padding: '32px',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+          border: isDark ? '1px solid #404040' : 'none',
+          position: 'relative',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
+        }}>
+          <h3 style={{ 
+            fontSize: '20px', 
+            fontWeight: '600', 
+            color: isDark ? '#ffffff' : '#1F2937', 
+            marginBottom: '32px',
+            margin: '0 0 32px 0',
+            alignSelf: 'flex-start',
+            width: '100%'
+          }}>
+            Usage
+          </h3>
+          
+          {/* Three Circular Progress Bars */}
+          <div style={{ 
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '20px',
+            width: '100%',
+            marginTop: '-20px'
+          }}>
+            {/* Left Progress Circle - 62% */}
+            <div style={{ 
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
+            }}>
+              <div style={{ position: 'relative' }}>
+                <svg width="100" height="100" viewBox="0 0 100 100">
+                  {/* Background circle */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    fill="none"
+                    stroke={isDark ? "#404040" : "#E5E7EB"}
+                    strokeWidth="8"
+                  />
+                  
+                  {/* Progress circle */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    fill="none"
+                    stroke="#8B5CF6"
+                    strokeWidth="8"
+                    strokeDasharray={`${2 * Math.PI * 40 * 0.62} ${2 * Math.PI * 40 * 0.38}`}
+                    strokeDashoffset={2 * Math.PI * 40 * 0.25}
+                    transform="rotate(-90 50 50)"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                
+                {/* Percentage text */}
+                <div style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: '26px',
+                  fontWeight: '700',
+                  color: isDark ? '#ffffff' : '#1F2937'
+                }}>
+                  62%
+                </div>
+              </div>
+              
+              {/* Label text */}
+              <div style={{
+                marginTop: '8px',
+                textAlign: 'center',
+                fontSize: '14px',
+                color: isDark ? '#ffffff' : '#000000',
+                lineHeight: '1.3'
+              }}>
+                <div>Tokens</div>
+                <div>Remaining</div>
+              </div>
+            </div>
+
+            {/* Middle Progress Circle - 75% */}
+            <div style={{ position: 'relative' }}>
+              <svg width="100" height="100" viewBox="0 0 100 100">
+                {/* Background circle */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="none"
+                  stroke={isDark ? "#404040" : "#E5E7EB"}
+                  strokeWidth="8"
+                />
+                
+                {/* Progress circle */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="none"
+                  stroke="#8B5CF6"
+                  strokeWidth="8"
+                  strokeDasharray={`${2 * Math.PI * 40 * 0.75} ${2 * Math.PI * 40 * 0.25}`}
+                  strokeDashoffset={2 * Math.PI * 40 * 0.25}
+                  transform="rotate(-90 50 50)"
+                  strokeLinecap="round"
+                />
+              </svg>
+              
+              {/* Percentage text */}
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                fontSize: '26px',
+                fontWeight: '700',
+                color: isDark ? '#ffffff' : '#1F2937'
+              }}>
+                75%
+              </div>
+            </div>
+
+            {/* Right Progress Circle - 88% */}
+            <div style={{ position: 'relative' }}>
+              <svg width="100" height="100" viewBox="0 0 100 100">
+                {/* Background circle */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="none"
+                  stroke={isDark ? "#404040" : "#E5E7EB"}
+                  strokeWidth="8"
+                />
+                
+                {/* Progress circle */}
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="none"
+                  stroke="#8B5CF6"
+                  strokeWidth="8"
+                  strokeDasharray={`${2 * Math.PI * 40 * 0.88} ${2 * Math.PI * 40 * 0.12}`}
+                  strokeDashoffset={2 * Math.PI * 40 * 0.25}
+                  transform="rotate(-90 50 50)"
+                  strokeLinecap="round"
+                />
+              </svg>
+              
+              {/* Percentage text */}
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                fontSize: '26px',
+                fontWeight: '700',
+                color: isDark ? '#ffffff' : '#1F2937'
+              }}>
+                88%
               </div>
             </div>
           </div>
@@ -466,10 +679,11 @@ const Dashboard = ({ aiRating }) => {
       <div style={{ display: 'grid', gridTemplateColumns: '7fr 3fr', gap: '20px', marginBottom: '20px' }}>
         {/* Interview Skills Performance Chart */}
         <div style={{
-          backgroundColor: 'white',
+          backgroundColor: isDark ? '#2a2a2a' : 'white',
           borderRadius: '12px',
           padding: '24px',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+          border: isDark ? '1px solid #404040' : 'none'
         }}>
           <div style={{ 
             display: 'flex', 
@@ -477,53 +691,52 @@ const Dashboard = ({ aiRating }) => {
             alignItems: 'center',
             marginBottom: '24px'
           }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1F2937', margin: 0 }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937', margin: 0 }}>
               Interview Skills Performance
             </h3>
           </div>
           
           {/* Line Graph and Skill Bars */}
-          <div style={{ display: 'flex', gap: '60px', alignItems: 'flex-start' }}>
+          <div style={{ display: 'flex', gap: '30px', alignItems: 'center', justifyContent: 'flex-start' }}>
             {/* Graph */}
             <div style={{ flex: '1 1 auto' }}>
-              <InterviewSkillsGraph />
+              <InterviewSkillsGraph isDark={isDark} />
             </div>
             
             {/* Skill Bars */}
-            <div style={{ flex: '0 0 320px' }}>
-              <h4 style={{ fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '16px' }}>
+            <div style={{ flex: '0 0 300px', paddingRight: '40px', alignSelf: 'center', marginTop: '-25px' }}>
+              <h4 style={{ fontSize: '15px', fontWeight: '600', color: isDark ? '#e0e0e0' : '#374151', marginBottom: '16px' }}>
                 Most Recent Scores
               </h4>
               {[
-                { skill: 'Content Relevance', score: 68 },
-                { skill: 'Communication', score: 63 },
-                { skill: 'Confidence', score: 70 },
-                { skill: 'Structure', score: 58 },
-                { skill: 'Engagement', score: 75 }
+                { skill: 'Content Relevance', score: 68, color: '#F59E0B' },
+                { skill: 'Communication', score: 63, color: '#F59E0B' },
+                { skill: 'Confidence', score: 70, color: '#F59E0B' },
+                { skill: 'Structure', score: 58, color: '#EF4444' },
+                { skill: 'Engagement', score: 75, color: '#F59E0B' }
               ].map((item) => {
-                const scoreColor = getScoreColor(item.score);
                 return (
-                  <div key={item.skill} style={{ marginBottom: '16px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '13px', color: '#374151' }}>
+                  <div key={item.skill} style={{ marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '14px', color: isDark ? '#e0e0e0' : '#374151', fontWeight: '500' }}>
                         {item.skill}
                       </span>
-                      <span style={{ fontSize: '13px', color: scoreColor, fontWeight: '600' }}>
+                      <span style={{ fontSize: '14px', color: item.color, fontWeight: '600' }}>
                         {item.score}/100
                       </span>
                     </div>
                     <div style={{ 
                       width: '100%', 
-                      height: '6px', 
-                      backgroundColor: '#F3F4F6', 
-                      borderRadius: '3px',
+                      height: '8px', 
+                      backgroundColor: isDark ? '#404040' : '#F3F4F6', 
+                      borderRadius: '4px',
                       overflow: 'hidden'
                     }}>
                       <div style={{
                         width: `${item.score}%`,
                         height: '100%',
-                        backgroundColor: scoreColor,
-                        borderRadius: '3px',
+                        backgroundColor: item.color,
+                        borderRadius: '4px',
                         transition: 'width 0.5s ease'
                       }}></div>
                     </div>
@@ -536,15 +749,16 @@ const Dashboard = ({ aiRating }) => {
 
         {/* Skills Distribution Pie Chart */}
         <div style={{
-          backgroundColor: 'white',
+          backgroundColor: isDark ? '#2a2a2a' : 'white',
           borderRadius: '12px',
           padding: '24px',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+          border: isDark ? '1px solid #404040' : 'none'
         }}>
-          <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1F2937', marginBottom: '24px', margin: '0 0 24px 0' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937', marginBottom: '24px', margin: '0 0 24px 0' }}>
             Skills Distribution
           </h3>
-          <SkillsDistributionPieChart />
+          <SkillsDistributionPieChart isDark={isDark} />
         </div>
       </div>
 
@@ -552,12 +766,13 @@ const Dashboard = ({ aiRating }) => {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '20px' }}>
             {/* Strengths */}
             <div style={{
-              backgroundColor: 'white',
+              backgroundColor: isDark ? '#2a2a2a' : 'white',
               borderRadius: '12px',
               padding: '24px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              border: isDark ? '1px solid #404040' : 'none'
             }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1F2937', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937', marginBottom: '16px' }}>
                 Strengths
               </h3>
               {aiRating && aiRating.strengths && aiRating.strengths.length > 0 ? (
@@ -570,19 +785,19 @@ const Dashboard = ({ aiRating }) => {
                       marginBottom: '12px'
                     }}>
                       <span style={{ color: '#10B981', fontSize: '16px', marginTop: '-2px' }}>✓</span>
-                      <span style={{ fontSize: '14px', color: '#374151', lineHeight: '1.5' }}>
+                      <span style={{ fontSize: '14px', color: isDark ? '#e0e0e0' : '#374151', lineHeight: '1.5' }}>
                         {strength}
                       </span>
                     </div>
                   ))}
                   {aiRating.strengths.length > 3 && (
-                    <div style={{ fontSize: '13px', color: '#6B7280', marginTop: '8px' }}>
+                    <div style={{ fontSize: '13px', color: isDark ? '#a0a0a0' : '#6B7280', marginTop: '8px' }}>
                       +{aiRating.strengths.length - 3} more strengths
                     </div>
                   )}
                 </div>
               ) : (
-                <div style={{ fontSize: '14px', color: '#9CA3AF' }}>
+                <div style={{ fontSize: '14px', color: isDark ? '#808080' : '#9CA3AF' }}>
                   Complete an interview to see your strengths
                 </div>
               )}
@@ -590,12 +805,13 @@ const Dashboard = ({ aiRating }) => {
 
             {/* Areas for Improvement */}
             <div style={{
-              backgroundColor: 'white',
+              backgroundColor: isDark ? '#2a2a2a' : 'white',
               borderRadius: '12px',
               padding: '24px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              border: isDark ? '1px solid #404040' : 'none'
             }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1F2937', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937', marginBottom: '16px' }}>
                 Areas for Improvement
               </h3>
               {aiRating && aiRating.weaknesses && aiRating.weaknesses.length > 0 ? (
@@ -608,19 +824,19 @@ const Dashboard = ({ aiRating }) => {
                       marginBottom: '12px'
                     }}>
                       <span style={{ color: '#EF4444', fontSize: '16px', marginTop: '-2px' }}>•</span>
-                      <span style={{ fontSize: '14px', color: '#374151', lineHeight: '1.5' }}>
+                      <span style={{ fontSize: '14px', color: isDark ? '#e0e0e0' : '#374151', lineHeight: '1.5' }}>
                         {weakness}
                       </span>
                     </div>
                   ))}
                   {aiRating.weaknesses.length > 3 && (
-                    <div style={{ fontSize: '13px', color: '#6B7280', marginTop: '8px' }}>
+                    <div style={{ fontSize: '13px', color: isDark ? '#a0a0a0' : '#6B7280', marginTop: '8px' }}>
                       +{aiRating.weaknesses.length - 3} more areas
                     </div>
                   )}
                 </div>
               ) : (
-                <div style={{ fontSize: '14px', color: '#9CA3AF' }}>
+                <div style={{ fontSize: '14px', color: isDark ? '#808080' : '#9CA3AF' }}>
                   Complete an interview to see areas for improvement
                 </div>
               )}
@@ -628,12 +844,13 @@ const Dashboard = ({ aiRating }) => {
 
             {/* Top Recommendations */}
             <div style={{
-              backgroundColor: 'white',
+              backgroundColor: isDark ? '#2a2a2a' : 'white',
               borderRadius: '12px',
               padding: '24px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              border: isDark ? '1px solid #404040' : 'none'
             }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1F2937', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937', marginBottom: '16px' }}>
                 Top Recommendations
               </h3>
               {aiRating && aiRating.recommendations && aiRating.recommendations.length > 0 ? (
@@ -645,10 +862,10 @@ const Dashboard = ({ aiRating }) => {
                       <div key={index} style={{ 
                         marginBottom: '16px',
                         paddingBottom: '16px',
-                        borderBottom: index < 2 ? '1px solid #F3F4F6' : 'none'
+                        borderBottom: index < 2 ? `1px solid ${isDark ? '#404040' : '#F3F4F6'}` : 'none'
                       }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                          <span style={{ fontSize: '14px', fontWeight: '600', color: '#1F2937' }}>
+                          <span style={{ fontSize: '14px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937' }}>
                             {rec.area}
                           </span>
                           <span style={{ 
@@ -663,7 +880,7 @@ const Dashboard = ({ aiRating }) => {
                             {rec.priority}
                           </span>
                         </div>
-                        <p style={{ fontSize: '13px', color: '#6B7280', lineHeight: '1.5', margin: 0 }}>
+                        <p style={{ fontSize: '13px', color: isDark ? '#a0a0a0' : '#6B7280', lineHeight: '1.5', margin: 0 }}>
                           {rec.suggestion}
                         </p>
                       </div>
@@ -671,7 +888,7 @@ const Dashboard = ({ aiRating }) => {
                   })}
                 </div>
               ) : (
-                <div style={{ fontSize: '14px', color: '#9CA3AF' }}>
+                <div style={{ fontSize: '14px', color: isDark ? '#808080' : '#9CA3AF' }}>
                   Complete an interview to get personalized recommendations
                 </div>
               )}
