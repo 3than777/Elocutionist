@@ -44,5 +44,8 @@ export { default as chatRoutes } from './chat.routes';
 // Upload routes exports
 export { default as uploadRoutes } from './upload.routes';
 
+// Avatar routes exports
+export { default as avatarRoutes } from './avatar.routes';
+
 // Future route exports will be added here as they are implemented:
 // export { default as feedbackRoutes } from './feedback.routes'; 

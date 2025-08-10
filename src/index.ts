@@ -29,7 +29,7 @@ import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDB, disconnectDB } from './config/database';
-import { authRoutes, interviewRoutes, sessionRoutes, chatRoutes, uploadRoutes } from './routes';
+import { authRoutes, interviewRoutes, sessionRoutes, chatRoutes, uploadRoutes, avatarRoutes } from './routes';
 import { errorHandler, notFoundHandler } from './middleware';
 
 // Load environment variables from .env file
@@ -83,6 +83,7 @@ function createApp(): Application {
   app.use('/api/sessions', sessionRoutes);
   app.use('/api/chat', chatRoutes);
   app.use('/api/uploads', uploadRoutes);
+  app.use('/api/avatar', avatarRoutes);
 
   // 404 handler for undefined routes (must be before error handler)
   app.use(notFoundHandler);

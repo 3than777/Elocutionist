@@ -380,8 +380,8 @@ const Dashboard = ({ aiRating }) => {
           backgroundColor: isDark ? '#2a2a2a' : 'white',
           borderRadius: '12px',
           padding: '32px',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-          border: isDark ? '1px solid #404040' : 'none',
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          border: isDark ? '2px solid #505050' : '2px solid #E5E7EB',
           position: 'relative',
           overflow: 'hidden'
         }}>
@@ -495,8 +495,8 @@ const Dashboard = ({ aiRating }) => {
           backgroundColor: isDark ? '#2a2a2a' : 'white',
           borderRadius: '12px',
           padding: '32px',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-          border: isDark ? '1px solid #404040' : 'none',
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          border: isDark ? '2px solid #505050' : '2px solid #E5E7EB',
           position: 'relative',
           overflow: 'hidden',
           display: 'flex',
@@ -519,7 +519,7 @@ const Dashboard = ({ aiRating }) => {
           <div style={{ 
             display: 'flex',
             justifyContent: 'center',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             gap: '20px',
             width: '100%',
             marginTop: '-20px'
@@ -539,7 +539,7 @@ const Dashboard = ({ aiRating }) => {
                     cy="50"
                     r="40"
                     fill="none"
-                    stroke={isDark ? "#404040" : "#E5E7EB"}
+                    stroke={isDark ? "#505050" : "#D1D5DB"}
                     strokeWidth="8"
                   />
                   
@@ -586,86 +586,124 @@ const Dashboard = ({ aiRating }) => {
             </div>
 
             {/* Middle Progress Circle - 75% */}
-            <div style={{ position: 'relative' }}>
-              <svg width="100" height="100" viewBox="0 0 100 100">
-                {/* Background circle */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  fill="none"
-                  stroke={isDark ? "#404040" : "#E5E7EB"}
-                  strokeWidth="8"
-                />
+            <div style={{ 
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
+            }}>
+              <div style={{ position: 'relative' }}>
+                <svg width="100" height="100" viewBox="0 0 100 100">
+                  {/* Background circle */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    fill="none"
+                    stroke={isDark ? "#404040" : "#E5E7EB"}
+                    strokeWidth="8"
+                  />
+                  
+                  {/* Progress circle */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    fill="none"
+                    stroke="#8B5CF6"
+                    strokeWidth="8"
+                    strokeDasharray={`${2 * Math.PI * 40 * 0.75} ${2 * Math.PI * 40 * 0.25}`}
+                    strokeDashoffset={2 * Math.PI * 40 * 0.25}
+                    transform="rotate(-90 50 50)"
+                    strokeLinecap="round"
+                  />
+                </svg>
                 
-                {/* Progress circle */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  fill="none"
-                  stroke="#8B5CF6"
-                  strokeWidth="8"
-                  strokeDasharray={`${2 * Math.PI * 40 * 0.75} ${2 * Math.PI * 40 * 0.25}`}
-                  strokeDashoffset={2 * Math.PI * 40 * 0.25}
-                  transform="rotate(-90 50 50)"
-                  strokeLinecap="round"
-                />
-              </svg>
+                {/* Percentage text */}
+                <div style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: '26px',
+                  fontWeight: '700',
+                  color: isDark ? '#ffffff' : '#1F2937'
+                }}>
+                  75%
+                </div>
+              </div>
               
-              {/* Percentage text */}
+              {/* Label text */}
               <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                fontSize: '26px',
-                fontWeight: '700',
-                color: isDark ? '#ffffff' : '#1F2937'
+                marginTop: '8px',
+                textAlign: 'center',
+                fontSize: '14px',
+                color: isDark ? '#ffffff' : '#000000',
+                lineHeight: '1.3'
               }}>
-                75%
+                <div>Dynamic Hints</div>
+                <div>Remaining</div>
               </div>
             </div>
 
             {/* Right Progress Circle - 88% */}
-            <div style={{ position: 'relative' }}>
-              <svg width="100" height="100" viewBox="0 0 100 100">
-                {/* Background circle */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  fill="none"
-                  stroke={isDark ? "#404040" : "#E5E7EB"}
-                  strokeWidth="8"
-                />
+            <div style={{ 
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
+            }}>
+              <div style={{ position: 'relative' }}>
+                <svg width="100" height="100" viewBox="0 0 100 100">
+                  {/* Background circle */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    fill="none"
+                    stroke={isDark ? "#404040" : "#E5E7EB"}
+                    strokeWidth="8"
+                  />
+                  
+                  {/* Progress circle */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    fill="none"
+                    stroke="#8B5CF6"
+                    strokeWidth="8"
+                    strokeDasharray={`${2 * Math.PI * 40 * 0.88} ${2 * Math.PI * 40 * 0.12}`}
+                    strokeDashoffset={2 * Math.PI * 40 * 0.25}
+                    transform="rotate(-90 50 50)"
+                    strokeLinecap="round"
+                  />
+                </svg>
                 
-                {/* Progress circle */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="40"
-                  fill="none"
-                  stroke="#8B5CF6"
-                  strokeWidth="8"
-                  strokeDasharray={`${2 * Math.PI * 40 * 0.88} ${2 * Math.PI * 40 * 0.12}`}
-                  strokeDashoffset={2 * Math.PI * 40 * 0.25}
-                  transform="rotate(-90 50 50)"
-                  strokeLinecap="round"
-                />
-              </svg>
+                {/* Percentage text */}
+                <div style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: '26px',
+                  fontWeight: '700',
+                  color: isDark ? '#ffffff' : '#1F2937'
+                }}>
+                  88%
+                </div>
+              </div>
               
-              {/* Percentage text */}
+              {/* Label text */}
               <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                fontSize: '26px',
-                fontWeight: '700',
-                color: isDark ? '#ffffff' : '#1F2937'
+                marginTop: '8px',
+                textAlign: 'center',
+                fontSize: '14px',
+                color: isDark ? '#ffffff' : '#000000',
+                lineHeight: '1.3'
               }}>
-                88%
+                <div>Comprehensive Reviews</div>
+                <div>Remaining</div>
               </div>
             </div>
           </div>
@@ -682,8 +720,8 @@ const Dashboard = ({ aiRating }) => {
           backgroundColor: isDark ? '#2a2a2a' : 'white',
           borderRadius: '12px',
           padding: '24px',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-          border: isDark ? '1px solid #404040' : 'none'
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          border: isDark ? '2px solid #505050' : '2px solid #E5E7EB'
         }}>
           <div style={{ 
             display: 'flex', 
@@ -728,7 +766,7 @@ const Dashboard = ({ aiRating }) => {
                     <div style={{ 
                       width: '100%', 
                       height: '8px', 
-                      backgroundColor: isDark ? '#404040' : '#F3F4F6', 
+                      backgroundColor: isDark ? '#505050' : '#E5E7EB', 
                       borderRadius: '4px',
                       overflow: 'hidden'
                     }}>
@@ -752,8 +790,8 @@ const Dashboard = ({ aiRating }) => {
           backgroundColor: isDark ? '#2a2a2a' : 'white',
           borderRadius: '12px',
           padding: '24px',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-          border: isDark ? '1px solid #404040' : 'none'
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          border: isDark ? '2px solid #505050' : '2px solid #E5E7EB'
         }}>
           <h3 style={{ fontSize: '18px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937', marginBottom: '24px', margin: '0 0 24px 0' }}>
             Skills Distribution
@@ -769,8 +807,8 @@ const Dashboard = ({ aiRating }) => {
               backgroundColor: isDark ? '#2a2a2a' : 'white',
               borderRadius: '12px',
               padding: '24px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-              border: isDark ? '1px solid #404040' : 'none'
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+              border: isDark ? '2px solid #505050' : '2px solid #E5E7EB'
             }}>
               <h3 style={{ fontSize: '16px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937', marginBottom: '16px' }}>
                 Strengths
@@ -808,8 +846,8 @@ const Dashboard = ({ aiRating }) => {
               backgroundColor: isDark ? '#2a2a2a' : 'white',
               borderRadius: '12px',
               padding: '24px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-              border: isDark ? '1px solid #404040' : 'none'
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+              border: isDark ? '2px solid #505050' : '2px solid #E5E7EB'
             }}>
               <h3 style={{ fontSize: '16px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937', marginBottom: '16px' }}>
                 Areas for Improvement
@@ -847,8 +885,8 @@ const Dashboard = ({ aiRating }) => {
               backgroundColor: isDark ? '#2a2a2a' : 'white',
               borderRadius: '12px',
               padding: '24px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-              border: isDark ? '1px solid #404040' : 'none'
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+              border: isDark ? '2px solid #505050' : '2px solid #E5E7EB'
             }}>
               <h3 style={{ fontSize: '16px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937', marginBottom: '16px' }}>
                 Top Recommendations
@@ -862,7 +900,7 @@ const Dashboard = ({ aiRating }) => {
                       <div key={index} style={{ 
                         marginBottom: '16px',
                         paddingBottom: '16px',
-                        borderBottom: index < 2 ? `1px solid ${isDark ? '#404040' : '#F3F4F6'}` : 'none'
+                        borderBottom: index < 2 ? `2px solid ${isDark ? '#505050' : '#E5E7EB'}` : 'none'
                       }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                           <span style={{ fontSize: '14px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937' }}>

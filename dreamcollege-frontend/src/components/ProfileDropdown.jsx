@@ -171,15 +171,16 @@ const ProfileDropdown = ({ user, onSignOut }) => {
       >
         {/* Avatar */}
         <div
+          className="profile-avatar"
           style={{
             width: '28px',
             height: '28px',
             borderRadius: '50%',
-            backgroundColor: avatarColor,
+            backgroundColor: '#6366f1',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: 'white',
+            color: '#ffffff',
             fontSize: '12px',
             fontWeight: '600'
           }}
@@ -241,15 +242,16 @@ const ProfileDropdown = ({ user, onSignOut }) => {
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <div
+                className="profile-avatar-large"
                 style={{
                   width: '48px',
                   height: '48px',
                   borderRadius: '50%',
-                  backgroundColor: avatarColor,
+                  backgroundColor: '#6366f1',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: 'white',
+                  color: '#ffffff',
                   fontSize: '18px',
                   fontWeight: '600'
                 }}

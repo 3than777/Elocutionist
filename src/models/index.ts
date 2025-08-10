@@ -75,4 +75,8 @@ export {
   type FileType,
   PROCESSING_STATUS,
   FILE_TYPES
-} from './UploadedFile'; 
+} from './UploadedFile';
+export {
+  default as AvatarPreference,
+  type IAvatarPreference
+} from './AvatarPreference'; 

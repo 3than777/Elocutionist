@@ -1133,3 +1133,19 @@ body {
     transform: rotate(360deg);
   }
 }
+
+/* Profile Avatar Styles - Static purple background */
+.profile-avatar,
+.profile-avatar-large {
+  background-color: #6366f1 !important;
+  color: #ffffff !important;
+}
+
+/* Ensure the avatar styles are not overridden by theme */
+[data-theme="dark"] .profile-avatar,
+[data-theme="dark"] .profile-avatar-large,
+[data-theme="light"] .profile-avatar,
+[data-theme="light"] .profile-avatar-large {
+  background-color: #6366f1 !important;
+  color: #ffffff !important;
+}

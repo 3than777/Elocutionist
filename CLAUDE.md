@@ -1333,3 +1333,77 @@ const processOrder = (order: Order) => {
 ## Summary
 
 The key is to write clean, testable, functional code that evolves through small, safe increments. Every change should be driven by a test that describes the desired behavior, and the implementation should be the simplest thing that makes that test pass. When in doubt, favor simplicity and readability over cleverness.
+
+## Project-Specific Learnings
+
+### Avatar System Implementation (Phase 1)
+
+When implementing the 3D avatar system:
+
+1. **Dependency Installation**: Use `--legacy-peer-deps` flag when installing Three.js related packages due to peer dependency conflicts between different versions.
+
+2. **Mock Considerations for Backend Routes**:
+   - When testing routes that use authentication middleware, ensure both the middleware and models are properly mocked
+   - Export both default and named exports in mocks when the actual module uses default exports
+   - Mock user objects must match the exact structure expected by the middleware (e.g., `_id` as ObjectId, not string)
+
+3. **ESLint Configuration for Test Files**:
+   - With flat ESLint config, test files need separate configuration to include Jest globals
+   - Add a separate configuration block for test files with `globals.jest` included
+
+4. **Backend Route Testing Pattern**:
+   ```typescript
+   // Mock middleware first
+   jest.mock('../middleware', () => ({
+     authenticateToken: jest.fn((req, res, next) => {
+       req.user = { _id: new mongoose.Types.ObjectId(), email: 'test@example.com' };
+       next();
+     })
+   }));
+   
+   // Then mock models with both default and named exports
+   jest.mock('../models/Model', () => ({
+     default: { /* model methods */ },
+     /* duplicate methods for named imports */
+   }));
+   ```
+
+5. **Avatar Service Architecture**:
+   - Use service layer pattern for 3D asset management
+   - Implement caching at the service level to avoid reloading assets
+   - GLTFLoader requires explicit VRM plugin registration for avatar support
+
+### Avatar Component Development (Phase 2)
+
+When implementing 3D avatar components with React Three Fiber:
+
+1. **Component Architecture**:
+   - Separate concerns: AvatarMode (container), AvatarRenderer (3D model), AvatarControls (UI), InterviewStage (environment)
+   - Use controller classes for animation logic (LipSync, Gesture, Emotion)
+   - Keep 3D logic separate from React component logic
+
+2. **Testing 3D Components**:
+   - Mock @react-three/fiber and drei components as simple div elements
+   - When mocking components that use React hooks, require React within the mock scope
+   - Test behavior and props, not 3D rendering specifics
+   - Use data-testid attributes for easier test selection
+
+3. **React Three Fiber Gotchas**:
+   - Use lowercase for Three.js primitive elements in JSX (e.g., `<ambientLight />` not `<AmbientLight />`)
+   - Group refs in React Three Fiber may not have standard DOM methods
+   - Check for method existence before calling (e.g., `avatarRef.current.add`)
+
+4. **Styling Considerations**:
+   - styled-jsx requires separate installation in React projects
+   - For simple animations, use standard style tags or CSS modules
+   - React Three Fiber Canvas requires absolute positioning container
+
+5. **Performance Optimizations**:
+   - Implement quality settings (high/medium/low) to support various devices
+   - Use conditional rendering for expensive features based on quality setting
+   - Throttle animation updates in lower quality modes
+
+6. **Hook Dependencies**:
+   - Avoid external dependencies in useEffect by defining async functions inside
+   - For cleanup functions, be careful with ref values that may change
+   - Use callback pattern for complex effects to avoid dependency warnings

@@ -47,6 +47,7 @@
     "openai": "^5.10.1",
     "pdf-parse": "^1.1.1",
     "sharp": "^0.34.3",
+    "styled-jsx": "^5.1.7",
     "tesseract.js": "^6.0.1"
   }
 }
