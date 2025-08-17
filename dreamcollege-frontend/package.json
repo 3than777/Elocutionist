@@ -13,25 +13,14 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@pixiv/three-vrm": "^3.4.2",
-    "@react-spring/three": "^10.0.1",
-    "@react-three/drei": "^10.6.1",
-    "@react-three/fiber": "^9.3.0",
-    "@readyplayerme/react-avatar-creator": "^0.5.0",
-    "@readyplayerme/visage": "^6.16.0",
-    "@use-gesture/react": "^10.3.1",
     "file-type": "^21.0.0",
-    "leva": "^0.10.0",
-    "meyda": "^5.6.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-dropzone": "^14.3.8",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.8.0",
     "react-spring": "^10.0.1",
-    "stats.js": "^0.17.0",
-    "styled-jsx": "^5.1.7",
-    "three": "^0.179.1"
+    "styled-jsx": "^5.1.7"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.23.3",

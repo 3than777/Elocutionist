@@ -6,6 +6,7 @@ import AuthModal from './components/AuthModal';
 import ProfileDropdown from './components/ProfileDropdown';
 import HeaderDropdown from './components/HeaderDropdown';
 import Dashboard from './components/Dashboard';
+import AboutElocutionist from './components/AboutElocutionist';
 import { UploadProvider } from './context/UploadContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { getAIRatingsHistory } from './services/api';
@@ -186,6 +187,11 @@ function AppContent() {
           <HeaderDropdown 
             label="Resources" 
             items={['About Elocutionist', 'Media Hub']} 
+            onItemClick={(item) => {
+              if (item === 'About Elocutionist') {
+                navigate('/about-elocutionist');
+              }
+            }}
           />
           
           <button style={{
@@ -320,6 +326,12 @@ function AppContent() {
             <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
               <HeaderComponent />
               <Dashboard aiRating={aiRating || latestRatingFromDB} />
+            </div>
+          } />
+          <Route path="/about-elocutionist" element={
+            <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+              <HeaderComponent />
+              <AboutElocutionist />
             </div>
           } />
         </Routes>

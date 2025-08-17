@@ -297,6 +297,7 @@ const Dashboard = ({ aiRating }) => {
   const [totalInterviews, setTotalInterviews] = useState(0);
   const [avgScore, setAvgScore] = useState(0);
   const [practiceSessions, setPracticeSessions] = useState(0);
+  const [showBetaNotification, setShowBetaNotification] = useState(true);
   
   // Fetch ratings history on component mount
   useEffect(() => {
@@ -368,6 +369,104 @@ const Dashboard = ({ aiRating }) => {
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       flex: 1
     }}>
+      {/* Beta Notification Popup */}
+      {showBetaNotification && (
+        <>
+          {/* Backdrop */}
+          <div 
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              zIndex: 999,
+              cursor: 'pointer'
+            }} 
+            onClick={() => setShowBetaNotification(false)} 
+          />
+          
+          {/* Popup */}
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            backgroundColor: isDark ? '#2a2a2a' : '#ffffff',
+            border: `2px solid ${isDark ? '#505050' : '#E5E7EB'}`,
+            borderRadius: '16px',
+            padding: '32px',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            zIndex: 1000,
+            maxWidth: '420px',
+            width: '90%'
+          }}>
+            {/* Close button */}
+            <button
+              onClick={() => setShowBetaNotification(false)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'transparent',
+                border: 'none',
+                fontSize: '24px',
+                cursor: 'pointer',
+                color: isDark ? '#b0b0b0' : '#6B7280',
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '8px',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
+                e.target.style.color = isDark ? '#ffffff' : '#1F2937';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'transparent';
+                e.target.style.color = isDark ? '#b0b0b0' : '#6B7280';
+              }}
+            >
+              ×
+            </button>
+            
+            {/* Content */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+              <div style={{ 
+                fontSize: '32px',
+                flexShrink: 0,
+                marginTop: '-4px'
+              }}>
+                🚧
+              </div>
+              <div>
+                <h3 style={{
+                  margin: '0 0 12px 0',
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  color: isDark ? '#ffffff' : '#1F2937',
+                  letterSpacing: '-0.025em'
+                }}>
+                  Dashboard Beta
+                </h3>
+                <p style={{
+                  margin: 0,
+                  fontSize: '14px',
+                  lineHeight: '1.6',
+                  color: isDark ? '#b0b0b0' : '#6B7280'
+                }}>
+                  This feature is currently in beta. Some features might not work, or may contain placeholder/hardcoded data while we continue development.
+                </p>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+      
       {/* Top Stats Section */}
       <div style={{
         display: 'grid',
