@@ -298,6 +298,7 @@ const Dashboard = ({ aiRating }) => {
   const [avgScore, setAvgScore] = useState(0);
   const [practiceSessions, setPracticeSessions] = useState(0);
   const [showBetaNotification, setShowBetaNotification] = useState(true);
+  const [isHistoryExpanded, setIsHistoryExpanded] = useState(false);
   
   // Fetch ratings history on component mount
   useEffect(() => {
@@ -364,7 +365,9 @@ const Dashboard = ({ aiRating }) => {
   return (
     <div style={{ 
       padding: '24px',
-      backgroundColor: isDark ? '#1a1a1a' : 'var(--background-primary)',
+      background: isDark 
+        ? 'linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #16213e 100%)' 
+        : 'var(--background-primary)',
       minHeight: 'calc(100vh - 48px)',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       flex: 1
@@ -393,8 +396,10 @@ const Dashboard = ({ aiRating }) => {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            backgroundColor: isDark ? '#2a2a2a' : '#ffffff',
-            border: `2px solid ${isDark ? '#505050' : '#E5E7EB'}`,
+            backgroundColor: isDark ? 'rgba(30, 30, 30, 0.9)' : '#ffffff',
+            backdropFilter: isDark ? 'blur(20px)' : 'none',
+            WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
+            border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '2px solid #E5E7EB',
             borderRadius: '16px',
             padding: '32px',
             boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
@@ -455,7 +460,7 @@ const Dashboard = ({ aiRating }) => {
                 </h3>
                 <p style={{
                   margin: 0,
-                  fontSize: '14px',
+                  fontSize: '12px',
                   lineHeight: '1.6',
                   color: isDark ? '#b0b0b0' : '#6B7280'
                 }}>
@@ -476,13 +481,16 @@ const Dashboard = ({ aiRating }) => {
       }}>
         {/* Combined Stats Card */}
         <div style={{
-          backgroundColor: isDark ? '#2a2a2a' : 'white',
+          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'white',
+          backdropFilter: isDark ? 'blur(20px)' : 'none',
+          WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
           borderRadius: '12px',
           padding: '32px',
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-          border: isDark ? '2px solid #505050' : '2px solid #E5E7EB',
+          boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+          border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '2px solid #E5E7EB',
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          height: '180px'
         }}>
           <h3 style={{ 
             fontSize: '20px', 
@@ -591,16 +599,19 @@ const Dashboard = ({ aiRating }) => {
 
         {/* Elocutionist Score Card */}
         <div style={{
-          backgroundColor: isDark ? '#2a2a2a' : 'white',
+          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'white',
+          backdropFilter: isDark ? 'blur(20px)' : 'none',
+          WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
           borderRadius: '12px',
           padding: '32px',
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-          border: isDark ? '2px solid #505050' : '2px solid #E5E7EB',
+          boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+          border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '2px solid #E5E7EB',
           position: 'relative',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center'
+          alignItems: 'center',
+          height: '180px'
         }}>
           <h3 style={{ 
             fontSize: '20px', 
@@ -621,7 +632,7 @@ const Dashboard = ({ aiRating }) => {
             alignItems: 'flex-start',
             gap: '20px',
             width: '100%',
-            marginTop: '-20px'
+            marginTop: '-10px'
           }}>
             {/* Left Progress Circle - 62% */}
             <div style={{ 
@@ -631,12 +642,12 @@ const Dashboard = ({ aiRating }) => {
               alignItems: 'center'
             }}>
               <div style={{ position: 'relative' }}>
-                <svg width="100" height="100" viewBox="0 0 100 100">
+                <svg width="80" height="80" viewBox="0 0 80 80">
                   {/* Background circle */}
                   <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
+                    cx="40"
+                    cy="40"
+                    r="32"
                     fill="none"
                     stroke={isDark ? "#505050" : "#D1D5DB"}
                     strokeWidth="8"
@@ -644,15 +655,15 @@ const Dashboard = ({ aiRating }) => {
                   
                   {/* Progress circle */}
                   <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
+                    cx="40"
+                    cy="40"
+                    r="32"
                     fill="none"
                     stroke="#8B5CF6"
                     strokeWidth="8"
-                    strokeDasharray={`${2 * Math.PI * 40 * 0.62} ${2 * Math.PI * 40 * 0.38}`}
-                    strokeDashoffset={2 * Math.PI * 40 * 0.25}
-                    transform="rotate(-90 50 50)"
+                    strokeDasharray={`${2 * Math.PI * 32 * 0.62} ${2 * Math.PI * 32 * 0.38}`}
+                    strokeDashoffset={2 * Math.PI * 32 * 0.25}
+                    transform="rotate(-90 40 40)"
                     strokeLinecap="round"
                   />
                 </svg>
@@ -663,7 +674,7 @@ const Dashboard = ({ aiRating }) => {
                   top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
-                  fontSize: '26px',
+                  fontSize: '22px',
                   fontWeight: '700',
                   color: isDark ? '#ffffff' : '#1F2937'
                 }}>
@@ -675,7 +686,7 @@ const Dashboard = ({ aiRating }) => {
               <div style={{
                 marginTop: '8px',
                 textAlign: 'center',
-                fontSize: '14px',
+                fontSize: '12px',
                 color: isDark ? '#ffffff' : '#000000',
                 lineHeight: '1.3'
               }}>
@@ -692,12 +703,12 @@ const Dashboard = ({ aiRating }) => {
               alignItems: 'center'
             }}>
               <div style={{ position: 'relative' }}>
-                <svg width="100" height="100" viewBox="0 0 100 100">
+                <svg width="80" height="80" viewBox="0 0 80 80">
                   {/* Background circle */}
                   <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
+                    cx="40"
+                    cy="40"
+                    r="32"
                     fill="none"
                     stroke={isDark ? "#404040" : "#E5E7EB"}
                     strokeWidth="8"
@@ -705,15 +716,15 @@ const Dashboard = ({ aiRating }) => {
                   
                   {/* Progress circle */}
                   <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
+                    cx="40"
+                    cy="40"
+                    r="32"
                     fill="none"
                     stroke="#8B5CF6"
                     strokeWidth="8"
-                    strokeDasharray={`${2 * Math.PI * 40 * 0.75} ${2 * Math.PI * 40 * 0.25}`}
-                    strokeDashoffset={2 * Math.PI * 40 * 0.25}
-                    transform="rotate(-90 50 50)"
+                    strokeDasharray={`${2 * Math.PI * 32 * 0.75} ${2 * Math.PI * 32 * 0.25}`}
+                    strokeDashoffset={2 * Math.PI * 32 * 0.25}
+                    transform="rotate(-90 40 40)"
                     strokeLinecap="round"
                   />
                 </svg>
@@ -724,7 +735,7 @@ const Dashboard = ({ aiRating }) => {
                   top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
-                  fontSize: '26px',
+                  fontSize: '22px',
                   fontWeight: '700',
                   color: isDark ? '#ffffff' : '#1F2937'
                 }}>
@@ -736,7 +747,7 @@ const Dashboard = ({ aiRating }) => {
               <div style={{
                 marginTop: '8px',
                 textAlign: 'center',
-                fontSize: '14px',
+                fontSize: '12px',
                 color: isDark ? '#ffffff' : '#000000',
                 lineHeight: '1.3'
               }}>
@@ -753,12 +764,12 @@ const Dashboard = ({ aiRating }) => {
               alignItems: 'center'
             }}>
               <div style={{ position: 'relative' }}>
-                <svg width="100" height="100" viewBox="0 0 100 100">
+                <svg width="80" height="80" viewBox="0 0 80 80">
                   {/* Background circle */}
                   <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
+                    cx="40"
+                    cy="40"
+                    r="32"
                     fill="none"
                     stroke={isDark ? "#404040" : "#E5E7EB"}
                     strokeWidth="8"
@@ -766,15 +777,15 @@ const Dashboard = ({ aiRating }) => {
                   
                   {/* Progress circle */}
                   <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
+                    cx="40"
+                    cy="40"
+                    r="32"
                     fill="none"
                     stroke="#8B5CF6"
                     strokeWidth="8"
-                    strokeDasharray={`${2 * Math.PI * 40 * 0.88} ${2 * Math.PI * 40 * 0.12}`}
-                    strokeDashoffset={2 * Math.PI * 40 * 0.25}
-                    transform="rotate(-90 50 50)"
+                    strokeDasharray={`${2 * Math.PI * 32 * 0.88} ${2 * Math.PI * 32 * 0.12}`}
+                    strokeDashoffset={2 * Math.PI * 32 * 0.25}
+                    transform="rotate(-90 40 40)"
                     strokeLinecap="round"
                   />
                 </svg>
@@ -785,7 +796,7 @@ const Dashboard = ({ aiRating }) => {
                   top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
-                  fontSize: '26px',
+                  fontSize: '22px',
                   fontWeight: '700',
                   color: isDark ? '#ffffff' : '#1F2937'
                 }}>
@@ -797,7 +808,7 @@ const Dashboard = ({ aiRating }) => {
               <div style={{
                 marginTop: '8px',
                 textAlign: 'center',
-                fontSize: '14px',
+                fontSize: '12px',
                 color: isDark ? '#ffffff' : '#000000',
                 lineHeight: '1.3'
               }}>
@@ -808,19 +819,273 @@ const Dashboard = ({ aiRating }) => {
           </div>
         </div>
 
-        {/* Empty space for future content */}
-        <div></div>
+        {/* History Section */}
+        <div style={{
+          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'white',
+          backdropFilter: isDark ? 'blur(20px)' : 'none',
+          WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
+          borderRadius: '12px',
+          padding: '32px',
+          boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+          border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '2px solid #E5E7EB',
+          position: 'relative',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          height: isHistoryExpanded ? '400px' : '180px',
+          transition: 'height 0.3s ease'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '24px'
+          }}>
+            <h3 style={{ 
+              fontSize: '20px', 
+              fontWeight: '600', 
+              color: isDark ? '#ffffff' : '#1F2937', 
+              margin: '0'
+            }}>
+              Recent Interviews
+            </h3>
+            <button
+              style={{
+                fontSize: '12px',
+                fontWeight: '500',
+                color: '#8B5CF6',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                transition: 'background 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = isDark ? 'rgba(139, 92, 246, 0.1)' : 'rgba(139, 92, 246, 0.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'transparent';
+              }}
+              onClick={() => {
+                // TODO: Navigate to full history page
+                console.log('Navigate to full history');
+              }}
+            >
+              See All History
+            </button>
+          </div>
+          
+          {/* Scrollable container for interview history */}
+          <div style={{
+            overflowY: 'auto',
+            paddingRight: '8px',
+            flex: 1
+          }}>
+            {/* Hardcoded interview history items */}
+            {[
+              {
+                date: 'Dec 15, 2024',
+                type: 'Alumni Interview',
+                company: 'Harvard',
+                score: 85,
+                duration: '45 min',
+                summary: 'Excellent discussion about academic passions and extracurricular impact. Strong storytelling and genuine enthusiasm.'
+              },
+              {
+                date: 'Dec 10, 2024',
+                type: 'Academic Interview',
+                company: 'MIT',
+                score: 78,
+                duration: '50 min',
+                summary: 'Good demonstration of STEM interests. Could improve on articulating research experience more clearly.'
+              },
+              {
+                date: 'Dec 8, 2024',
+                type: 'Why Us Interview',
+                company: 'Stanford',
+                score: 82,
+                duration: '40 min',
+                summary: 'Strong knowledge of programs and culture. Connected personal goals well with university offerings.'
+              },
+              {
+                date: 'Dec 3, 2024',
+                type: 'Personal Interview',
+                company: 'Yale',
+                score: 79,
+                duration: '35 min',
+                summary: 'Good discussion of values and community service. Need to be more specific about future contributions to campus.'
+              },
+              {
+                date: 'Nov 28, 2024',
+                type: 'Scholarship Interview',
+                company: 'Princeton',
+                score: 88,
+                duration: '55 min',
+                summary: 'Compelling personal narrative and clear academic vision. Excellent articulation of financial need and merit.'
+              },
+              {
+                date: 'Nov 22, 2024',
+                type: 'Leadership Interview',
+                company: 'Columbia',
+                score: 76,
+                duration: '40 min',
+                summary: 'Demonstrated leadership potential but examples lacked depth. Work on quantifying impact and results.'
+              },
+              {
+                date: 'Nov 18, 2024',
+                type: 'Research Interview',
+                company: 'Caltech',
+                score: 83,
+                duration: '60 min',
+                summary: 'Strong technical knowledge and research experience. Excellent explanation of complex scientific concepts.'
+              },
+              {
+                date: 'Nov 15, 2024',
+                type: 'Community Interview',
+                company: 'Brown',
+                score: 80,
+                duration: '45 min',
+                summary: 'Good fit with open curriculum philosophy. Showed genuine interest in interdisciplinary learning.'
+              },
+              {
+                date: 'Nov 10, 2024',
+                type: 'Creative Portfolio',
+                company: 'RISD',
+                score: 91,
+                duration: '50 min',
+                summary: 'Outstanding portfolio presentation. Exceptional artistic vision and technical execution across mediums.'
+              },
+              {
+                date: 'Nov 5, 2024',
+                type: 'Mock Interview',
+                company: 'Dartmouth',
+                score: 74,
+                duration: '30 min',
+                summary: 'First interview attempt showed potential. Focus on reducing filler words and maintaining eye contact.'
+              }
+            ].map((interview, index) => (
+              <div
+                key={index}
+                style={{
+                  marginBottom: index < 9 ? '12px' : '0',
+                  paddingBottom: index < 9 ? '12px' : '0',
+                  borderBottom: index < 9 ? `1px solid ${isDark ? '#404040' : '#E5E7EB'}` : 'none'
+                }}
+              >
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  marginBottom: '8px'
+                }}>
+                  <div>
+                    <div style={{
+                      fontSize: '15px',
+                      fontWeight: '600',
+                      color: isDark ? '#ffffff' : '#1F2937',
+                      marginBottom: '4px'
+                    }}>
+                      {interview.type}
+                    </div>
+                    <div style={{
+                      fontSize: '13px',
+                      color: isDark ? '#a0a0a0' : '#6B7280',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px'
+                    }}>
+                      <span>{interview.date}</span>
+                      <span>•</span>
+                      <span>{interview.company}</span>
+                      <span>•</span>
+                      <span>{interview.duration}</span>
+                    </div>
+                  </div>
+                  <div style={{
+                    fontSize: '16px',
+                    fontWeight: '700',
+                    color: interview.score >= 80 ? '#10B981' : interview.score >= 70 ? '#F59E0B' : '#EF4444'
+                  }}>
+                    {interview.score}
+                  </div>
+                </div>
+                <p style={{
+                  fontSize: '13px',
+                  color: isDark ? '#b0b0b0' : '#4B5563',
+                  lineHeight: '1.5',
+                  margin: '8px 0 0 0'
+                }}>
+                  {interview.summary}
+                </p>
+              </div>
+            ))}
+          </div>
+          
+          {/* Expand/Collapse button */}
+          <div
+            onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
+            style={{
+              position: 'absolute',
+              bottom: '10px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.15)' : '#f3f4f6',
+              backdropFilter: isDark ? 'blur(30px) saturate(200%)' : 'none',
+              WebkitBackdropFilter: isDark ? 'blur(30px) saturate(200%)' : 'none',
+              border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.25)' : '#E5E7EB'}`,
+              borderRadius: '50%',
+              width: '32px',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              zIndex: 10
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.2)' : '#e5e7eb';
+              e.currentTarget.style.border = isDark ? '1px solid rgba(255, 255, 255, 0.35)' : '1px solid #E5E7EB';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.15)' : '#f3f4f6';
+              e.currentTarget.style.border = isDark ? '1px solid rgba(255, 255, 255, 0.25)' : '1px solid #E5E7EB';
+            }}
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              style={{
+                transform: isHistoryExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.3s ease'
+              }}
+            >
+              <path
+                d="M4 6L8 10L12 6"
+                stroke={isDark ? '#e0e0e0' : '#4B5563'}
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+        </div>
       </div>
 
       {/* Interview Skills Performance and Skills Distribution Row */}
       <div style={{ display: 'grid', gridTemplateColumns: '7fr 3fr', gap: '20px', marginBottom: '20px' }}>
         {/* Interview Skills Performance Chart */}
         <div style={{
-          backgroundColor: isDark ? '#2a2a2a' : 'white',
+          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'white',
+          backdropFilter: isDark ? 'blur(20px)' : 'none',
+          WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
           borderRadius: '12px',
           padding: '24px',
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-          border: isDark ? '2px solid #505050' : '2px solid #E5E7EB'
+          boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+          border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '2px solid #E5E7EB'
         }}>
           <div style={{ 
             display: 'flex', 
@@ -886,11 +1151,13 @@ const Dashboard = ({ aiRating }) => {
 
         {/* Skills Distribution Pie Chart */}
         <div style={{
-          backgroundColor: isDark ? '#2a2a2a' : 'white',
+          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'white',
+          backdropFilter: isDark ? 'blur(20px)' : 'none',
+          WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
           borderRadius: '12px',
           padding: '24px',
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-          border: isDark ? '2px solid #505050' : '2px solid #E5E7EB'
+          boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+          border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '2px solid #E5E7EB'
         }}>
           <h3 style={{ fontSize: '18px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937', marginBottom: '24px', margin: '0 0 24px 0' }}>
             Skills Distribution
@@ -903,11 +1170,13 @@ const Dashboard = ({ aiRating }) => {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '20px' }}>
             {/* Strengths */}
             <div style={{
-              backgroundColor: isDark ? '#2a2a2a' : 'white',
+              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'white',
+              backdropFilter: isDark ? 'blur(20px)' : 'none',
+              WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
               borderRadius: '12px',
               padding: '24px',
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-              border: isDark ? '2px solid #505050' : '2px solid #E5E7EB'
+              boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '2px solid #E5E7EB'
             }}>
               <h3 style={{ fontSize: '16px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937', marginBottom: '16px' }}>
                 Strengths
@@ -942,11 +1211,13 @@ const Dashboard = ({ aiRating }) => {
 
             {/* Areas for Improvement */}
             <div style={{
-              backgroundColor: isDark ? '#2a2a2a' : 'white',
+              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'white',
+              backdropFilter: isDark ? 'blur(20px)' : 'none',
+              WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
               borderRadius: '12px',
               padding: '24px',
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-              border: isDark ? '2px solid #505050' : '2px solid #E5E7EB'
+              boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '2px solid #E5E7EB'
             }}>
               <h3 style={{ fontSize: '16px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937', marginBottom: '16px' }}>
                 Areas for Improvement
@@ -981,11 +1252,13 @@ const Dashboard = ({ aiRating }) => {
 
             {/* Top Recommendations */}
             <div style={{
-              backgroundColor: isDark ? '#2a2a2a' : 'white',
+              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'white',
+              backdropFilter: isDark ? 'blur(20px)' : 'none',
+              WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
               borderRadius: '12px',
               padding: '24px',
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-              border: isDark ? '2px solid #505050' : '2px solid #E5E7EB'
+              boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '2px solid #E5E7EB'
             }}>
               <h3 style={{ fontSize: '16px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937', marginBottom: '16px' }}>
                 Top Recommendations
@@ -999,7 +1272,7 @@ const Dashboard = ({ aiRating }) => {
                       <div key={index} style={{ 
                         marginBottom: '16px',
                         paddingBottom: '16px',
-                        borderBottom: index < 2 ? `2px solid ${isDark ? '#505050' : '#E5E7EB'}` : 'none'
+                        borderBottom: index < 2 ? `1px solid ${isDark ? 'rgba(255, 255, 255, 0.1)' : '#E5E7EB'}` : 'none'
                       }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                           <span style={{ fontSize: '14px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937' }}>
@@ -1037,10 +1310,17 @@ const Dashboard = ({ aiRating }) => {
         marginTop: '20px'
       }}>
         <div style={{
-          background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+          background: isDark 
+            ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%)' 
+            : 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
+          backdropFilter: isDark ? 'blur(20px)' : 'none',
+          WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
           borderRadius: '12px',
           padding: '24px',
           color: 'white',
+          border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : 'none',
+          boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
           position: 'relative',
           overflow: 'hidden'
         }}>
