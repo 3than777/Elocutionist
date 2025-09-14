@@ -610,17 +610,14 @@ const Dashboard = ({ aiRating }) => {
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
           height: '180px'
         }}>
           <h3 style={{ 
             fontSize: '20px', 
             fontWeight: '600', 
             color: isDark ? '#ffffff' : '#1F2937', 
-            marginBottom: '32px',
-            margin: '0 0 32px 0',
-            alignSelf: 'flex-start',
-            width: '100%'
+            marginBottom: '20px',
+            margin: '0 0 20px 0'
           }}>
             Usage
           </h3>
@@ -630,16 +627,16 @@ const Dashboard = ({ aiRating }) => {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'flex-start',
-            gap: '20px',
             width: '100%',
-            marginTop: '-10px'
+            flex: 1,
+            gap: '60px'
           }}>
             {/* Left Progress Circle - 62% */}
             <div style={{ 
-              position: 'relative',
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'center'
+              alignItems: 'center',
+              width: '160px'
             }}>
               <div style={{ position: 'relative' }}>
                 <svg width="80" height="80" viewBox="0 0 80 80">
@@ -684,11 +681,11 @@ const Dashboard = ({ aiRating }) => {
               
               {/* Label text */}
               <div style={{
-                marginTop: '8px',
+                marginTop: '10px',
                 textAlign: 'center',
                 fontSize: '12px',
-                color: isDark ? '#ffffff' : '#000000',
-                lineHeight: '1.3'
+                color: isDark ? '#e0e0e0' : '#374151',
+                lineHeight: '1.4'
               }}>
                 <div>Tokens</div>
                 <div>Remaining</div>
@@ -697,10 +694,10 @@ const Dashboard = ({ aiRating }) => {
 
             {/* Middle Progress Circle - 75% */}
             <div style={{ 
-              position: 'relative',
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'center'
+              alignItems: 'center',
+              width: '160px'
             }}>
               <div style={{ position: 'relative' }}>
                 <svg width="80" height="80" viewBox="0 0 80 80">
@@ -710,7 +707,7 @@ const Dashboard = ({ aiRating }) => {
                     cy="40"
                     r="32"
                     fill="none"
-                    stroke={isDark ? "#404040" : "#E5E7EB"}
+                    stroke={isDark ? "#505050" : "#D1D5DB"}
                     strokeWidth="8"
                   />
                   
@@ -745,11 +742,11 @@ const Dashboard = ({ aiRating }) => {
               
               {/* Label text */}
               <div style={{
-                marginTop: '8px',
+                marginTop: '10px',
                 textAlign: 'center',
                 fontSize: '12px',
-                color: isDark ? '#ffffff' : '#000000',
-                lineHeight: '1.3'
+                color: isDark ? '#e0e0e0' : '#374151',
+                lineHeight: '1.4'
               }}>
                 <div>Dynamic Hints</div>
                 <div>Remaining</div>
@@ -758,10 +755,10 @@ const Dashboard = ({ aiRating }) => {
 
             {/* Right Progress Circle - 88% */}
             <div style={{ 
-              position: 'relative',
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'center'
+              alignItems: 'center',
+              width: '160px'
             }}>
               <div style={{ position: 'relative' }}>
                 <svg width="80" height="80" viewBox="0 0 80 80">
@@ -771,7 +768,7 @@ const Dashboard = ({ aiRating }) => {
                     cy="40"
                     r="32"
                     fill="none"
-                    stroke={isDark ? "#404040" : "#E5E7EB"}
+                    stroke={isDark ? "#505050" : "#D1D5DB"}
                     strokeWidth="8"
                   />
                   
@@ -806,11 +803,11 @@ const Dashboard = ({ aiRating }) => {
               
               {/* Label text */}
               <div style={{
-                marginTop: '8px',
+                marginTop: '10px',
                 textAlign: 'center',
                 fontSize: '12px',
-                color: isDark ? '#ffffff' : '#000000',
-                lineHeight: '1.3'
+                color: isDark ? '#e0e0e0' : '#374151',
+                lineHeight: '1.4'
               }}>
                 <div>Comprehensive Reviews</div>
                 <div>Remaining</div>
@@ -1030,9 +1027,9 @@ const Dashboard = ({ aiRating }) => {
               bottom: '10px',
               left: '50%',
               transform: 'translateX(-50%)',
-              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.15)' : '#f3f4f6',
-              backdropFilter: isDark ? 'blur(30px) saturate(200%)' : 'none',
-              WebkitBackdropFilter: isDark ? 'blur(30px) saturate(200%)' : 'none',
+              backgroundColor: 'transparent',
+              backdropFilter: 'none',
+              WebkitBackdropFilter: 'none',
               border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.25)' : '#E5E7EB'}`,
               borderRadius: '50%',
               width: '32px',
@@ -1045,11 +1042,11 @@ const Dashboard = ({ aiRating }) => {
               zIndex: 10
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.2)' : '#e5e7eb';
+              e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
               e.currentTarget.style.border = isDark ? '1px solid rgba(255, 255, 255, 0.35)' : '1px solid #E5E7EB';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.15)' : '#f3f4f6';
+              e.currentTarget.style.backgroundColor = 'transparent';
               e.currentTarget.style.border = isDark ? '1px solid rgba(255, 255, 255, 0.25)' : '1px solid #E5E7EB';
             }}
           >
