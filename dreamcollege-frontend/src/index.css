@@ -14,7 +14,7 @@
   --accent-error: var(--color-red);
   
   /* Light theme colors */
-  --background-primary: transparent;
+  --background-primary: #ffffff;
   --background-secondary: #fafafa;
   --background-tertiary: #f8f9fa;
   --background-quaternary: #f0f0f0;
@@ -132,6 +132,16 @@ html, body, #root, .app-grid {
   height: 100%;
   margin: 0;
 }
+
+/* Ensure html has proper background in dark mode */
+html {
+  background-color: #ffffff;
+}
+
+[data-theme="dark"] html {
+  background-color: #000000;
+}
+
 body {
   font-family: 'Inter', sans-serif;
   margin: 0;
@@ -139,11 +149,25 @@ body {
   color: var(--text-primary);
   transition: color 0.3s ease;
 }
+
+/* Ensure root element has proper background */
+#root {
+  background-color: var(--background-primary);
+}
+
+[data-theme="dark"] #root {
+  background-color: #000000;
+}
 .app-grid {
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: auto 1fr;
   height: 100%;
+  background-color: var(--background-primary);
+}
+
+[data-theme="dark"] .app-grid {
+  background-color: #000000;
 }
 .chat-container {
   display: flex;
@@ -210,13 +234,9 @@ body {
 
 /* Chat area wrapper styles to prevent flash */
 .chat-area-wrapper {
-  background-color: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background-color: transparent;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border: 2px solid #E5E7EB;
   position: relative;
   overflow: hidden;
   /* No transition on background to prevent flash */
@@ -225,8 +245,20 @@ body {
   will-change: contents;
 }
 
+/* Light theme styles */
+[data-theme="light"] .chat-area-wrapper {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 2px solid #E5E7EB;
+}
+
+/* Dark theme styles */
 [data-theme="dark"] .chat-area-wrapper {
-  background-color: rgba(255, 255, 255, 0.05) !important;
+  background-color: rgba(0, 0, 0, 0.8) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 8px 32px 0 rgba(139, 92, 246, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }

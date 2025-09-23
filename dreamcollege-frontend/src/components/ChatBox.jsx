@@ -1785,9 +1785,10 @@ Your goal is to help students become more confident, articulate, and authentic i
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
+            backgroundColor: isDark ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.5)',
             zIndex: 1001,
-            backdropFilter: 'blur(2px)'
+            backdropFilter: 'blur(2px)',
+            WebkitBackdropFilter: 'blur(2px)'
           }}></div>
           
           {/* Dialog */}
@@ -1797,9 +1798,9 @@ Your goal is to help students become more confident, articulate, and authentic i
             left: '50%',
             transform: 'translate(-50%, -50%)',
             zIndex: 1002,
-            backgroundColor: isDark ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.9)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
+            backgroundColor: isDark ? '#1e1e1e' : 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: isDark ? 'none' : 'blur(20px)',
+            WebkitBackdropFilter: isDark ? 'none' : 'blur(20px)',
             borderRadius: '12px',
             padding: '30px',
             boxShadow: '0 10px 40px var(--shadow-medium)',
@@ -1838,7 +1839,7 @@ Your goal is to help students become more confident, articulate, and authentic i
             
             {/* Interview Summary */}
             <div style={{
-              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
               borderRadius: '8px',
               padding: '15px',
               marginBottom: '25px',
