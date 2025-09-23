@@ -99,6 +99,7 @@ export default function UploadButton() {
       {/* Drag and Drop Zone */}
       <div
         {...getRootProps()}
+        className="upload-area"
         style={{
           border: `2px dashed ${isDragActive ? 'var(--accent-blue)' : 'var(--border-tertiary)'}`,
           borderRadius: '8px',
@@ -242,7 +243,7 @@ export default function UploadButton() {
                         padding: '4px 8px',
                         fontSize: '12px',
                         border: '1px solid #007bff',
-                        backgroundColor: '#fff',
+                        backgroundColor: 'var(--background-primary)',
                         color: '#007bff',
                         borderRadius: '4px',
                         cursor: 'pointer'
@@ -259,7 +260,7 @@ export default function UploadButton() {
                       padding: '4px 8px',
                       fontSize: '12px',
                       border: '1px solid #dc3545',
-                      backgroundColor: '#fff',
+                      backgroundColor: 'var(--background-primary)',
                       color: '#dc3545',
                       borderRadius: '4px',
                       cursor: 'pointer'

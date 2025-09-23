@@ -227,7 +227,7 @@ const ProfileDropdown = ({ user, onSignOut }) => {
             border: '1px solid var(--border-primary)',
             borderRadius: '12px',
             boxShadow: isDark ? '0 8px 24px rgba(0, 0, 0, 0.4)' : '0 8px 24px rgba(0, 0, 0, 0.12)',
-            zIndex: 1000,
+            zIndex: 10000,
             padding: '12px 0',
             fontSize: '15px'
           }}

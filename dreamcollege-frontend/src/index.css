@@ -14,7 +14,7 @@
   --accent-error: var(--color-red);
   
   /* Light theme colors */
-  --background-primary: #ffffff;
+  --background-primary: transparent;
   --background-secondary: #fafafa;
   --background-tertiary: #f8f9fa;
   --background-quaternary: #f0f0f0;
@@ -27,10 +27,10 @@
   --border-primary: #e0e0e0;
   --border-secondary: #ddd;
   --border-tertiary: #ccc;
-  --input-background: #ffffff;
+  --input-background: #f5f5f5;
   --settings-background: #ffffff;
   --message-ai-background: #f0f0f0;
-  --message-user-background: rgba(37, 99, 235, 0.1);
+  --message-user-background: #e0e0e0;
   --accent-blue: var(--accent-primary);
   --accent-blue-hover: #1d4ed8;
   --success-background: rgba(5, 150, 105, 0.1);
@@ -78,24 +78,24 @@
   --accent-warning: var(--color-gold);
   --accent-error: var(--color-red);
   
-  /* Dark theme colors */
-  --background-primary: #1c1c1e;
-  --background-secondary: #2c2c2e;
-  --background-tertiary: #3a3a3c;
-  --background-quaternary: #48484a;
-  --background-selected: #1a3a52;
-  --background-info: #1e3a5f;
+  /* Dark theme colors - using semi-transparent backgrounds */
+  --background-primary: #000000;
+  --background-secondary: rgba(255, 255, 255, 0.05);
+  --background-tertiary: rgba(255, 255, 255, 0.08);
+  --background-quaternary: rgba(255, 255, 255, 0.1);
+  --background-selected: rgba(96, 165, 250, 0.15);
+  --background-info: rgba(96, 165, 250, 0.1);
   --text-primary: #ffffff;
   --text-secondary: #e5e5e7;
   --text-tertiary: #aeaeb2;
   --text-quaternary: #8e8e93;
-  --border-primary: #48484a;
-  --border-secondary: #3a3a3c;
-  --border-tertiary: #2c2c2e;
-  --input-background: #2c2c2e;
-  --settings-background: #2c2c2e;
-  --message-ai-background: #3a3a3c;
-  --message-user-background: rgba(96, 165, 250, 0.1);
+  --border-primary: rgba(255, 255, 255, 0.1);
+  --border-secondary: rgba(255, 255, 255, 0.08);
+  --border-tertiary: rgba(255, 255, 255, 0.05);
+  --input-background: #2a2a2a;
+  --settings-background: rgba(255, 255, 255, 0.05);
+  --message-ai-background: #2a2a2a;
+  --message-user-background: #333333;
   --accent-blue: var(--accent-primary);
   --accent-blue-hover: #3b82f6;
   --success-background: rgba(16, 185, 129, 0.1);
@@ -107,15 +107,15 @@
   --error-background: rgba(239, 68, 68, 0.1);
   --error-text: var(--accent-error);
   --error-border: rgba(239, 68, 68, 0.2);
-  --toggle-inactive: #3a3a3c;
+  --toggle-inactive: rgba(255, 255, 255, 0.05);
   --toggle-active: var(--accent-primary);
-  --toggle-track-inactive: #48484a;
+  --toggle-track-inactive: rgba(255, 255, 255, 0.1);
   --shadow-light: rgba(0, 0, 0, 0.3);
   --shadow-medium: rgba(0, 0, 0, 0.5);
   --checkbox-background: rgba(96, 165, 250, 0.1);
   --checkbox-text: #ffffff;
-  --level-button-background: #2c2c2e;
-  --level-button-border: #48484a;
+  --level-button-background: rgba(255, 255, 255, 0.05);
+  --level-button-border: rgba(255, 255, 255, 0.1);
   --level-button-text: #ffffff;
   --level-button-active: var(--accent-primary);
   --tip-background: rgba(245, 158, 11, 0.1);
@@ -124,8 +124,8 @@
   --ai-text-primary: #ffffff;
   --ai-text-secondary: #e5e5e7;
   --ai-text-tertiary: #8e8e93;
-  --ai-skeleton: #3a3a3c;
-  --ai-separator: #48484a;
+  --ai-skeleton: rgba(255, 255, 255, 0.05);
+  --ai-separator: rgba(255, 255, 255, 0.1);
 }
 
 html, body, #root, .app-grid {
@@ -137,35 +137,45 @@ body {
   margin: 0;
   background-color: var(--background-primary);
   color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: color 0.3s ease;
 }
 .app-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr;
   grid-template-rows: auto 1fr;
-  column-gap: 1px;
-  row-gap: 0;
-  background: var(--border-secondary);
-}
-.chat-area {
-  background: var(--background-primary);
-  padding: 12px;
-}
-.settings-area {
-  background: var(--background-primary);
-  padding: 12px;
-  overflow-y: auto;
+  height: 100%;
 }
 .chat-container {
   display: flex;
   flex-direction: column;
   height: 100%;
   position: relative;
+  background: transparent;
+}
+
+/* Ensure chat container never flashes white in dark mode */
+[data-theme="dark"] .chat-container {
+  background-color: transparent !important;
+}
+
+/* Ensure practice page container maintains dark background */
+[data-theme="dark"] .practice-page-container {
+  background: radial-gradient(ellipse at top left, rgba(147, 51, 234, 0.25) 0%, transparent 45%), 
+              radial-gradient(ellipse at bottom right, rgba(236, 72, 153, 0.25) 0%, transparent 45%), 
+              radial-gradient(ellipse at center right, rgba(59, 130, 246, 0.25) 0%, transparent 45%), 
+              #000000 !important;
 }
 .messages {
   flex: 1;
   overflow-y: auto;
   margin-bottom: 8px;
+  background: transparent;
+  /* Remove transition to prevent flash */
+}
+
+/* Ensure messages container has proper background in dark mode */
+[data-theme="dark"] .messages {
+  background-color: transparent !important;
 }
 .message {
   padding: 6px 10px;
@@ -173,15 +183,58 @@ body {
   border-radius: 8px;
   max-width: 70%;
 }
+[data-theme="dark"] .message {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
 .message.ai {
   background: var(--message-ai-background);
   align-self: flex-start;
   color: var(--text-primary);
 }
-.message.you {
+[data-theme="dark"] .message.ai {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: #ffffff;
+}
+.message.user {
   background: var(--message-user-background);
   align-self: flex-end;
   color: var(--text-primary);
+}
+[data-theme="dark"] .message.user {
+  color: #ffffff;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Chat area wrapper styles to prevent flash */
+.chat-area-wrapper {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 2px solid #E5E7EB;
+  position: relative;
+  overflow: hidden;
+  /* No transition on background to prevent flash */
+  transition: box-shadow 0.3s ease, border 0.3s ease;
+  /* Prevent repaint issues */
+  will-change: contents;
+}
+
+[data-theme="dark"] .chat-area-wrapper {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 8px 32px 0 rgba(139, 92, 246, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Prevent white flash on messages area specifically */
+[data-theme="dark"] .chat-area-wrapper .messages,
+[data-theme="dark"] .chat-area-wrapper .chat-container {
+  background-color: transparent !important;
 }
 .input-row {
   display: flex;
@@ -189,10 +242,15 @@ body {
 .input-row input {
   flex: 1;
   padding: 8px;
-  border: 1px solid var(--border-tertiary);
+  border: none;
   border-radius: 4px 0 0 4px;
   background: var(--input-background);
   color: var(--text-primary);
+}
+[data-theme="dark"] .input-row input {
+  color: #ffffff;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 .input-row button {
   width: 40px;
@@ -215,6 +273,10 @@ body {
   margin-top: 16px;
   background: var(--settings-background);
 }
+[data-theme="dark"] .settings-box {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
 .settings-box h3 {
   margin-top: 0;
   margin-bottom: 8px;
@@ -226,7 +288,7 @@ body {
 .message.ai h1, .message.ai h2, .message.ai h3, .message.ai h4, .message.ai h5, .message.ai h6 {
   margin: 0.5em 0;
   font-weight: bold;
-  color: var(--text-primary);
+  color: inherit;
 }
 
 .message.ai h1 { font-size: 1.2em; }
@@ -236,7 +298,7 @@ body {
 .message.ai p {
   margin: 0.5em 0;
   line-height: 1.4;
-  color: var(--text-primary);
+  color: inherit;
 }
 
 .message.ai ol, .message.ai ul {
@@ -247,47 +309,53 @@ body {
 .message.ai li {
   margin: 0.3em 0;
   line-height: 1.4;
-  color: var(--text-primary);
+  color: inherit;
 }
 
 .message.ai strong {
   font-weight: bold;
-  color: var(--text-primary);
+  color: inherit;
 }
 
 .message.ai em {
   font-style: italic;
-  color: var(--text-primary);
+  color: inherit;
 }
 
 .message.ai code {
-  background: var(--background-quaternary);
+  background: rgba(0, 0, 0, 0.1);
   padding: 2px 4px;
   border-radius: 3px;
   font-family: 'Monaco', 'Menlo', monospace;
   font-size: 0.9em;
-  color: var(--text-primary);
+  color: inherit;
+}
+[data-theme="dark"] .message.ai code {
+  background: rgba(0, 0, 0, 0.3);
 }
 
 .message.ai pre {
-  background: var(--background-quaternary);
+  background: rgba(0, 0, 0, 0.1);
   padding: 8px;
   border-radius: 4px;
   overflow-x: auto;
   margin: 0.5em 0;
 }
+[data-theme="dark"] .message.ai pre {
+  background: rgba(0, 0, 0, 0.3);
+}
 
 .message.ai pre code {
   background: none;
   padding: 0;
-  color: var(--text-primary);
+  color: inherit;
 }
 
 .message.ai blockquote {
-  border-left: 3px solid var(--border-secondary);
+  border-left: 3px solid var(--border-primary);
   margin: 0.5em 0;
   padding-left: 1em;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
 }
 
 /* Pulse animation for interview status indicator */
@@ -306,6 +374,148 @@ body {
   }
 }
 
+/* Dark mode backdrop filters for semi-transparent elements */
+[data-theme="dark"] .voice-tutorial {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+[data-theme="dark"] .voice-toggle-container {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+[data-theme="dark"] .tutorial-step__icon {
+  background: transparent !important;
+}
+
+[data-theme="dark"] .tutorial-benefit {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .tutorial-warning {
+  background: rgba(245, 158, 11, 0.1) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .permission-indicator {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .tutorial-settings-preview {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .progress-bar {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme="dark"] .audio-level-bar {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme="dark"] .speech-result-text {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .level-selector button {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* File Manager and Upload components */
+[data-theme="dark"] .file-manager-container {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+[data-theme="dark"] .file-item {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .upload-area {
+  background: rgba(255, 255, 255, 0.05) !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 2px dashed rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .upload-area:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* AI Rating Display */
+[data-theme="dark"] .ai-rating-container {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .ai-rating-card {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Progress Indicator */
+[data-theme="dark"] .progress-indicator {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Settings Panels */
+[data-theme="dark"] .settings-panel {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Buttons in dark mode */
+[data-theme="dark"] button {
+  transition: all 0.2s ease;
+}
+
+[data-theme="dark"] button:not(.voice-toggle):not(.tutorial-button--primary):not(.end-interview-button):not(.new-interview-button):not(.dialog-button):hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Separator line */
+[data-theme="dark"] hr {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Tutorial warning and info boxes */
+[data-theme="dark"] .tutorial-warning,
+[data-theme="dark"] .tutorial-settings-note {
+  background: rgba(245, 158, 11, 0.1) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Speech feedback elements */
+[data-theme="dark"] .speech-feedback-container {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
 /* Voice Mode Toggle Styles */
 .voice-toggle-container {
   display: flex;
@@ -313,10 +523,11 @@ body {
   align-items: center;
   gap: 8px;
   padding: 12px;
-  background: white;
+  background: var(--background-secondary);
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--shadow-light);
   margin: 10px 0;
+  border: 1px solid var(--border-primary);
 }
 
 .voice-toggle {
@@ -345,7 +556,7 @@ body {
   position: relative;
   width: 60px;
   height: 30px;
-  background-color: #e9ecef;
+  background-color: var(--toggle-track-inactive);
   border-radius: 15px;
   transition: background-color 0.3s ease;
 }
@@ -989,16 +1200,12 @@ body {
   border: 2px solid var(--border-color) !important;
 }
 
-.high-contrast-mode .message {
-  border: 1px solid var(--border-color) !important;
-}
-
 .high-contrast-mode .message.ai {
   background: #f0f0f0 !important;
   color: var(--text-color) !important;
 }
 
-.high-contrast-mode .message.you {
+.high-contrast-mode .message.user {
   background: #e0e0e0 !important;
   color: var(--text-color) !important;
 }

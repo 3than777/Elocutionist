@@ -15,7 +15,13 @@ export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     // Check for saved theme preference or default to 'light'
     const savedTheme = localStorage.getItem('theme');
-    return savedTheme || 'light';
+    const initialTheme = savedTheme || 'light';
+    
+    // Apply theme immediately during initialization
+    document.documentElement.setAttribute('data-theme', initialTheme);
+    applyColorScheme(initialTheme);
+    
+    return initialTheme;
   });
 
   useEffect(() => {

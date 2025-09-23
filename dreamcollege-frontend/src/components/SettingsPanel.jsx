@@ -275,7 +275,7 @@ export default function SettingsPanel({
       fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif'
     }}>
       {/* Expert/Advanced/Beginner */}
-      <div style={{
+      <div className="settings-panel" style={{
         backgroundColor: 'var(--settings-background)',
         borderRadius: '16px',
         padding: '20px',
@@ -295,7 +295,7 @@ export default function SettingsPanel({
 
 
       {/* Voice Settings */}
-      <div style={{
+      <div className="settings-panel" style={{
         backgroundColor: 'var(--settings-background)',
         borderRadius: '16px',
         padding: '20px',

@@ -366,11 +366,14 @@ const Dashboard = ({ aiRating }) => {
     <div style={{ 
       padding: '24px',
       background: isDark 
-        ? 'linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #16213e 100%)' 
+        ? 'radial-gradient(ellipse at top left, rgba(147, 51, 234, 0.25) 0%, transparent 45%), radial-gradient(ellipse at bottom right, rgba(236, 72, 153, 0.25) 0%, transparent 45%), radial-gradient(ellipse at center right, rgba(59, 130, 246, 0.25) 0%, transparent 45%), #000000' 
         : 'var(--background-primary)',
       minHeight: 'calc(100vh - 48px)',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      flex: 1
+      flex: 1,
+      overflowY: 'auto',
+      height: '100%',
+      maxHeight: 'calc(100vh - 48px)'
     }}>
       {/* Beta Notification Popup */}
       {showBetaNotification && (
@@ -399,7 +402,7 @@ const Dashboard = ({ aiRating }) => {
             backgroundColor: isDark ? 'rgba(30, 30, 30, 0.9)' : '#ffffff',
             backdropFilter: isDark ? 'blur(20px)' : 'none',
             WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
-            border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '2px solid #E5E7EB',
+            border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '2px solid #E5E7EB',
             borderRadius: '16px',
             padding: '32px',
             boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
@@ -481,13 +484,13 @@ const Dashboard = ({ aiRating }) => {
       }}>
         {/* Combined Stats Card */}
         <div style={{
-          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'white',
+          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'white',
           backdropFilter: isDark ? 'blur(20px)' : 'none',
           WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
           borderRadius: '12px',
           padding: '32px',
-          boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
-          border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '2px solid #E5E7EB',
+          boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.05)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+          border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '2px solid #E5E7EB',
           position: 'relative',
           overflow: 'hidden',
           height: '180px'
@@ -599,13 +602,13 @@ const Dashboard = ({ aiRating }) => {
 
         {/* Elocutionist Score Card */}
         <div style={{
-          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'white',
+          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'white',
           backdropFilter: isDark ? 'blur(20px)' : 'none',
           WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
           borderRadius: '12px',
           padding: '32px',
-          boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
-          border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '2px solid #E5E7EB',
+          boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.05)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+          border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '2px solid #E5E7EB',
           position: 'relative',
           overflow: 'hidden',
           display: 'flex',
@@ -818,13 +821,13 @@ const Dashboard = ({ aiRating }) => {
 
         {/* History Section */}
         <div style={{
-          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'white',
+          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'white',
           backdropFilter: isDark ? 'blur(20px)' : 'none',
           WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
           borderRadius: '12px',
           padding: '32px',
-          boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
-          border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '2px solid #E5E7EB',
+          boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.05)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+          border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '2px solid #E5E7EB',
           position: 'relative',
           overflow: 'hidden',
           display: 'flex',
@@ -1076,12 +1079,12 @@ const Dashboard = ({ aiRating }) => {
       <div style={{ display: 'grid', gridTemplateColumns: '7fr 3fr', gap: '20px', marginBottom: '20px' }}>
         {/* Interview Skills Performance Chart */}
         <div style={{
-          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'white',
+          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'white',
           backdropFilter: isDark ? 'blur(20px)' : 'none',
           WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
           borderRadius: '12px',
           padding: '24px',
-          boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+          boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.05)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
           border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '2px solid #E5E7EB'
         }}>
           <div style={{ 
@@ -1148,12 +1151,12 @@ const Dashboard = ({ aiRating }) => {
 
         {/* Skills Distribution Pie Chart */}
         <div style={{
-          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'white',
+          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'white',
           backdropFilter: isDark ? 'blur(20px)' : 'none',
           WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
           borderRadius: '12px',
           padding: '24px',
-          boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+          boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.05)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
           border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '2px solid #E5E7EB'
         }}>
           <h3 style={{ fontSize: '18px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937', marginBottom: '24px', margin: '0 0 24px 0' }}>
@@ -1167,12 +1170,12 @@ const Dashboard = ({ aiRating }) => {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginBottom: '20px' }}>
             {/* Strengths */}
             <div style={{
-              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'white',
+              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'white',
               backdropFilter: isDark ? 'blur(20px)' : 'none',
               WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
               borderRadius: '12px',
               padding: '24px',
-              boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+              boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.05)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
               border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '2px solid #E5E7EB'
             }}>
               <h3 style={{ fontSize: '16px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937', marginBottom: '16px' }}>
@@ -1208,12 +1211,12 @@ const Dashboard = ({ aiRating }) => {
 
             {/* Areas for Improvement */}
             <div style={{
-              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'white',
+              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'white',
               backdropFilter: isDark ? 'blur(20px)' : 'none',
               WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
               borderRadius: '12px',
               padding: '24px',
-              boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+              boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.05)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
               border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '2px solid #E5E7EB'
             }}>
               <h3 style={{ fontSize: '16px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937', marginBottom: '16px' }}>
@@ -1249,12 +1252,12 @@ const Dashboard = ({ aiRating }) => {
 
             {/* Top Recommendations */}
             <div style={{
-              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'white',
+              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'white',
               backdropFilter: isDark ? 'blur(20px)' : 'none',
               WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
               borderRadius: '12px',
               padding: '24px',
-              boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+              boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.05)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
               border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '2px solid #E5E7EB'
             }}>
               <h3 style={{ fontSize: '16px', fontWeight: '600', color: isDark ? '#ffffff' : '#1F2937', marginBottom: '16px' }}>
@@ -1317,7 +1320,7 @@ const Dashboard = ({ aiRating }) => {
           padding: '24px',
           color: 'white',
           border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : 'none',
-          boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.1)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+          boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.05)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
           position: 'relative',
           overflow: 'hidden'
         }}>

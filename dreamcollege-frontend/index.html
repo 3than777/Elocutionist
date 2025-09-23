@@ -5,6 +5,15 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Elocutionist - AI Interview Coach</title>
+    <script>
+      // Apply theme immediately to prevent flash
+      (function() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        // Also apply to body as backup
+        document.documentElement.style.backgroundColor = savedTheme === 'dark' ? '#000000' : '#ffffff';
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

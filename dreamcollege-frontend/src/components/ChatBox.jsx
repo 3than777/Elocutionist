@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useUploadContext } from '../context/UploadContext';
+import { useTheme } from '../context/ThemeContext';
 import { submitInterviewTranscript, generateAIRating as apiGenerateAIRating, retryApiCall, getUserFriendlyErrorMessage, getProgressMessage } from '../services/api';
 import { speakText, stopSpeaking, getTextToSpeechStatus, setTextToSpeechCallbacks } from '../services/textToSpeech';
 import ProgressIndicator from './ProgressIndicator';
@@ -20,6 +21,7 @@ export default function ChatBox({
   showVoiceTutorial,
   setShowVoiceTutorial
 }) {
+  const { isDark } = useTheme();
   const [messages, setMessages] = useState([
     { sender: 'ai', text: 'Hello! Ready to practice?' }
   ]);
@@ -1587,7 +1589,9 @@ Your goal is to help students become more confident, articulate, and authentic i
           top: '20px',
           right: '20px',
           maxWidth: '300px',
-          backgroundColor: getOnboardingTips().type === 'success' ? '#d4edda' : '#d1ecf1',
+          backgroundColor: getOnboardingTips().type === 'success' ? 'rgba(212, 237, 218, 0.9)' : 'rgba(209, 236, 241, 0.9)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
           border: `1px solid ${getOnboardingTips().type === 'success' ? '#c3e6cb' : '#bee5eb'}`,
           borderRadius: '8px',
           padding: '12px 16px',
@@ -1662,12 +1666,15 @@ Your goal is to help students become more confident, articulate, and authentic i
 
         {user && isInterviewActive && (
             <button
+              className="end-interview-button"
               onClick={handleEndInterviewClick}
               disabled={endInterviewButtonState === 'processing'}
               style={{
                 padding: '12px 20px',
                 fontSize: '15px',
-                backgroundColor: endInterviewButtonState === 'processing' ? '#8E8E93' : '#34C759',
+                backgroundColor: endInterviewButtonState === 'processing' ? 'rgba(142, 142, 147, 0.9)' : 'rgba(52, 199, 89, 0.9)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '16px',
@@ -1685,13 +1692,11 @@ Your goal is to help students become more confident, articulate, and authentic i
               }}
               onMouseOver={(e) => {
                 if (endInterviewButtonState !== 'processing') {
-                  e.currentTarget.style.backgroundColor = '#30D158';
                   e.currentTarget.style.transform = 'scale(0.98)';
                 }
               }}
               onMouseOut={(e) => {
                 if (endInterviewButtonState !== 'processing') {
-                  e.currentTarget.style.backgroundColor = '#34C759';
                   e.currentTarget.style.transform = 'scale(1)';
                 }
               }}
@@ -1722,12 +1727,15 @@ Your goal is to help students become more confident, articulate, and authentic i
 
         {isInterviewCompleted && (
           <button
+            className="new-interview-button"
             onClick={user ? newInterview : undefined}
             disabled={!user}
             style={{
               padding: '12px 20px',
               fontSize: '15px',
-              backgroundColor: user ? '#007AFF' : '#8E8E93',
+              backgroundColor: user ? 'rgba(0, 122, 255, 0.9)' : 'rgba(142, 142, 147, 0.9)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
               color: 'white',
               border: 'none',
               borderRadius: '16px',
@@ -1740,13 +1748,13 @@ Your goal is to help students become more confident, articulate, and authentic i
             }}
             onMouseOver={(e) => {
               if (user) {
-                e.currentTarget.style.backgroundColor = '#0051D5';
+                e.currentTarget.style.backgroundColor = 'rgba(0, 81, 213, 0.9)';
                 e.currentTarget.style.transform = 'scale(0.98)';
               }
             }}
             onMouseOut={(e) => {
               if (user) {
-                e.currentTarget.style.backgroundColor = '#007AFF';
+                e.currentTarget.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
                 e.currentTarget.style.transform = 'scale(1)';
               }
             }}
@@ -1789,7 +1797,9 @@ Your goal is to help students become more confident, articulate, and authentic i
             left: '50%',
             transform: 'translate(-50%, -50%)',
             zIndex: 1002,
-            backgroundColor: 'var(--background-primary)',
+            backgroundColor: isDark ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
             borderRadius: '12px',
             padding: '30px',
             boxShadow: '0 10px 40px var(--shadow-medium)',
@@ -1828,7 +1838,7 @@ Your goal is to help students become more confident, articulate, and authentic i
             
             {/* Interview Summary */}
             <div style={{
-              backgroundColor: 'var(--background-secondary)',
+              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
               borderRadius: '8px',
               padding: '15px',
               marginBottom: '25px',
@@ -1886,11 +1896,14 @@ Your goal is to help students become more confident, articulate, and authentic i
               flexWrap: 'wrap'
             }}>
               <button
+                className="dialog-button"
                 onClick={cancelEndInterview}
                 style={{
                   padding: '12px 20px',
                   fontSize: '15px',
-                  backgroundColor: '#8E8E93',
+                  backgroundColor: 'rgba(142, 142, 147, 0.9)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '12px',
@@ -1900,22 +1913,25 @@ Your goal is to help students become more confident, articulate, and authentic i
                   transition: 'all 0.2s ease'
                 }}
                 onMouseOver={(e) => {
-                  e.target.style.backgroundColor = '#6D6D70';
-                  e.target.style.transform = 'scale(0.98)';
+                  e.currentTarget.style.backgroundColor = 'rgba(109, 109, 112, 0.9)';
+                  e.currentTarget.style.transform = 'scale(0.98)';
                 }}
                 onMouseOut={(e) => {
-                  e.target.style.backgroundColor = '#8E8E93';
-                  e.target.style.transform = 'scale(1)';
+                  e.currentTarget.style.backgroundColor = 'rgba(142, 142, 147, 0.9)';
+                  e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
                 ❌ Cancel
               </button>
               <button
+                className="dialog-button"
                 onClick={endInterviewWithoutRating}
                 style={{
                   padding: '12px 20px',
                   fontSize: '15px',
-                  backgroundColor: '#FF9500',
+                  backgroundColor: 'rgba(255, 149, 0, 0.9)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '12px',
@@ -1925,22 +1941,25 @@ Your goal is to help students become more confident, articulate, and authentic i
                   transition: 'all 0.2s ease'
                 }}
                 onMouseOver={(e) => {
-                  e.target.style.backgroundColor = '#DB7600';
-                  e.target.style.transform = 'scale(0.98)';
+                  e.currentTarget.style.backgroundColor = 'rgba(219, 118, 0, 0.9)';
+                  e.currentTarget.style.transform = 'scale(0.98)';
                 }}
                 onMouseOut={(e) => {
-                  e.target.style.backgroundColor = '#FF9500';
-                  e.target.style.transform = 'scale(1)';
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 149, 0, 0.9)';
+                  e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
                 🚪 End Without Rating
               </button>
               <button
+                className="dialog-button"
                 onClick={confirmEndInterview}
                 style={{
                   padding: '12px 20px',
                   fontSize: '15px',
-                  backgroundColor: '#34C759',
+                  backgroundColor: 'rgba(52, 199, 89, 0.9)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '12px',
@@ -1950,12 +1969,12 @@ Your goal is to help students become more confident, articulate, and authentic i
                   transition: 'all 0.2s ease'
                 }}
                 onMouseOver={(e) => {
-                  e.target.style.backgroundColor = '#30D158';
-                  e.target.style.transform = 'scale(0.98)';
+                  e.currentTarget.style.backgroundColor = 'rgba(40, 179, 69, 0.9)';
+                  e.currentTarget.style.transform = 'scale(0.98)';
                 }}
                 onMouseOut={(e) => {
-                  e.target.style.backgroundColor = '#34C759';
-                  e.target.style.transform = 'scale(1)';
+                  e.currentTarget.style.backgroundColor = 'rgba(52, 199, 89, 0.9)';
+                  e.currentTarget.style.transform = 'scale(1)';
                 }}
               >
                 ✅ Yes, Generate Rating
@@ -2000,13 +2019,12 @@ Your goal is to help students become more confident, articulate, and authentic i
               disabled={isLoading || isInterviewCompleted}
               style={{
                 padding: '12px 16px',
-                border: '1px solid var(--border-primary)',
+                border: 'none',
                 borderRadius: '20px',
                 fontSize: '17px',
                 fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif',
                 letterSpacing: '-0.41px',
                 backgroundColor: isInterviewCompleted ? 'var(--toggle-inactive)' : 'var(--input-background)',
-                color: 'var(--text-primary)',
                 transition: 'all 0.2s ease',
                 outline: 'none',
                 flex: 1,
@@ -2014,12 +2032,10 @@ Your goal is to help students become more confident, articulate, and authentic i
               }}
               onFocus={(e) => {
                 if (!isInterviewCompleted) {
-                  e.currentTarget.style.borderColor = 'var(--accent-blue)';
                   e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,122,255,0.1)';
                 }
               }}
               onBlur={(e) => {
-                e.currentTarget.style.borderColor = 'var(--border-primary)';
                 e.currentTarget.style.boxShadow = 'none';
               }}
             />
