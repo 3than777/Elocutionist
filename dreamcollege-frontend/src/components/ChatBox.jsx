@@ -59,6 +59,9 @@ export default function ChatBox({
   const [showOnboardingTips, setShowOnboardingTips] = useState(false);
   const [voiceCalibrationComplete, setVoiceCalibrationComplete] = useState(false);
   
+  // Interview timer state
+  const [elapsedTime, setElapsedTime] = useState(0);
+  
   // Map difficulty levels from LevelSelector to prompt expectations
   const mapDifficulty = (level) => {
     const mapping = {
@@ -81,6 +84,17 @@ export default function ChatBox({
   // Get upload context
   const { uploadedFiles, refreshFiles } = useUploadContext();
   const hasContent = uploadedFiles && uploadedFiles.length > 0;
+
+  /**
+   * Format elapsed time into MM:SS format
+   * @param {number} seconds - Elapsed time in seconds
+   * @returns {string} Formatted time string
+   */
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
 
   /**
    * Read speech settings from localStorage
@@ -178,6 +192,29 @@ export default function ChatBox({
        setTextToSpeechCallbacks({});
      };
    }, []);
+
+  // Update interview timer
+  useEffect(() => {
+    let intervalId;
+    
+    if (isInterviewActive && interviewStartTime) {
+      // Update timer every second
+      intervalId = setInterval(() => {
+        const now = Date.now();
+        const elapsed = Math.floor((now - interviewStartTime.getTime()) / 1000);
+        setElapsedTime(elapsed);
+      }, 1000);
+    } else {
+      // Reset timer when interview is not active
+      setElapsedTime(0);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isInterviewActive, interviewStartTime]);
 
    /**
     * Check if this is the user's first time using voice mode
@@ -1571,6 +1608,41 @@ Your goal is to help students become more confident, articulate, and authentic i
         onVoiceModeChange={handleVoiceModeChange}
         disabled={isLoading}
       />
+
+      {/* Interview Timer */}
+      <div style={{
+        position: 'absolute',
+        top: '16px',
+        left: '16px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px',
+        padding: '6px 12px',
+        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        borderRadius: '12px',
+        border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)'}`,
+        zIndex: 10,
+        opacity: isInterviewActive ? 1 : 0.5,
+        transition: 'opacity 0.3s ease'
+      }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ opacity: isInterviewActive ? 0.6 : 0.4 }}>
+          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+          <path d="M12 7V12L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        <span style={{
+          fontSize: '13px',
+          fontWeight: '500',
+          color: isInterviewActive 
+            ? (isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)')
+            : (isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.3)'),
+          fontVariantNumeric: 'tabular-nums',
+          letterSpacing: '0.5px'
+        }}>
+          {formatTime(elapsedTime)}
+        </span>
+      </div>
 
       {/* Voice Mode Tutorial (Step 12) */}
       {showVoiceTutorial && (
