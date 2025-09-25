@@ -66,7 +66,7 @@
 [data-theme="dark"] {
   /* Brand colors - dark mode (desaturated for better visibility) */
   --color-blue: #60a5fa;
-  --color-purple: #a855f7;
+  --color-purple: #a855f9;
   --color-red: #ef4444;
   --color-gold: #f59e0b;
   --color-green: #10b981;
@@ -79,7 +79,7 @@
   --accent-error: var(--color-red);
   
   /* Dark theme colors - using semi-transparent backgrounds */
-  --background-primary: #000000;
+  --background-primary: rgba(255, 255, 255, 0.05);
   --background-secondary: rgba(255, 255, 255, 0.05);
   --background-tertiary: rgba(255, 255, 255, 0.08);
   --background-quaternary: rgba(255, 255, 255, 0.1);
