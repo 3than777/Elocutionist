@@ -1805,10 +1805,10 @@ Your goal is to help students become more confident, articulate, and authentic i
             style={{
               padding: '12px 20px',
               fontSize: '15px',
-              backgroundColor: user ? 'rgba(0, 122, 255, 0.9)' : 'rgba(142, 142, 147, 0.9)',
+              backgroundColor: user ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.1)',
               backdropFilter: 'blur(10px)',
               WebkitBackdropFilter: 'blur(10px)',
-              color: 'white',
+              color: user ? 'rgba(0, 122, 255, 1)' : 'rgba(142, 142, 147, 1)',
               border: 'none',
               borderRadius: '16px',
               cursor: user ? 'pointer' : 'not-allowed',
@@ -1820,13 +1820,13 @@ Your goal is to help students become more confident, articulate, and authentic i
             }}
             onMouseOver={(e) => {
               if (user) {
-                e.currentTarget.style.backgroundColor = 'rgba(0, 81, 213, 0.9)';
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
                 e.currentTarget.style.transform = 'scale(0.98)';
               }
             }}
             onMouseOut={(e) => {
               if (user) {
-                e.currentTarget.style.backgroundColor = 'rgba(0, 122, 255, 0.9)';
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)';
                 e.currentTarget.style.transform = 'scale(1)';
               }
             }}

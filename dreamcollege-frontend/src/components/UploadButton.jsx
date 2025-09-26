@@ -25,10 +25,10 @@ const FILE_ICONS = {
 
 // Processing status colors
 const STATUS_COLORS = {
-  pending: '#ffa500',
-  processing: '#007bff',
-  completed: '#28a745',
-  failed: '#dc3545'
+  pending: 'var(--accent-warning)',
+  processing: 'var(--accent-primary)',
+  completed: 'var(--accent-success)',
+  failed: 'var(--accent-error)'
 };
 
 export default function UploadButton() {
@@ -117,7 +117,7 @@ export default function UploadButton() {
         <div style={{ marginBottom: '10px', display: 'flex', justifyContent: 'center' }}>
           {uploading ? (
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ animation: 'spin 1s linear infinite' }}>
-              <circle cx="12" cy="12" r="10" stroke="#ddd" strokeWidth="2"/>
+              <circle cx="12" cy="12" r="10" stroke="var(--border-primary)" strokeWidth="2"/>
               <path d="M4 12a8 8 0 0 1 8-8" stroke="var(--accent-blue)" strokeWidth="2" strokeLinecap="round"/>
             </svg>
           ) : (
@@ -211,7 +211,7 @@ export default function UploadButton() {
                   </div>
                   <div style={{ 
                     fontSize: '12px', 
-                    color: '#666',
+                    color: 'var(--text-tertiary)',
                     marginTop: '2px'
                   }}>
                     {formatFileSize(file.size)}
@@ -242,9 +242,9 @@ export default function UploadButton() {
                       style={{
                         padding: '4px 8px',
                         fontSize: '12px',
-                        border: '1px solid #007bff',
+                        border: '1px solid var(--accent-primary)',
                         backgroundColor: 'var(--background-primary)',
-                        color: '#007bff',
+                        color: 'var(--accent-primary)',
                         borderRadius: '4px',
                         cursor: 'pointer'
                       }}
@@ -259,9 +259,9 @@ export default function UploadButton() {
                     style={{
                       padding: '4px 8px',
                       fontSize: '12px',
-                      border: '1px solid #dc3545',
+                      border: '1px solid var(--accent-error)',
                       backgroundColor: 'var(--background-primary)',
-                      color: '#dc3545',
+                      color: 'var(--accent-error)',
                       borderRadius: '4px',
                       cursor: 'pointer'
                     }}

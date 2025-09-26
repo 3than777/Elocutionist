@@ -336,9 +336,7 @@ function AppContent() {
                   />
                 </div>
                 <div className="settings-area-wrapper" style={{
-                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'white',
-                  backdropFilter: isDark ? 'blur(20px)' : 'none',
-                  WebkitBackdropFilter: isDark ? 'blur(20px)' : 'none',
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#ffffff',
                   borderRadius: '12px',
                   padding: '20px',
                   boxShadow: isDark ? '0 8px 32px 0 rgba(139, 92, 246, 0.05)' : '0 2px 4px rgba(0, 0, 0, 0.1)',

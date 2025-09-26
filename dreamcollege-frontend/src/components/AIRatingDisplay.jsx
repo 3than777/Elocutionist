@@ -40,11 +40,12 @@ const AIRatingDisplay = ({
     return (
       <div style={{
         padding: '20px',
-        backgroundColor: 'var(--settings-background)',
         borderRadius: '8px',
         border: '1px solid var(--border-primary)',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)'
       }}>
         {/* Animated background for loading effect */}
         <div style={{
@@ -219,7 +220,6 @@ const AIRatingDisplay = ({
     return (
       <div style={{
         padding: '30px',
-        backgroundColor: 'var(--background-secondary)',
         borderRadius: '8px',
         border: '2px dashed var(--border-primary)',
         textAlign: 'center',
@@ -426,12 +426,13 @@ const AIRatingDisplay = ({
 
   return (
     <div style={{
-      backgroundColor: 'var(--settings-background)',
       borderRadius: '20px',
       border: 'none',
       overflow: 'hidden',
       boxShadow: '0 8px 32px var(--shadow-light), 0 4px 16px var(--shadow-medium)',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif'
+      fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif',
+      backdropFilter: 'blur(10px)',
+      WebkitBackdropFilter: 'blur(10px)'
     }}>
       {/* Overall Rating Header - Apple Style */}
       <div style={{

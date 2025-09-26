@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import LevelSelector from './LevelSelector';
 import UploadButton from './UploadButton';
 import FileManager from './FileManager';
@@ -34,6 +35,7 @@ export default function SettingsPanel({
   const [showDetailedView, setShowDetailedView] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const uploadContext = useUploadContext();
+  const { isDark } = useTheme();
   
   // Voice Settings State
   const [availableVoices, setAvailableVoices] = useState([]);
@@ -276,7 +278,7 @@ export default function SettingsPanel({
     }}>
       {/* Expert/Advanced/Beginner */}
       <div className="settings-panel" style={{
-        backgroundColor: 'var(--settings-background)',
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
         borderRadius: '16px',
         padding: '20px',
         marginBottom: '16px',
@@ -296,7 +298,7 @@ export default function SettingsPanel({
 
       {/* Voice Settings */}
       <div className="settings-panel" style={{
-        backgroundColor: 'var(--settings-background)',
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
         borderRadius: '16px',
         padding: '20px',
         marginBottom: '16px',
@@ -322,7 +324,7 @@ export default function SettingsPanel({
               style={{
                 padding: '6px 12px',
                 fontSize: '13px',
-                backgroundColor: '#FF9500',
+                backgroundColor: 'var(--accent-warning)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '12px',
@@ -332,11 +334,11 @@ export default function SettingsPanel({
                 transition: 'all 0.2s ease'
               }}
               onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = '#DB7600';
+                e.currentTarget.style.opacity = '0.9';
                 e.currentTarget.style.transform = 'scale(0.98)';
               }}
               onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = '#FF9500';
+                e.currentTarget.style.opacity = '1';
                 e.currentTarget.style.transform = 'scale(1)';
               }}
             >
@@ -348,7 +350,7 @@ export default function SettingsPanel({
                 padding: '6px 12px',
                 fontSize: '13px',
                 border: 'none',
-                backgroundColor: '#34C759',
+                backgroundColor: 'var(--accent-success)',
                 color: '#ffffff',
                 borderRadius: '12px',
                 cursor: 'pointer',
@@ -357,11 +359,11 @@ export default function SettingsPanel({
                 transition: 'all 0.2s ease'
               }}
               onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = '#30D158';
+                e.currentTarget.style.opacity = '0.9';
                 e.currentTarget.style.transform = 'scale(0.98)';
               }}
               onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = '#34C759';
+                e.currentTarget.style.opacity = '1';
                 e.currentTarget.style.transform = 'scale(1)';
               }}
             >
@@ -373,12 +375,12 @@ export default function SettingsPanel({
         {voiceError && (
           <div style={{
             padding: '12px 16px',
-            backgroundColor: '#FFF8E6',
-            border: '1px solid #FDE68A',
+            backgroundColor: 'var(--warning-background)',
+            border: '1px solid var(--warning-border)',
             borderRadius: '12px',
             marginBottom: '16px',
             fontSize: '15px',
-            color: '#92400E',
+            color: 'var(--warning-text)',
             letterSpacing: '-0.24px'
           }}>
             ⚠️ {voiceError}
@@ -557,7 +559,7 @@ export default function SettingsPanel({
                 style={{
                   flex: 1,
                   padding: '8px 12px',
-                  backgroundColor: '#17a2b8',
+                  backgroundColor: 'var(--accent-primary)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '4px',
@@ -574,7 +576,7 @@ export default function SettingsPanel({
                 style={{
                   flex: 1,
                   padding: '8px 12px',
-                  backgroundColor: '#28a745',
+                  backgroundColor: 'var(--accent-success)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '4px',
@@ -590,7 +592,7 @@ export default function SettingsPanel({
                 style={{
                   flex: 1,
                   padding: '8px 12px',
-                  backgroundColor: '#6c757d',
+                  backgroundColor: 'var(--text-tertiary)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '4px',
@@ -607,7 +609,7 @@ export default function SettingsPanel({
         {!showVoiceSettings && voiceInitialized && (
           <div style={{
             fontSize: '14px',
-            color: '#28a745',
+            color: 'var(--accent-success)',
             display: 'flex',
             alignItems: 'center',
             gap: '5px'
@@ -618,7 +620,7 @@ export default function SettingsPanel({
       </div>
 
       {/* Upload Information - Enhanced */}
-      <div className="settings-box">
+      <div className="settings-box" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -645,7 +647,7 @@ export default function SettingsPanel({
                 padding: '4px 8px',
                 fontSize: '12px',
                 border: '1px solid var(--accent-primary)',
-                backgroundColor: 'var(--background-primary)',
+                backgroundColor: 'transparent',
                 color: 'var(--accent-primary)',
                 borderRadius: '4px',
                 cursor: 'pointer'
@@ -660,7 +662,7 @@ export default function SettingsPanel({
         {stats.totalFiles > 0 && !showDetailedView && (
           <div style={{
             padding: '10px',
-            backgroundColor: 'var(--background-quaternary)',
+            backgroundColor: 'rgba(255, 255, 255, 0.03)',
             borderRadius: '4px',
             marginBottom: '10px',
             fontSize: '13px',
@@ -699,7 +701,7 @@ export default function SettingsPanel({
           ) : (
             <div style={{
               padding: '20px',
-              backgroundColor: 'var(--background-quaternary)',
+              backgroundColor: 'rgba(255, 255, 255, 0.03)',
               border: '1px dashed var(--border-tertiary)',
               borderRadius: '8px',
               textAlign: 'center',
@@ -761,7 +763,7 @@ export default function SettingsPanel({
             style={{
               padding: '8px 12px',
               fontSize: '13px',
-              backgroundColor: isRefreshing ? '#28a745' : '#6c757d',
+              backgroundColor: isRefreshing ? 'var(--accent-success)' : 'var(--text-tertiary)',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
@@ -780,7 +782,7 @@ export default function SettingsPanel({
       {/* Separator + AI Rating lowered */}
       <hr style={{ margin: '24px 0' }} />
 
-      <div className="settings-box">
+      <div className="settings-box" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
         <h3>AI Rating</h3>
         <AIRatingDisplay
           rating={aiRating}
