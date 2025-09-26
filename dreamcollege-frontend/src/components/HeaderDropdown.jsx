@@ -87,7 +87,7 @@ const HeaderDropdown = ({ label, items, onItemClick }) => {
             transform: 'translateX(-50%)',
             marginTop: '8px',
             minWidth: '180px',
-            backgroundColor: 'var(--background-primary)',
+            backgroundColor: isDark ? 'rgb(30, 30, 30)' : 'rgb(255, 255, 255)',
             border: '1px solid var(--border-primary)',
             borderRadius: '8px',
             boxShadow: isDark ? '0 8px 24px rgba(0, 0, 0, 0.4)' : '0 8px 24px rgba(0, 0, 0, 0.12)',

@@ -7,6 +7,8 @@ import ProfileDropdown from './components/ProfileDropdown';
 import HeaderDropdown from './components/HeaderDropdown';
 import Dashboard from './components/Dashboard';
 import AboutElocutionist from './components/AboutElocutionist';
+import History from './components/History';
+import MediaHub from './components/MediaHub';
 import { UploadProvider } from './context/UploadContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { getAIRatingsHistory } from './services/api';
@@ -41,11 +43,12 @@ const HeaderComponent = ({ user, onShowAuthModal, onLogout }) => {
           fontWeight: '600', 
           color: 'var(--text-primary)',
           letterSpacing: '-0.02em',
-          cursor: 'pointer'
+          cursor: 'pointer',
+          fontFamily: "'JetBrains Mono', monospace"
         }}
         onClick={() => navigate('/')}
         >
-          AI Interview Coach
+          Elocutionist
         </div>
       </div>
 
@@ -98,6 +101,8 @@ const HeaderComponent = ({ user, onShowAuthModal, onLogout }) => {
             onItemClick={(item) => {
               if (item === 'About Elocutionist') {
                 navigate('/about-elocutionist');
+              } else if (item === 'Media Hub') {
+                navigate('/media-hub');
               }
             }}
           />
@@ -374,6 +379,26 @@ function AppContent() {
                 onLogout={handleLogout} 
               />
               <AboutElocutionist />
+            </div>
+          } />
+          <Route path="/history" element={
+            <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+              <HeaderComponent 
+                user={user} 
+                onShowAuthModal={() => setShowAuthModal(true)} 
+                onLogout={handleLogout} 
+              />
+              <History />
+            </div>
+          } />
+          <Route path="/media-hub" element={
+            <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+              <HeaderComponent 
+                user={user} 
+                onShowAuthModal={() => setShowAuthModal(true)} 
+                onLogout={handleLogout} 
+              />
+              <MediaHub />
             </div>
           } />
         </Routes>

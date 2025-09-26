@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
 :root {
   /* Brand colors - light mode (bright, saturated) */
   --color-blue: #2563eb;
@@ -408,9 +410,10 @@ body {
 
 /* Dark mode backdrop filters for semi-transparent elements */
 [data-theme="dark"] .voice-tutorial {
-  background: rgba(255, 255, 255, 0.05) !important;
+  background: rgba(20, 20, 20, 0.95) !important;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  color: var(--text-primary);
 }
 
 [data-theme="dark"] .voice-toggle-container {
@@ -423,11 +426,6 @@ body {
   background: transparent !important;
 }
 
-[data-theme="dark"] .tutorial-benefit {
-  background: rgba(255, 255, 255, 0.05) !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
 
 [data-theme="dark"] .tutorial-warning {
   background: rgba(245, 158, 11, 0.1) !important;
@@ -440,10 +438,30 @@ body {
   -webkit-backdrop-filter: blur(10px);
 }
 
+[data-theme="dark"] .permission-indicator--prompt {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
 [data-theme="dark"] .tutorial-settings-preview {
   background: rgba(255, 255, 255, 0.05) !important;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .practice-instructions {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .tutorial-practice-session {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .practice-transcript {
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 
 [data-theme="dark"] .progress-bar {
@@ -455,6 +473,12 @@ body {
 }
 
 [data-theme="dark"] .speech-result-text {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .tutorial-speech-result {
   background: rgba(255, 255, 255, 0.05) !important;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -534,9 +558,14 @@ body {
 }
 
 /* Tutorial warning and info boxes */
-[data-theme="dark"] .tutorial-warning,
-[data-theme="dark"] .tutorial-settings-note {
+[data-theme="dark"] .tutorial-warning {
   background: rgba(245, 158, 11, 0.1) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .tutorial-settings-note {
+  background: rgba(255, 255, 255, 0.05) !important;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -667,6 +696,16 @@ body {
   text-align: center;
   color: var(--accent-success);
   font-size: 11px;
+}
+
+/* Force dark mode colors for voice tutorial elements */
+[data-theme="dark"] .voice-tutorial-overlay * {
+  --background-primary: rgba(20, 20, 20, 0.95) !important;
+  --background-secondary: rgba(30, 30, 30, 0.95) !important;
+  --background-tertiary: rgba(40, 40, 40, 0.95) !important;
+  --background-quaternary: rgba(50, 50, 50, 0.95) !important;
+  --text-primary: #ffffff !important;
+  --text-secondary: #e5e5e7 !important;
 }
 
 /* Voice Tutorial Styles */
@@ -808,6 +847,13 @@ body {
 
 .tutorial-benefit__icon {
   font-size: 18px;
+}
+
+[data-theme="dark"] .tutorial-benefit {
+  background: rgba(30, 30, 30, 0.8) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .tutorial-warning {
