@@ -35,45 +35,11 @@ const AboutElocutionist = () => {
             position: 'relative',
             overflow: 'hidden'
           }}>
-            {/* Decorative element mimicking the gold frame in reference */}
-            <div style={{
-              position: 'absolute',
-              bottom: '40px',
-              right: '40px',
-              width: '150px',
-              height: '150px',
-              border: '3px solid var(--accent-primary)',
-              borderRadius: '8px',
-              transform: 'rotate(5deg)'
-            }} />
-            
-            {/* Person silhouette placeholder */}
-            <svg width="200" height="300" viewBox="0 0 200 300" fill="var(--text-tertiary)">
-              <circle cx="100" cy="80" r="40"/>
-              <path d="M 60 120 Q 100 100 140 120 L 140 250 Q 100 270 60 250 Z"/>
+            {/* Gene sequence SVG */}
+            <svg width="300" height="300" viewBox="0 0 1024 1024">
+              <path d="M832 384l8 1.6-1.6 8 1.6 3.2-4.8 3.2-44.8 161.6-16-4.8 40-147.2-260.8 144-158.4 284.8-11.2-6.4-6.4 6.4-176-176 11.2-11.2 163.2 163.2 147.2-265.6-294.4-297.6 11.2-11.2v-8h9.6l3.2-3.2 3.2 3.2L664 208l1.6 16-395.2 22.4 278.4 278.4 276.8-153.6 6.4 12.8z" fill="var(--text-tertiary)" />
+              <path d="M896 384c0 35.2-28.8 64-64 64s-64-28.8-64-64 28.8-64 64-64 64 28.8 64 64z m-656-32c-62.4 0-112-49.6-112-112s49.6-112 112-112 112 49.6 112 112-49.6 112-112 112z m304 336c-80 0-144-64-144-144s64-144 144-144 144 64 144 144-64 144-144 144z m-224 144c0-35.2 28.8-64 64-64s64 28.8 64 64-28.8 64-64 64-64-28.8-64-64z m-144-176c0-17.6 14.4-32 32-32s32 14.4 32 32-14.4 32-32 32-32-14.4-32-32z m448-440c0-22.4 17.6-40 40-40s40 17.6 40 40-17.6 40-40 40-40-17.6-40-40zM736 560c0-27.2 20.8-48 48-48s48 20.8 48 48-20.8 48-48 48-48-20.8-48-48z" fill="var(--accent-primary)" />
             </svg>
-            
-            {/* Decorative items on desk */}
-            <div style={{
-              position: 'absolute',
-              bottom: '20px',
-              left: '20px',
-              display: 'flex',
-              gap: '10px'
-            }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                backgroundColor: 'var(--text-quaternary)',
-                borderRadius: '50%'
-              }} />
-              <div style={{
-                width: '40px',
-                height: '40px',
-                backgroundColor: 'var(--text-quaternary)',
-                borderRadius: '50%'
-              }} />
-            </div>
           </div>
         </div>
 
@@ -87,35 +53,8 @@ const AboutElocutionist = () => {
           {/* Logo and Title */}
           <div style={{
             display: 'flex',
-            alignItems: 'center',
-            gap: '30px'
+            alignItems: 'center'
           }}>
-            {/* Logo placeholder */}
-            <div style={{
-              width: '60px',
-              height: '60px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
-                <circle cx="30" cy="30" r="30" fill="var(--background-tertiary)"/>
-                <g transform="translate(30, 30)">
-                  {Array.from({ length: 16 }).map((_, i) => (
-                    <rect
-                      key={i}
-                      x="-2"
-                      y="-20"
-                      width="4"
-                      height="8"
-                      fill="var(--text-primary)"
-                      transform={`rotate(${i * 22.5})`}
-                    />
-                  ))}
-                </g>
-              </svg>
-            </div>
-            
             <h1 style={{
               fontSize: '48px',
               fontWeight: '700',
@@ -136,18 +75,16 @@ const AboutElocutionist = () => {
             color: 'var(--text-secondary)'
           }}>
             <p style={{ margin: 0 }}>
-              Elocutionist started as a small AI-powered coaching platform in San Francisco, 
-              aiming to help job seekers master interview skills with cutting-edge technology. 
+              Elocutionist was founded as a small AI-powered interview coaching platform in Dallas, 
+              aiming to help prospective college students master interview skills with cutting-edge technology. 
               It soon became obvious that traditional mock interviews weren't enough to help 
-              candidates truly excel, and so we built an AI that adapts to each user's needs 
-              and provides personalized feedback in real-time.
+              students truly excel, and so we built an AI that adapts to each user's needs 
+              and provides personalized feedback, realistic interview environment, 
+              comprehensive performance tracking and ultra-customizable settings.
             </p>
             
             <p style={{ margin: 0 }}>
-              Currently, we offer AI-powered interview coaching, real-time feedback analysis, 
-              and comprehensive performance tracking to help our users build confidence and 
-              land their dream jobs. We value our users above everything else, meaning that 
-              we won't take "OK" as an answer when it comes to interview preparation.
+              Elocutionist is free, completely open-source, and requires nothing other than a computer and a drive to learn. 
             </p>
           </div>
 
