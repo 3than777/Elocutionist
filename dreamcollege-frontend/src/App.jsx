@@ -9,6 +9,7 @@ import Dashboard from './components/Dashboard';
 import AboutElocutionist from './components/AboutElocutionist';
 import History from './components/History';
 import MediaHub from './components/MediaHub';
+import ApiStatusCheck from './components/ApiStatusCheck';
 import { UploadProvider } from './context/UploadContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { getAIRatingsHistory } from './services/api';

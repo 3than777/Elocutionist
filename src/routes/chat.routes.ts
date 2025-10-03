@@ -399,8 +399,25 @@ router.post('/', optionalAuth, async (req: AuthenticatedRequest, res: Response):
     });
 
   } catch (err: any) {
-    console.error('Chat error:', err);
-    res.status(500).json({ error: err.message || 'Internal server error' });
+    console.error('Chat error details:', {
+      message: err.message,
+      stack: err.stack,
+      name: err.name,
+      status: err.status
+    });
+    
+    // Provide more specific error messages
+    if (err.message?.includes('OPENAI_API_KEY')) {
+      res.status(503).json({ error: 'AI service configuration error. Please check server configuration.' });
+    } else if (err.message?.includes('401')) {
+      res.status(503).json({ error: 'AI service authentication failed. Please check API credentials.' });
+    } else if (err.message?.includes('429')) {
+      res.status(503).json({ error: 'AI service rate limit exceeded. Please try again later.' });
+    } else if (err.message?.includes('timeout')) {
+      res.status(504).json({ error: 'AI service request timed out. Please try again.' });
+    } else {
+      res.status(500).json({ error: err.message || 'Internal server error' });
+    }
   }
 });
 

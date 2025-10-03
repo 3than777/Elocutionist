@@ -25,7 +25,10 @@
  */
 
 // API Configuration
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// In production (Vercel), use relative paths if VITE_API_URL is not set
+// This allows the frontend to call the backend on the same domain
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 
+  (import.meta.env.MODE === 'production' ? '' : 'http://localhost:3000');
 const API_TIMEOUT = 30000; // 30 seconds
 
 /**

@@ -108,6 +108,38 @@ function createApp(): Application {
     });
   });
 
+  // OpenAI diagnostic endpoint (for debugging)
+  app.get('/api/openai-status', async (req: Request, res: Response) => {
+    try {
+      const hasApiKey = !!process.env.OPENAI_API_KEY;
+      const keyPrefix = hasApiKey ? process.env.OPENAI_API_KEY?.substring(0, 7) + '...' : 'NOT SET';
+      
+      // Try to import and validate OpenAI connection
+      let openaiStatus = 'unknown';
+      let openaiError = null;
+      
+      try {
+        const { validateOpenAIConnection } = await import('./services/openai.service');
+        const isValid = await validateOpenAIConnection();
+        openaiStatus = isValid ? 'connected' : 'failed';
+      } catch (error: any) {
+        openaiStatus = 'error';
+        openaiError = error.message;
+      }
+      
+      res.json({
+        apiKeyConfigured: hasApiKey,
+        keyPrefix: keyPrefix,
+        openaiStatus: openaiStatus,
+        error: openaiError,
+        nodeEnv: process.env.NODE_ENV,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to check OpenAI status', details: error.message });
+    }
+  });
+
   // API Routes
   app.use('/api/auth', authRoutes);
   app.use('/api/interviews', interviewRoutes);

@@ -556,7 +556,13 @@ Your goal is to help students become more confident, articulate, and authentic i
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          errorData = { error: `HTTP error ${response.status}` };
+        }
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
@@ -574,7 +580,19 @@ Your goal is to help students become more confident, articulate, and authentic i
 
     } catch (error) {
       console.error('Error sending message:', error);
-      const errorMessage = 'Sorry, I encountered an error. Please try again.';
+      
+      // Provide more specific error messages based on the error
+      let errorMessage = 'Sorry, I encountered an error. Please try again.';
+      if (error.message?.includes('AI service configuration error')) {
+        errorMessage = 'The AI service is not properly configured. Please contact support.';
+      } else if (error.message?.includes('AI service authentication failed')) {
+        errorMessage = 'AI service authentication failed. Please check the API configuration.';
+      } else if (error.message?.includes('rate limit')) {
+        errorMessage = 'AI service is temporarily busy. Please try again in a few moments.';
+      } else if (error.message?.includes('Network')) {
+        errorMessage = 'Network error. Please check your internet connection and try again.';
+      }
+      
       const aiErrorMessage = { sender: 'ai', text: errorMessage };
       setMessages(prev => [...prev, aiErrorMessage]);
       
@@ -1131,8 +1149,8 @@ Your goal is to help students become more confident, articulate, and authentic i
 
         // Use authenticated endpoint when user is logged in and wants to use uploaded content
         const endpoint = user?.token && useUploadedContent 
-          ? 'http://localhost:3000/api/chat/authenticated'
-          : 'http://localhost:3000/api/chat';
+          ? `${API_BASE_URL}/api/chat/authenticated`
+          : `${API_BASE_URL}/api/chat`;
         
         const response = await fetch(endpoint, {
           method: 'POST',
@@ -1144,7 +1162,13 @@ Your goal is to help students become more confident, articulate, and authentic i
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          let errorData;
+          try {
+            errorData = await response.json();
+          } catch (e) {
+            errorData = { error: `HTTP error ${response.status}` };
+          }
+          throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
         }
 
         const data = await response.json();
@@ -1158,7 +1182,19 @@ Your goal is to help students become more confident, articulate, and authentic i
 
       } catch (error) {
         console.error('Error starting interview:', error);
-        const errorMessage = 'Sorry, I encountered an error starting the interview. Please try again.';
+        
+        // Provide more specific error messages based on the error
+        let errorMessage = 'Sorry, I encountered an error starting the interview. Please try again.';
+        if (error.message?.includes('AI service configuration error')) {
+          errorMessage = 'The AI service is not properly configured. Please contact support.';
+        } else if (error.message?.includes('AI service authentication failed')) {
+          errorMessage = 'AI service authentication failed. Please check the API configuration.';
+        } else if (error.message?.includes('rate limit')) {
+          errorMessage = 'AI service is temporarily busy. Please try again in a few moments.';
+        } else if (error.message?.includes('Network')) {
+          errorMessage = 'Network error. Please check your internet connection and try again.';
+        }
+        
         const aiErrorMessage = { sender: 'ai', text: errorMessage };
         setMessages(prev => [...prev, aiErrorMessage]);
         
