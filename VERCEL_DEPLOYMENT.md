@@ -36,8 +36,22 @@ OPENAI_API_KEY = your-openai-api-key
 1. Create a MongoDB Atlas account at https://www.mongodb.com/cloud/atlas
 2. Create a new cluster (free tier is sufficient)
 3. Create a database user with read/write permissions
-4. Whitelist all IP addresses (0.0.0.0/0) for Vercel's dynamic IPs
-5. Get your connection string and add it to Vercel environment variables
+4. **CRITICAL**: Whitelist all IP addresses (0.0.0.0/0) for Vercel's dynamic IPs
+   - Go to Network Access in MongoDB Atlas
+   - Click "Add IP Address"
+   - Select "Allow Access from Anywhere"
+   - This is required because Vercel uses dynamic IPs
+5. Get your connection string:
+   - Click "Connect" on your cluster
+   - Choose "Connect your application"
+   - Copy the connection string
+   - Replace `<password>` with your database user's password
+   - Add to Vercel as `MONGODB_URI`
+
+Example connection string:
+```
+mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/ai-interview-coach?retryWrites=true&w=majority
+```
 
 ## CORS Configuration Update
 
@@ -64,16 +78,38 @@ FRONTEND_URL = https://your-deployed-app.vercel.app
 
 ## Troubleshooting
 
-If you still see "Load failed" errors:
+### "Registration service temporarily unavailable" Error
 
-1. Check the browser console for specific error messages
-2. Verify all environment variables are set correctly in Vercel
-3. Ensure MongoDB connection string is correct and database is accessible
-4. Check Vercel function logs for backend errors
+This error usually means MongoDB connection is failing. Check:
+
+1. **MongoDB Atlas Network Access**:
+   - Ensure 0.0.0.0/0 is whitelisted
+   - Check if your cluster is active (not paused)
+
+2. **Environment Variables**:
+   - Verify `MONGODB_URI` is set correctly in Vercel
+   - Check that the password in the URI is correct
+   - Ensure there are no spaces or quotes in the value
+
+3. **Check Vercel Function Logs**:
+   - Go to your Vercel project → Functions tab
+   - Click on `api/index` to see logs
+   - Look for MongoDB connection errors
+
+4. **Test the Health Endpoint**:
+   - Visit `https://your-app.vercel.app/api/health`
+   - Should show database connection status
+
+### Other Common Issues
+
+1. **CORS errors**: Make sure `FRONTEND_URL` environment variable matches your Vercel app URL
+2. **404 errors on API calls**: Ensure `VITE_API_URL` is set to `/api`
+3. **JWT errors**: Generate a proper `JWT_SECRET` for production
 
 ## Testing the Deployment
 
 After deployment, test the following:
-1. Visit `/health` endpoint to verify backend is running
+1. Visit `/api/health` endpoint to verify backend is running
 2. Try creating a new account
 3. Check browser network tab for any failed API calls
+4. Check Vercel function logs for any errors

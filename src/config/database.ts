@@ -33,6 +33,18 @@
 
 import mongoose, { Connection } from 'mongoose';
 
+// Global connection cache for serverless environments
+declare global {
+  // eslint-disable-next-line no-var
+  var mongoose: {
+    conn: Connection | null;
+    promise: Promise<Connection> | null;
+  };
+}
+
+// Initialize global mongoose cache
+global.mongoose = global.mongoose || { conn: null, promise: null };
+
 /**
  * Interface defining the database connection result
  */
@@ -138,10 +150,14 @@ async function attemptMongoConnection(
     try {
       console.log(`🔄 MongoDB connection attempt ${attempt}/${finalOptions.maxRetries}`);
       
-      // Attempt connection with optimized options
-      await mongoose.connect(uri, getMongooseOptions());
+      // Create connection promise and cache it for serverless
+      global.mongoose.promise = mongoose.connect(uri, getMongooseOptions()).then(() => mongoose.connection);
+      
+      // Await the connection
+      await global.mongoose.promise;
       
       const connection = mongoose.connection;
+      global.mongoose.conn = connection;
       
       // Verify connection is ready
       if (connection.readyState === 1) {
@@ -160,6 +176,8 @@ async function attemptMongoConnection(
     } catch (error) {
       lastError = error as Error;
       console.warn(`⚠️ MongoDB connection attempt ${attempt} failed:`, error);
+      // Clear the promise cache on error
+      global.mongoose.promise = null;
       
       if (attempt < finalOptions.maxRetries!) {
         console.log(`⏳ Retrying in ${finalOptions.retryDelay}ms...`);
@@ -210,6 +228,29 @@ export async function connectDB(
     // Validate environment configuration
     if (!mongoUri && !useMockDb) {
       throw new Error('MONGODB_URI environment variable is required when USE_MOCK_DB is not true');
+    }
+    
+    // Check if already connected (for serverless environment)
+    if (global.mongoose.conn && global.mongoose.conn.readyState === 1) {
+      console.log('♻️ Reusing existing MongoDB connection');
+      return {
+        success: true,
+        connection: global.mongoose.conn,
+        isMockMode: false,
+        message: 'MongoDB connection reused'
+      };
+    }
+    
+    // Check if connection is in progress
+    if (global.mongoose.promise) {
+      console.log('⏳ Waiting for existing connection attempt...');
+      const connection = await global.mongoose.promise;
+      return {
+        success: true,
+        connection,
+        isMockMode: false,
+        message: 'MongoDB connected successfully'
+      };
     }
     
     // Check if mock mode is explicitly requested
@@ -294,6 +335,9 @@ export async function disconnectDB(): Promise<void> {
     if (mongoose.connection.readyState !== 0) {
       await mongoose.connection.close();
       console.log('✅ Database connection closed gracefully');
+      // Clear the global cache for serverless
+      global.mongoose.conn = null;
+      global.mongoose.promise = null;
     }
   } catch (error) {
     console.error('❌ Error closing database connection:', error);

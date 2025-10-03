@@ -187,8 +187,12 @@ async function gracefulShutdown(): Promise<void> {
 process.on('SIGTERM', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);
 
-// Initialize and start the application
+// Initialize application
 const app: Application = createApp();
-startServer(app);
+
+// Only start server if not being imported as a module
+if (require.main === module) {
+  startServer(app);
+}
 
 export default app; 
