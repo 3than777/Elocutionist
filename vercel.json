@@ -1,6 +1,8 @@
 {
-  "buildCommand": "cd dreamcollege-frontend && npm install && npm run build",
-  "outputDirectory": "dreamcollege-frontend/dist",
-  "devCommand": "cd dreamcollege-frontend && npm run dev",
-  "installCommand": "npm install && cd dreamcollege-frontend && npm install"
+  "buildCommand": "npm run build && cd dreamcollege-frontend && npm install && npm run build && cp -r dist ../public",
+  "installCommand": "npm install && cd dreamcollege-frontend && npm install",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/(.*)", "destination": "/public/$1" }
+  ]
 }
