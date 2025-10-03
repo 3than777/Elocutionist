@@ -1,0 +1,21 @@
+{
+  "buildCommand": "cd dreamcollege-frontend && npm install && npm run build",
+  "outputDirectory": "dreamcollege-frontend/dist",
+  "devCommand": "cd dreamcollege-frontend && npm run dev",
+  "installCommand": "npm install && cd dreamcollege-frontend && npm install",
+  "functions": {
+    "api/*.ts": {
+      "runtime": "@vercel/node@3"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/dreamcollege-frontend/dist/$1"
+    }
+  ]
+}
