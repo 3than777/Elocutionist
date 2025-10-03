@@ -1,22 +1,11 @@
 {
+  "outputDirectory": "dreamcollege-frontend/dist",
   "buildCommand": "npm run build && cd dreamcollege-frontend && npm install && npm run build",
   "installCommand": "npm install && cd dreamcollege-frontend && npm install",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api"
-    },
-    {
-      "src": "/assets/(.*)",
-      "dest": "/dreamcollege-frontend/dist/assets/$1"
-    },
-    {
-      "src": "/",
-      "dest": "/dreamcollege-frontend/dist/index.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/dreamcollege-frontend/dist/$1"
+      "source": "/api/(.*)",
+      "destination": "/api"
     }
   ],
   "functions": {
