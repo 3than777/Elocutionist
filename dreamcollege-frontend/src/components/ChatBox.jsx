@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useUploadContext } from '../context/UploadContext';
 import { useTheme } from '../context/ThemeContext';
-import { submitInterviewTranscript, generateAIRating as apiGenerateAIRating, retryApiCall, getUserFriendlyErrorMessage, getProgressMessage } from '../services/api';
+import { submitInterviewTranscript, generateAIRating as apiGenerateAIRating, retryApiCall, getUserFriendlyErrorMessage, getProgressMessage, API_BASE_URL } from '../services/api';
 import { speakText, stopSpeaking, getTextToSpeechStatus, setTextToSpeechCallbacks } from '../services/textToSpeech';
 import ProgressIndicator from './ProgressIndicator';
 import VoiceModeToggle from './VoiceModeToggle';
@@ -524,7 +524,7 @@ Your goal is to help students become more confident, articulate, and authentic i
       };
       
       console.log('Full request details:', {
-        url: 'http://localhost:3000/api/chat',
+        url: `${API_BASE_URL}/api/chat`,
         authHeader: user?.token ? `Bearer ${user.token}` : 'No token',
         body: requestBody,
         userObject: user
@@ -532,8 +532,8 @@ Your goal is to help students become more confident, articulate, and authentic i
 
       // Use authenticated endpoint when user is logged in and wants to use uploaded content
       const endpoint = user?.token && useUploadedContent 
-        ? 'http://localhost:3000/api/chat/authenticated'
-        : 'http://localhost:3000/api/chat';
+        ? `${API_BASE_URL}/api/chat/authenticated`
+        : `${API_BASE_URL}/api/chat`;
       
       console.log('=== CHAT REQUEST DEBUG ===');
       console.log('User:', user);
@@ -1449,7 +1449,7 @@ Your goal is to help students become more confident, articulate, and authentic i
       };
       
       console.log('Full request details:', {
-        url: 'http://localhost:3000/api/chat',
+        url: `${API_BASE_URL}/api/chat`,
         authHeader: user?.token ? `Bearer ${user.token}` : 'No token',
         body: requestBody,
         userObject: user
@@ -1457,8 +1457,8 @@ Your goal is to help students become more confident, articulate, and authentic i
 
       // Use authenticated endpoint when user is logged in and wants to use uploaded content
       const endpoint = user?.token && useUploadedContent 
-        ? 'http://localhost:3000/api/chat/authenticated'
-        : 'http://localhost:3000/api/chat';
+        ? `${API_BASE_URL}/api/chat/authenticated`
+        : `${API_BASE_URL}/api/chat`;
       
       console.log('=== CHAT REQUEST DEBUG ===');
       console.log('User:', user);
@@ -1574,7 +1574,7 @@ Your goal is to help students become more confident, articulate, and authentic i
     }
     
     try {
-      const response = await fetch('http://localhost:3000/api/chat/debug-files', {
+      const response = await fetch(`${API_BASE_URL}/api/chat/debug-files`, {
         headers: {
           'Authorization': `Bearer ${user.token}`
         }

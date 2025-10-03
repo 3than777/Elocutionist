@@ -29,7 +29,8 @@ OPENAI_API_KEY = your-openai-api-key
 ⚠️ **SECURITY WARNING**: 
 - Never commit API keys to your repository
 - Generate a new JWT_SECRET for production (use: `openssl rand -hex 64`)
-- Your current .env file contains an exposed OpenAI API key - please regenerate it immediately
+- If you've committed any API keys, regenerate them immediately in your provider's dashboard
+- Use Vercel's environment variables for all sensitive data
 
 ## MongoDB Setup
 
@@ -77,6 +78,34 @@ FRONTEND_URL = https://your-deployed-app.vercel.app
 4. Deploy
 
 ## Troubleshooting
+
+### AI Interview Not Working / "Sorry, I encountered an error starting the interview"
+
+This error typically means the OpenAI integration is failing. Check:
+
+1. **OpenAI API Key**:
+   - Ensure `OPENAI_API_KEY` is set in Vercel environment variables
+   - Verify the key starts with `sk-` and is valid
+   - Check your OpenAI account has available credits
+   - Test the key at https://platform.openai.com/api-keys
+
+2. **Frontend API URL**:
+   - Verify `VITE_API_URL` is set correctly in Vercel
+   - For production, it should be empty or set to your Vercel app URL
+   - The frontend will use relative paths `/api` if not set
+
+3. **Check Function Logs**:
+   - Go to Vercel dashboard → Functions tab
+   - Look for errors in the `/api/chat` endpoint
+   - Common issues: Invalid API key, rate limits, network errors
+
+4. **Verify Environment Variables**:
+   ```
+   OPENAI_API_KEY = sk-proj-...
+   MONGODB_URI = mongodb+srv://...
+   JWT_SECRET = your-secure-secret
+   VITE_API_URL = https://your-app.vercel.app
+   ```
 
 ### "Registration service temporarily unavailable" Error
 
