@@ -59,10 +59,41 @@ function createApp(): Application {
   const app: Application = express();
 
   // CORS middleware - allow cross-origin requests
-  app.use(cors({
-    origin: true, // Allow all origins in development
+  const corsOptions = {
+    origin: (origin: any, callback: any) => {
+      // Allow requests with no origin (like mobile apps or Postman)
+      if (!origin) return callback(null, true);
+      
+      // In production, use specific frontend URL
+      if (process.env.NODE_ENV === 'production') {
+        const allowedOrigins = [
+          process.env.FRONTEND_URL,
+          'https://*.vercel.app' // Allow Vercel preview deployments
+        ];
+        
+        const isAllowed = allowedOrigins.some(allowed => {
+          if (!allowed) return false;
+          if (allowed.includes('*')) {
+            const pattern = allowed.replace('*', '.*');
+            return new RegExp(pattern).test(origin);
+          }
+          return origin === allowed;
+        });
+        
+        if (isAllowed) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      } else {
+        // Allow all origins in development
+        callback(null, true);
+      }
+    },
     credentials: true
-  }));
+  };
+  
+  app.use(cors(corsOptions));
 
   // JSON parsing middleware
   app.use(express.json({ limit: '10mb' }));
