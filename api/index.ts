@@ -26,20 +26,31 @@ app.use(express.urlencoded({ extended: true }));
 // Health check endpoint
 app.get('/health', async (req, res) => {
   try {
+    // Check environment variables
+    const envCheck = {
+      OPENAI_API_KEY: !!process.env.OPENAI_API_KEY,
+      MONGODB_URI: !!process.env.MONGODB_URI,
+      JWT_SECRET: !!process.env.JWT_SECRET,
+      NODE_ENV: process.env.NODE_ENV,
+      OPENAI_KEY_PREFIX: process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.substring(0, 7) + '...' : 'NOT SET'
+    };
+    
     // Ensure database is connected for health check
     const dbResult = await connectDB();
     res.status(200).json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
       service: 'AI Interview Coach Backend',
-      database: dbResult.success ? 'connected' : 'disconnected'
+      database: dbResult.success ? 'connected' : 'disconnected',
+      environment: envCheck
     });
   } catch (error) {
     res.status(503).json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
       service: 'AI Interview Coach Backend',
-      error: 'Database connection failed'
+      error: 'Database connection failed',
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });
